@@ -70,15 +70,15 @@ import CardHand from "@/components/CardHand.vue";
     { value: 'A', suit: 'spades' },
     { value: '2', suit: 'spades' },
     { value: '3', suit: 'spades' },
-    { value: '4', suit: 'spades' },
-    { value: '5', suit: 'spades' },
-    { value: '6', suit: 'spades' },
-    { value: '7', suit: 'spades' },
-    { value: '8', suit: 'spades' },
-    { value: '9', suit: 'spades' },
-    { value: '10', suit: 'spades' },
-    { value: 'J', suit: 'spades' }
-  ]" :maxWidth="100" />
+    // { value: '4', suit: 'spades' },
+    // { value: '5', suit: 'spades' },
+    // { value: '6', suit: 'spades' },
+    // { value: '7', suit: 'spades' },
+    // { value: '8', suit: 'spades' },
+    // { value: '9', suit: 'spades' },
+    // { value: '10', suit: 'spades' },
+    // { value: 'J', suit: 'spades' }
+  ]" />
 </template>
 
 <style scoped></style>

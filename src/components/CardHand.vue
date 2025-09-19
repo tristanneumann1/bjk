@@ -21,7 +21,7 @@ type CardLike = {
   suit?: string
 }
 
-const CARD_WIDTH = 64
+const CARD_WIDTH = 46
 const CARD_HEIGHT = 64
 const MAX_CARDS = 11
 const DEFAULT_MAX_WIDTH = CARD_WIDTH + (MAX_CARDS - 1) * (CARD_WIDTH / 2)
@@ -40,7 +40,8 @@ const displayCards = computed(() =>
   })),
 )
 
-const maxWidth = computed(() => props.maxWidth ?? DEFAULT_MAX_WIDTH)
+const maxWidth = computed(() => DEFAULT_MAX_WIDTH)
+// const maxWidth = computed(() => props.maxWidth ?? DEFAULT_MAX_WIDTH)
 
 const cardSpacing = computed(() => {
   const count = visibleCards.value.length
