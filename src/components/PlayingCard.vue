@@ -79,7 +79,10 @@ const suitAliases: Record<string, CardSuit> = {
 const props = defineProps<{
   value?: string | number
   suit?: string
+  large?: boolean
 }>()
+
+const scale = computed(() => (props.large ? 1.5 : 1))
 
 const normalizedValue = computed<CardValue | null>(() => {
   if (props.value === undefined || props.value === null) {
@@ -124,12 +127,14 @@ const tileStyle = computed(() => {
   const offsetX = -column * (TILE_WIDTH + TILE_SPACING)
   const offsetY = -row * (TILE_HEIGHT + TILE_SPACING)
 
+  const scaleValue = scale.value
+
   return {
-    width: `${TILE_WIDTH}px`,
-    height: `${TILE_HEIGHT}px`,
+    width: `${TILE_WIDTH * scaleValue}px`,
+    height: `${TILE_HEIGHT * scaleValue}px`,
     backgroundImage: `url(${cardsTilemapUrl})`,
-    backgroundPosition: `${offsetX}px ${offsetY}px`,
-    backgroundSize: `${TILEMAP_WIDTH}px ${TILEMAP_HEIGHT}px`,
+    backgroundPosition: `${offsetX * scaleValue}px ${offsetY * scaleValue}px`,
+    backgroundSize: `${TILEMAP_WIDTH * scaleValue}px ${TILEMAP_HEIGHT * scaleValue}px`,
   }
 })
 

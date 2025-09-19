@@ -7,6 +7,7 @@
       :style="cardPositions[index]"
       :value="card.value"
       :suit="card.suit"
+      :large="isLarge"
     />
   </div>
 </template>
@@ -21,17 +22,28 @@ type CardLike = {
   suit?: string
 }
 
-const CARD_WIDTH = 46
-const CARD_HEIGHT = 64
-const MAX_CARDS = 11
-const DEFAULT_MAX_WIDTH = CARD_WIDTH + (MAX_CARDS - 1) * (CARD_WIDTH / 2)
+const BASE_CARD_WIDTH = 46
+const BASE_CARD_HEIGHT = 64
+const MAX_CARDS = 13
 
 const props = defineProps<{
   cards: CardLike[]
   maxWidth?: number
+  large?: boolean
 }>()
 
+const scale = computed(() => (props.large ? 1.5 : 1))
+
+const cardWidth = computed(() => BASE_CARD_WIDTH * scale.value)
+const cardHeight = computed(() => BASE_CARD_HEIGHT * scale.value)
+
+const defaultMaxWidth = computed(() => cardWidth.value + (MAX_CARDS - 1) * (cardWidth.value / 4))
+
+const maxWidth = computed(() => props.maxWidth ?? defaultMaxWidth.value)
+
 const visibleCards = computed(() => props.cards.slice(0, MAX_CARDS))
+
+const isLarge = computed(() => props.large ?? false)
 
 const displayCards = computed(() =>
   visibleCards.value.map(card => ({
@@ -40,20 +52,17 @@ const displayCards = computed(() =>
   })),
 )
 
-const maxWidth = computed(() => DEFAULT_MAX_WIDTH)
-// const maxWidth = computed(() => props.maxWidth ?? DEFAULT_MAX_WIDTH)
-
 const cardSpacing = computed(() => {
   const count = visibleCards.value.length
   if (count <= 1) {
     return 0
   }
 
-  const availableWidth = maxWidth.value - CARD_WIDTH
+  const availableWidth = Math.max(maxWidth.value - cardWidth.value, 0)
   const idealSpacing = availableWidth / (count - 1)
-  const clampedSpacing = Math.min(idealSpacing, CARD_WIDTH)
+  const clampedSpacing = Math.min(idealSpacing, cardWidth.value)
 
-  return Math.max(clampedSpacing, CARD_WIDTH / 2)
+  return Math.max(clampedSpacing, cardWidth.value / 4)
 })
 
 const handWidth = computed(() => {
@@ -62,13 +71,13 @@ const handWidth = computed(() => {
     return 0
   }
 
-  return CARD_WIDTH + cardSpacing.value * (count - 1)
+  return cardWidth.value + cardSpacing.value * (count - 1)
 })
 
 const handStyle = computed(() => ({
   maxWidth: `${maxWidth.value}px`,
   width: `${Math.min(handWidth.value, maxWidth.value)}px`,
-  height: `${CARD_HEIGHT}px`,
+  height: `${cardHeight.value}px`,
 }))
 
 const cardPositions = computed(() =>
