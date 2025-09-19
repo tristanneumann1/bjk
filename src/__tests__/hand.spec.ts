@@ -1,8 +1,7 @@
-import { Hand } from 'models/hand';
-import { Card } from 'models/card';
-import { describe, expect } from 'vitest';
-import { Player } from 'models/player';
-import { Rules } from 'models/rules';
+import { Hand } from '@/models/hand';
+import { Card } from '@/models/card';
+import { Player } from '@/models/player';
+import { Rules } from '@/models/rules';
 
 describe('Hand Model', () => {
   Player.initialize(new Player(100))

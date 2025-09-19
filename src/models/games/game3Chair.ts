@@ -1,4 +1,4 @@
-import { Game1 } from 'models/games/game1';
+import { Game1 } from '@/models/games/game1';
 
 export class Game3Chair extends Game1 {
   constructor() {

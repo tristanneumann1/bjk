@@ -1,8 +1,8 @@
-import { Card } from 'models/card';
-import { HandResult } from 'models/chair';
+import { Card } from '@/models/card';
+import { type HandResult } from '@/models/chair';
 export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
-import { Rules } from 'models/rules';
-import { Player } from 'models/player';
+import { Rules } from '@/models/rules';
+import { Player } from '@/models/player';
 
 export class Hand {
   public isSplit = false;

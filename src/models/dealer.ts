@@ -1,6 +1,6 @@
-import { Card } from 'models/card';
-import { Rules } from 'models/rules';
-import { Hand } from 'models/hand';
+import { Card } from '@/models/card';
+import { Rules } from '@/models/rules';
+import { Hand } from '@/models/hand';
 
 export class Dealer {
   private dealIndex = 0;

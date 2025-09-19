@@ -1,8 +1,8 @@
 import prompt from 'prompt';
-import { Action } from 'models/hand';
+import { type Action } from '@/models/hand';
 // import { GameRigged } from 'models/games/gameRigged';
 // import { Card } from 'models/card';
-import { Game3Chair } from 'models/games/game3Chair';
+import { Game3Chair } from '@/models/games/game3Chair';
 
 async function run () {
   const game = new Game3Chair()

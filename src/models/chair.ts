@@ -1,9 +1,9 @@
-import { Card } from 'models/card';
-import { Action, Hand } from 'models/hand';
-import { Dealer } from 'models/dealer';
-import { Player } from 'models/player';
-import chalk, { ColorName, ModifierName } from 'chalk';
-import { Rules } from 'models/rules';
+import { Card } from '@/models/card';
+import { type Action, Hand } from '@/models/hand';
+import { Dealer } from '@/models/dealer';
+import { Player } from '@/models/player';
+import chalk, { type ColorName, type ModifierName } from 'chalk';
+import { Rules } from '@/models/rules';
 
 export type HandResult = 'Win' | 'Lose' | 'Push' | 'BlackJackWin' | 'Double' | 'Double_Push';
 const HAND_VIEW_COLORS: { [result in HandResult]: ColorName | ModifierName} = {
