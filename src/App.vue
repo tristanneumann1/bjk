@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import PlayingCard from "@/components/PlayingCard.vue";
 import CardHand from "@/components/CardHand.vue";
-import Hand from "@/components/Hand.vue";
+import Chair from "@/components/Chair.vue";
 import PlayerBalanceDisplay from "@/components/PlayerBalanceDisplay.vue";
 import ActionSection from "@/components/ActionSection.vue";
 import DealerSection from "@/components/DealerSection.vue";
@@ -66,9 +66,9 @@ const HAND_STRAIGHT = [
     alignItems: 'flex-end',
     justifyContent: 'center',
   }">
-    <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
-    <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
-    <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+    <Chair :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+    <Chair :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+    <Chair :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
   </div>
   <PlayerBalanceDisplay/>
 </template>

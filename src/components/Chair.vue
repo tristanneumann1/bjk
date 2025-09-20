@@ -1,5 +1,5 @@
 <template>
-  <div class="player-spot" aria-label="Player Spot" :style="{width: '272px' }">
+  <div class="chair" aria-label="Player Spot" :style="{width: '272px' }">
     <div class="hand__top" aria-label="Inactive hands">
       <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
         <span
@@ -201,7 +201,7 @@ const setActiveHand = (index: number) => {
 </script>
 
 <style scoped>
-.player-spot {
+.chair {
   display: flex;
   flex-direction: column;
   align-items: center;
