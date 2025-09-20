@@ -43,11 +43,6 @@ const HAND_STRAIGHT = [
 </script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
 <!--  <PlayingCard value="A" suit="spades" large />-->
 <!--  <PlayingCard value="2" suit="spades" large />-->
 <!--  <PlayingCard value="3" suit="spades" large />-->
@@ -121,8 +116,12 @@ const HAND_STRAIGHT = [
     // { value: 'K', suit: 'spades' }
 
   ]"/>
-
+  <br>
+  <br>
+  <br>
+  <br>
   <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+
 </template>
 
 <style scoped></style>

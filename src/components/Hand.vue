@@ -3,6 +3,13 @@
     <div v-if="activeEntry" class="hand__frame">
       <div class="hand__top" aria-label="Inactive hands">
         <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
+          <span
+            v-if="leftHiddenCount > 0"
+            class="hand__ellipsis"
+            aria-hidden="true"
+          >
+            {{ '.'.repeat(leftHiddenCount) }}
+          </span>
           <button
             v-for="entry in leftStack"
             :key="entry.index"
@@ -21,6 +28,13 @@
         </div>
 
         <div class="hand__top-stack hand__top-stack--right" aria-label="Hands after active">
+          <span
+            v-if="rightHiddenCount > 0"
+            class="hand__ellipsis"
+            aria-hidden="true"
+          >
+            {{ '.'.repeat(rightHiddenCount) }}
+          </span>
           <button
             v-for="entry in rightStack"
             :key="entry.index"
@@ -73,6 +87,7 @@ type HandEntry = {
 const MAX_HAND_SETS = 8
 const BASE_CARD_HEIGHT = 64
 const STACK_OVERLAP = BASE_CARD_HEIGHT / 2
+const MAX_VISIBLE_STACK = 2
 
 const props = defineProps<{
   hands: CardLike[][]
@@ -146,16 +161,26 @@ const buildStack = (entries: HandEntry[]) =>
     } as Record<string, string | number>,
   }))
 
-const leftStack = computed(() =>
-  buildStack(
-    handEntries.value
-      .filter(entry => entry.index < activeHandIndex.value)
-  ),
+const leftEntries = computed(() =>
+  handEntries.value
+    .filter(entry => entry.index < activeHandIndex.value)
 )
 
-const rightStack = computed(() =>
-  buildStack(handEntries.value.filter(entry => entry.index > activeHandIndex.value).reverse()),
+const rightEntries = computed(() =>
+  handEntries.value
+    .filter(entry => entry.index > activeHandIndex.value),
 )
+
+const leftDisplayEntries = computed(() => leftEntries.value.slice(Math.max(leftEntries.value.length - MAX_VISIBLE_STACK, 0), leftEntries.value.length))
+const rightDisplayEntries = computed(() => rightEntries.value.slice(0, Math.min(MAX_VISIBLE_STACK, rightEntries.value.length)).reverse())
+
+
+const leftHiddenCount = computed(() => Math.max(leftEntries.value.length - leftDisplayEntries.value.length, 0))
+const rightHiddenCount = computed(() => Math.max(rightEntries.value.length - rightDisplayEntries.value.length, 0))
+
+const leftStack = computed(() => buildStack(leftDisplayEntries.value))
+
+const rightStack = computed(() => buildStack(rightDisplayEntries.value))
 
 const setActiveHand = (index: number) => {
   const nextIndex = clampIndex(index)
@@ -229,6 +254,14 @@ const setActiveHand = (index: number) => {
 .hand__top-stack--right {
   right: 0;
   align-items: flex-end;
+}
+
+.hand__ellipsis {
+  font-size: 1.5rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+  letter-spacing: 0.25rem;
 }
 
 .hand__entry--stack {
