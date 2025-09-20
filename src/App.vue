@@ -4,6 +4,7 @@ import CardHand from "@/components/CardHand.vue";
 import Hand from "@/components/Hand.vue";
 import PlayerBalanceDisplay from "@/components/PlayerBalanceDisplay.vue";
 import ActionSection from "@/components/ActionSection.vue";
+import DealerSection from "@/components/DealerSection.vue";
 
 const HAND_SPADES = [{ value: 'A', suit: 'spades' },
     { value: '2', suit: 'spades' },
@@ -47,7 +48,16 @@ const HAND_STRAIGHT = [
 <template>
 
 
-  <ActionSection />
+  <div :style="{
+    width: '100%',
+    display: 'flex',
+    gap: '2rem',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  }">
+    <DealerSection />
+    <ActionSection />
+  </div>
 
   <div :style="{
     width: '100%',

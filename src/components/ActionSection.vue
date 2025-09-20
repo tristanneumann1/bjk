@@ -26,15 +26,16 @@ const onActionClick = (action: PlayerAction) => {
 
 <style scoped>
 .action-section {
+  padding: 0.5rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   width: 100%;
-  max-width: 20rem;
+  max-width: 30rem;
 }
 
 .action-section__button {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.75rem;
   border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.1);

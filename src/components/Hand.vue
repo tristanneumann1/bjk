@@ -267,7 +267,7 @@ const setActiveHand = (index: number) => {
 
 .hand__ellipsis {
   font-size: 1.5rem;
-  line-height: 1;
+  line-height: 0.5;
   margin-bottom: 0.5rem;
   opacity: 0.6;
   letter-spacing: 0.25rem;
