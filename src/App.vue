@@ -2,6 +2,7 @@
 import PlayingCard from "@/components/PlayingCard.vue";
 import CardHand from "@/components/CardHand.vue";
 import Hand from "@/components/Hand.vue";
+import PlayerBalanceDisplay from "@/components/PlayerBalanceDisplay.vue";
 
 const HAND_SPADES = [{ value: 'A', suit: 'spades' },
     { value: '2', suit: 'spades' },
@@ -131,7 +132,7 @@ const HAND_STRAIGHT = [
     <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
     <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
   </div>
-
+  <PlayerBalanceDisplay/>
 </template>
 
 <style>
