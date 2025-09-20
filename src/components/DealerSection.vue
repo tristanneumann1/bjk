@@ -1,5 +1,8 @@
 <template>
   <section class="dealer-section" aria-label="Dealer hand">
+    <div class="dealer-section__count" aria-live="polite">
+      Running Count: <span class="dealer-section__count-value">{{ formattedRunningCount }}</span>
+    </div>
     <div class="dealer-section__content">
       <div class="dealer-shoe" aria-label="Remaining shoe">
         <div class="dealer-shoe__track">
@@ -26,7 +29,11 @@ const shoeFillPercent = computed(() => {
   return Math.max(0, Math.min(100, Math.round(fraction * 100)))
 })
 
-const shoeLabel = computed(() => `${dealer.remainingShoeSize}/${dealer.totalShoeSize}`)
+const formattedRunningCount = computed(() => {
+  const count = dealer.runningCount
+  const sign = count > 0 ? '+' : ''
+  return `${sign}${count}`
+})
 </script>
 
 <style scoped>
@@ -36,6 +43,16 @@ const shoeLabel = computed(() => `${dealer.remainingShoeSize}/${dealer.totalShoe
   align-items: center;
   gap: 0.75rem;
   padding: 1.5rem;
+}
+
+.dealer-section__count {
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.dealer-section__count-value {
+  font-weight: 600;
 }
 
 .dealer-section__content {

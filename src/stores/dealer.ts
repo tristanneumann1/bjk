@@ -12,7 +12,7 @@ export const useDealerStore = defineStore('dealer', () => {
   const cards = ref<DealerCard[]>([{}, {value: 'A', suit: 'H'}])
   const totalShoeSize = ref(DEFAULT_SHOE_SIZE)
   const remainingShoeSize = ref(DEFAULT_SHOE_SIZE / 2)
-
+  const runningCount = ref(0)
 
   const setCards = (nextCards: DealerCard[]) => {
     cards.value = nextCards
@@ -43,21 +43,33 @@ export const useDealerStore = defineStore('dealer', () => {
     remainingShoeSize.value = DEFAULT_SHOE_SIZE / 2
   }
 
+  const setRunningCount = (count: number) => {
+    runningCount.value = Math.trunc(count)
+  }
+
+  const adjustRunningCount = (delta: number) => {
+    runningCount.value = Math.trunc(runningCount.value + delta)
+  }
+
   const reset = () => {
     resetCards()
     resetShoe()
+    runningCount.value = 0
   }
 
   return {
     cards,
     totalShoeSize,
     remainingShoeSize,
+    runningCount,
     setCards,
     addCard,
     resetCards,
     setShoeSizes,
     adjustShoe,
     resetShoe,
+    setRunningCount,
+    adjustRunningCount,
     reset,
   }
 })
