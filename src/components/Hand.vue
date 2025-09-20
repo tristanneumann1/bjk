@@ -1,77 +1,82 @@
 <template>
-  <div class="hand" role="group" aria-label="Card hands">
-    <div v-if="activeEntry" class="hand__frame">
-      <div class="hand__top" aria-label="Inactive hands">
-        <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
-          <span
-            v-if="leftHiddenCount > 0"
-            class="hand__ellipsis"
-            aria-hidden="true"
-          >
-            {{ '.'.repeat(leftHiddenCount) }}
-          </span>
-          <button
-            v-for="entry in leftStack"
-            :key="entry.index"
-            class="hand__entry hand__entry--stack"
-            type="button"
-            role="listitem"
-            :style="entry.style"
-            :aria-pressed="entry.index === activeHandIndex"
-            @click="setActiveHand(entry.index)"
-          >
-            <CardHand
-              :cards="entry.hand"
-              :maxWidth="cardHandMaxWidth"
-            />
-          </button>
-        </div>
-
-        <div class="hand__top-stack hand__top-stack--right" aria-label="Hands after active">
-          <span
-            v-if="rightHiddenCount > 0"
-            class="hand__ellipsis"
-            aria-hidden="true"
-          >
-            {{ '.'.repeat(rightHiddenCount) }}
-          </span>
-          <button
-            v-for="entry in rightStack"
-            :key="entry.index"
-            class="hand__entry hand__entry--stack"
-            type="button"
-            role="listitem"
-            :style="entry.style"
-            :aria-pressed="entry.index === activeHandIndex"
-            @click="setActiveHand(entry.index)"
-          >
-            <CardHand
-              :cards="entry.hand"
-              :maxWidth="cardHandMaxWidth"
-            />
-          </button>
-        </div>
+  <div class="player-spot" aria-label="Player Spot" :style="{width: '272px' }">
+    <div class="hand__top" aria-label="Inactive hands">
+      <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
+        <span
+          v-if="leftHiddenCount > 0"
+          class="hand__ellipsis"
+          aria-hidden="true"
+        >
+          {{ '.'.repeat(leftHiddenCount) }}
+        </span>
+        <button
+          v-for="entry in leftStack"
+          :key="entry.index"
+          class="hand__entry hand__entry--stack"
+          type="button"
+          role="listitem"
+          :style="entry.style"
+          :aria-pressed="entry.index === activeHandIndex"
+          @click="setActiveHand(entry.index)"
+        >
+          <CardHand
+            :cards="entry.hand"
+            :maxWidth="cardHandMaxWidth"
+          />
+        </button>
       </div>
 
-      <button
-        class="hand__entry hand__entry--active"
-        type="button"
-        :aria-pressed="true"
-        @click="setActiveHand(activeEntry.index)"
-      >
-        <CardHand
-          :cards="activeEntry.hand"
-          :large="true"
-          :maxWidth="cardHandMaxWidth"
-        />
-      </button>
+      <div class="hand__top-stack hand__top-stack--right" aria-label="Hands after active">
+        <span
+          v-if="rightHiddenCount > 0"
+          class="hand__ellipsis"
+          aria-hidden="true"
+        >
+          {{ '.'.repeat(rightHiddenCount) }}
+        </span>
+        <button
+          v-for="entry in rightStack"
+          :key="entry.index"
+          class="hand__entry hand__entry--stack"
+          type="button"
+          role="listitem"
+          :style="entry.style"
+          :aria-pressed="entry.index === activeHandIndex"
+          @click="setActiveHand(entry.index)"
+        >
+          <CardHand
+            :cards="entry.hand"
+            :maxWidth="cardHandMaxWidth"
+          />
+        </button>
+      </div>
     </div>
+    <div class="hand" role="group" aria-label="Card hands">
+      <div v-if="activeEntry" class="hand__frame">
+
+        <button
+          class="hand__entry hand__entry--active"
+          type="button"
+          :aria-pressed="true"
+          @click="setActiveHand(activeEntry.index)"
+        >
+          <CardHand
+            :cards="activeEntry.hand"
+            :large="true"
+            :maxWidth="cardHandMaxWidth"
+          />
+        </button>
+      </div>
+    </div>
+    <BettingSlider :initial-value="15" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import CardHand from '@/components/CardHand.vue'
+import BettingSlider from "@/components/BettingSlider.vue";
+import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 
 type CardLike = {
   value?: string | number
@@ -85,8 +90,9 @@ type HandEntry = {
 }
 
 const MAX_HAND_SETS = 8
-const BASE_CARD_HEIGHT = 64
-const STACK_OVERLAP = BASE_CARD_HEIGHT / 2
+const BASE_SMALL_CARD_HEIGHT = 64 * CARD_SCALE_SMALL
+const BASE_LARGE_CARD_HEIGHT = 64 * CARD_SCALE_LARGE
+const STACK_OVERLAP = BASE_SMALL_CARD_HEIGHT / 2
 const MAX_VISIBLE_STACK = 2
 
 const props = defineProps<{
@@ -195,12 +201,17 @@ const setActiveHand = (index: number) => {
 </script>
 
 <style scoped>
+.player-spot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .hand {
-  width: 280px;
   position: relative;
   display: flex;
   justify-content: center;
-  padding: 2rem 4rem;
+  padding: 1rem 2rem;
 }
 
 .hand__entry {
@@ -239,20 +250,18 @@ const setActiveHand = (index: number) => {
 }
 
 .hand__top-stack {
-  position: absolute;
-  bottom: 132px;
+  position: unset;
   display: flex;
+  justify-content: flex-end;
   flex-direction: column;
   pointer-events: none;
 }
 
 .hand__top-stack--left {
   align-items: flex-start;
-  left: 0;
 }
 
 .hand__top-stack--right {
-  right: 0;
   align-items: flex-end;
 }
 

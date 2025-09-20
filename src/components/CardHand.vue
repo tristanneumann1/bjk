@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import PlayingCard from '@/components/PlayingCard.vue'
+import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 
 type CardLike = {
   value?: string | number
@@ -32,7 +33,7 @@ const props = defineProps<{
   large?: boolean
 }>()
 
-const scale = computed(() => (props.large ? 1.5 : 1))
+const scale = computed(() => (props.large ? CARD_SCALE_LARGE : CARD_SCALE_SMALL))
 
 const cardWidth = computed(() => BASE_CARD_WIDTH * scale.value)
 const cardHeight = computed(() => BASE_CARD_HEIGHT * scale.value)

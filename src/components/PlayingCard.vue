@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 
 const TILE_WIDTH = 64
 const TILE_HEIGHT = 64
@@ -82,7 +83,7 @@ const props = defineProps<{
   large?: boolean
 }>()
 
-const scale = computed(() => (props.large ? 1.5 : 1))
+const scale = computed(() => (props.large ? CARD_SCALE_LARGE : CARD_SCALE_SMALL))
 
 const normalizedValue = computed<CardValue | null>(() => {
   if (props.value === undefined || props.value === null) {

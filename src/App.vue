@@ -120,8 +120,23 @@ const HAND_STRAIGHT = [
   <br>
   <br>
   <br>
-  <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+  <div :style="{
+    width: '100%',
+    display: 'flex',
+    gap: '2rem',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  }">
+    <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+    <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+    <Hand :hands="[HAND_SPADES, HAND_HEARTS, HAND_KINGS, HAND_BLACKJACK, HAND_STRAIGHT]" />
+  </div>
 
 </template>
 
-<style scoped></style>
+<style>
+body {
+  margin: 0;
+  background-color: #006400;
+}
+</style>

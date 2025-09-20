@@ -1,20 +1,29 @@
 <template>
   <div class="betting-slider" role="group" aria-label="Bet amount selector">
-    <button
-      type="button"
-      class="betting-slider__control"
-      aria-label="Decrease bet"
-      @click="decrement"
-      :disabled="isAtMinimum"
-    >
-      −
-    </button>
-
     <div class="betting-slider__body">
       <div class="betting-slider__value" aria-live="polite">
+        <button
+          type="button"
+          class="betting-slider__control"
+          aria-label="Decrease bet"
+          @click="decrement"
+          :disabled="isAtMinimum"
+        >
+          −
+        </button>
         {{ formattedValue }}
+        <button
+          type="button"
+          class="betting-slider__control"
+          aria-label="Increase bet"
+          @click="increment"
+          :disabled="isAtMaximum"
+        >
+          +
+        </button>
       </div>
       <input
+        v-show="props.showSlider === true"
         ref="sliderRef"
         class="betting-slider__range"
         type="range"
@@ -26,16 +35,6 @@
         @input="onSliderInput"
       />
     </div>
-
-    <button
-      type="button"
-      class="betting-slider__control"
-      aria-label="Increase bet"
-      @click="increment"
-      :disabled="isAtMaximum"
-    >
-      +
-    </button>
   </div>
 </template>
 
@@ -43,11 +42,12 @@
 import { computed, ref, watch } from 'vue'
 
 const MIN_BET = 5
-const MAX_BET = 1000
+const MAX_BET = 300
 const STEP = 5
 
 const props = defineProps<{
   initialValue?: number
+  showSlider?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -126,6 +126,7 @@ const onSliderInput = (event: Event) => {
 .betting-slider__control {
   width: 1.5rem;
   height: 1.5rem;
+  margin: 0 0.5rem;
   border-radius: 999px;
   border: none;
   background: rgba(255, 255, 255, 0.15);
@@ -156,7 +157,7 @@ const onSliderInput = (event: Event) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 10rem;
+  min-width: 7rem;
 }
 
 .betting-slider__range {
@@ -164,6 +165,9 @@ const onSliderInput = (event: Event) => {
 }
 
 .betting-slider__value {
+  color: white;
+  display: flex;
+  flex-direction: row;
   margin-top: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
