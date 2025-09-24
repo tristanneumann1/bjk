@@ -1,31 +1,18 @@
-import mitt from 'mitt'
-
-export interface ModelPropertyChangeEvent<T = unknown> {
-  model: string
-  property: string
-  value: T
-  previous: T | undefined
-  target: object
-}
-
-export type ModelEventMap = {
-  'model:change': ModelPropertyChangeEvent
-} & Record<string, ModelPropertyChangeEvent>
-
-export const modelEvents = mitt<ModelEventMap>()
-
-// export const modelChangeEvent = 'model:change'
-
-export const modelPropertyEvent = (model: string, property: string) => `${model}:${property}`
+import { type ModelPropertyChangeEvent, modelChangeEvent, modelPropertyEvent, modelInstanceEvent, modelInstancePropertyEvent, modelEvents } from "@/lib/mitt";
 
 type Constructor<T = object> = new (...args: any[]) => T
 
 interface AttachOptions<T extends Constructor> {
   model: string
   props: readonly (keyof InstanceType<T> & string)[]
+  trackInstance?: boolean
 }
 
 const storageKeyMap = new WeakMap<object, Map<string, symbol>>()
+const instanceCounters = new WeakMap<Constructor, number>()
+const instanceIdLookup = new WeakMap<object, string>()
+
+export const getModelInstanceId = (instance: object) => instanceIdLookup.get(instance)
 
 const getStorageKey = (prototype: object, property: string) => {
   let propertyMap = storageKeyMap.get(prototype)
@@ -47,8 +34,25 @@ export function attachModelEventEmitter<T extends Constructor>(
   ctor: T,
   options: AttachOptions<T>,
 ) {
-  const { model, props } = options
+  const { model, props, trackInstance = false } = options
   const prototype = ctor.prototype
+
+  const ensureInstanceId = (instance: Record<string | symbol, unknown>) => {
+    if (!trackInstance) {
+      return undefined
+    }
+
+    let id = instanceIdLookup.get(instance)
+    if (id) {
+      return id
+    }
+
+    const nextIndex = (instanceCounters.get(ctor) ?? 0) + 1
+    instanceCounters.set(ctor, nextIndex)
+    id = `${model}_${nextIndex}`
+    instanceIdLookup.set(instance, id)
+    return id
+  }
 
   props.forEach((property) => {
     const descriptor = Object.getOwnPropertyDescriptor(prototype, property)
@@ -67,6 +71,7 @@ export function attachModelEventEmitter<T extends Constructor>(
       },
       set(this: Record<symbol, unknown>, value: unknown) {
         const previous = this[storageKey]
+        const instanceId = ensureInstanceId(this as Record<string | symbol, unknown>)
 
         if (Object.is(previous, value)) {
           this[storageKey] = value
@@ -77,17 +82,21 @@ export function attachModelEventEmitter<T extends Constructor>(
 
         const payload: ModelPropertyChangeEvent = {
           model,
+          instanceId,
           property,
           value,
           previous,
           target: this,
         }
 
-        // modelEvents.emit(modelChangeEvent, payload)
+        modelEvents.emit(modelChangeEvent, payload)
         modelEvents.emit(model, payload)
         modelEvents.emit(modelPropertyEvent(model, property), payload)
+        if (instanceId) {
+          modelEvents.emit(modelInstanceEvent(model, instanceId), payload)
+          modelEvents.emit(modelInstancePropertyEvent(model, property, instanceId), payload)
+        }
       },
     })
   })
 }
-

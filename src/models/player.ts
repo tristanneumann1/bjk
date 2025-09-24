@@ -13,4 +13,5 @@ export class Player {
 attachModelEventEmitter(Player, {
   model: 'player',
   props: ['balance'],
+  trackInstance: false,
 })

@@ -1,9 +1,13 @@
 import { defineStore } from 'pinia'
 import { markRaw, onScopeDispose, ref } from 'vue'
 import { Session } from '@/models/session'
-import { modelEvents, modelPropertyEvent, type ModelPropertyChangeEvent } from '@/lib/modelEvents.ts'
+import {
+  modelEvents,
+  modelPropertyEvent,
+  type ModelPropertyChangeEvent,
+} from '@/lib/mitt.ts'
 
-const DEFAULT_BALANCE = 0
+const DEFAULT_BALANCE = 0 // Default to 0 if session still loading
 const PLAYER_BALANCE_EVENT = modelPropertyEvent('player', 'balance')
 
 export const usePlayerStore = defineStore('player', () => {
@@ -15,6 +19,8 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   modelEvents.on(PLAYER_BALANCE_EVENT, onBalanceChange)
+
+
   onScopeDispose(() => {
     modelEvents.off(PLAYER_BALANCE_EVENT, onBalanceChange)
   })

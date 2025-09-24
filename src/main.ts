@@ -4,6 +4,7 @@ import App from '@/App.vue'
 import {Session} from "@/models/session.ts";
 import {Player} from "@/models/player.ts";
 import {Rules} from "@/models/rules.ts";
+import './lib/mitt' //initialize modelEvents
 
 Session.initialize({
   player: new Player(10_000),
