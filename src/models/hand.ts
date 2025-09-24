@@ -2,6 +2,17 @@ import { Card } from '@/models/card';
 import { type HandResult } from '@/models/chair';
 export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
 import {Session} from "@/models/session.ts";
+import {
+  modelChangeEvent,
+  modelCustomEvent,
+  modelEvents,
+  modelInstanceCustomEvent,
+  type ModelPropertyChangeEvent
+} from "@/lib/mitt";
+import {ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
+
+export const NEW_CARD_EVENT = 'new_card'
+export const SPLIT_CARDS_EVENT = 'split_cards'
 
 export class Hand {
   public isSplit = false;
@@ -10,6 +21,7 @@ export class Hand {
   public hasStood = false;
   public isSurrendered = false
   constructor(public cards: Card[] = []) {
+    ensureInstanceId(Hand, 'hand', this as Record<string | symbol, unknown>)
   }
 
   get softValue(): number {
@@ -40,6 +52,36 @@ export class Hand {
 
   addCard (card: Card) {
     this.cards.push(card);
+    const instanceId = getModelInstanceId(this);
+    const payload: ModelPropertyChangeEvent = {
+      model: 'hand',
+      instanceId,
+      event: NEW_CARD_EVENT,
+      value: card,
+      previous: undefined,
+      target: this,
+    }
+    modelEvents.emit(modelChangeEvent, payload)
+    modelEvents.emit(modelCustomEvent('hand', NEW_CARD_EVENT), payload)
+    if (instanceId) modelEvents.emit(modelInstanceCustomEvent('hand', NEW_CARD_EVENT, instanceId), payload)
+  }
+
+  splitCards (): Card | undefined {
+    const splitCard = this.cards.pop();
+    const instanceId = getModelInstanceId(this);
+    const payload: ModelPropertyChangeEvent = {
+      model: 'hand',
+      instanceId,
+      event: SPLIT_CARDS_EVENT,
+      value: splitCard,
+      previous: undefined,
+      target: this,
+    }
+
+    modelEvents.emit(modelChangeEvent, payload)
+    modelEvents.emit(modelCustomEvent('hand', SPLIT_CARDS_EVENT), payload)
+    if (instanceId) modelEvents.emit(modelInstanceCustomEvent('hand', SPLIT_CARDS_EVENT, instanceId), payload)
+    return splitCard
   }
 
   split() {

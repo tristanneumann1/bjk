@@ -14,6 +14,19 @@ const instanceIdLookup = new WeakMap<object, string>()
 
 export const getModelInstanceId = (instance: object) => instanceIdLookup.get(instance)
 
+export function ensureInstanceId<T extends Constructor> (ctor: T, model: string, instance: Record<string | symbol, unknown>) {
+  let id = instanceIdLookup.get(instance)
+    if (id) {
+      return id
+    }
+
+    const nextIndex = (instanceCounters.get(ctor) ?? 0) + 1
+    instanceCounters.set(ctor, nextIndex)
+    id = `${model}_${nextIndex}`
+    instanceIdLookup.set(instance, id)
+    return id
+  }
+
 const getStorageKey = (prototype: object, property: string) => {
   let propertyMap = storageKeyMap.get(prototype)
   if (!propertyMap) {
@@ -37,23 +50,6 @@ export function attachModelEventEmitter<T extends Constructor>(
   const { model, props, trackInstance = false } = options
   const prototype = ctor.prototype
 
-  const ensureInstanceId = (instance: Record<string | symbol, unknown>) => {
-    if (!trackInstance) {
-      return undefined
-    }
-
-    let id = instanceIdLookup.get(instance)
-    if (id) {
-      return id
-    }
-
-    const nextIndex = (instanceCounters.get(ctor) ?? 0) + 1
-    instanceCounters.set(ctor, nextIndex)
-    id = `${model}_${nextIndex}`
-    instanceIdLookup.set(instance, id)
-    return id
-  }
-
   props.forEach((property) => {
     const descriptor = Object.getOwnPropertyDescriptor(prototype, property)
 
@@ -71,7 +67,7 @@ export function attachModelEventEmitter<T extends Constructor>(
       },
       set(this: Record<symbol, unknown>, value: unknown) {
         const previous = this[storageKey]
-        const instanceId = ensureInstanceId(this as Record<string | symbol, unknown>)
+        const instanceId = trackInstance ? ensureInstanceId(ctor, model, this as Record<string | symbol, unknown>) : undefined
 
         if (Object.is(previous, value)) {
           this[storageKey] = value

@@ -1,8 +1,15 @@
 import { Card } from '@/models/card';
-import { type Action, Hand } from '@/models/hand';
+import {type Action, Hand} from '@/models/hand';
 import { Dealer } from '@/models/dealer';
 import chalk, { type ColorName, type ModifierName } from 'chalk';
 import {Session} from "@/models/session.ts";
+import {ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
+import {
+  modelChangeEvent,
+  modelCustomEvent,
+  modelEvents, modelInstanceCustomEvent,
+  type ModelPropertyChangeEvent
+} from "@/lib/mitt";
 
 export type HandResult = 'Win' | 'Lose' | 'Push' | 'BlackJackWin' | 'Double' | 'Double_Push';
 const HAND_VIEW_COLORS: { [result in HandResult]: ColorName | ModifierName} = {
@@ -14,10 +21,13 @@ const HAND_VIEW_COLORS: { [result in HandResult]: ColorName | ModifierName} = {
   'Double_Push': 'white'   // Cyan
 }
 
+export const NEW_HAND_EVENT = 'new_hand'
+
 export class Chair {
   private betValue: number = 0;
   private activeHandIndex = 0;
   constructor(public hands: Hand[] = []) {
+    ensureInstanceId(Chair, 'chair', this as Record<string | symbol, unknown>)
   }
 
   get bet(): number {
@@ -106,14 +116,14 @@ export class Chair {
         this.moveToNextHand(dealer);
         break;
       case 'Split':
-        const splitCard = this.activeHand.cards.pop();
+        const splitCard = this.activeHand.splitCards();
         if (!splitCard) {
           throw new Error('No card to split');
         }
         const newHand = new Hand([splitCard]);
         newHand.split();
         this.activeHand.split();
-        this.hands.push(newHand);
+        this.addHand(newHand)
         this.activeHand.addCard(dealer.dealCard())
         break;
       case 'Hit':
@@ -127,6 +137,21 @@ export class Chair {
         this.moveToNextHand(dealer);
         break;
     }
+  }
+  private addHand(newHand: Hand) {
+    this.hands.push(newHand)
+    const instanceId = getModelInstanceId(this);
+    const payload: ModelPropertyChangeEvent = {
+      model: 'chair',
+      instanceId,
+      event: NEW_HAND_EVENT,
+      value: newHand,
+      previous: undefined,
+      target: this,
+    }
+    modelEvents.emit(modelChangeEvent, payload)
+    modelEvents.emit(modelCustomEvent('hand', NEW_HAND_EVENT), payload)
+    if (instanceId) modelEvents.emit(modelInstanceCustomEvent('chair', NEW_HAND_EVENT, instanceId), payload)
   }
 
   view(isActive: boolean, other?: Hand | null): void {
