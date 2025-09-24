@@ -1,7 +1,14 @@
 import { Chair } from '@/models/chair';
 import { Dealer } from '@/models/dealer';
-import { type Action } from '@/models/hand';
+import {type Action, NEW_CARD_EVENT} from '@/models/hand';
 import {Session} from "@/models/session.ts";
+import {attachModelEventEmitter, getModelInstanceId} from "@/lib/modelEvents";
+import {
+  modelChangeEvent,
+  modelCustomEvent,
+  modelEvents, modelInstanceCustomEvent,
+  ModelPropertyChangeEvent
+} from "@/lib/mitt";
 
 interface PlayerChair {
   [chairId: number]: Chair | null;
@@ -15,9 +22,11 @@ const DEFAULT_TABLE_CONFIGURATION : TableConfiguration= {
   logAfterAction: false,
 }
 
+export const CHAIR_EVENT = 'chair'
+
 export class Table {
-  private chairIndex = 0;
-  private chairTurnIndex = 0;
+  chairIndex = 0;
+  chairTurnIndex = 0;
   constructor(public dealer: Dealer, public dealerChair: Chair, public playerChairs: PlayerChair = {}, public configuration: TableConfiguration = DEFAULT_TABLE_CONFIGURATION) {}
 
   get dealerPeekedBlackjack(): boolean {
@@ -61,8 +70,19 @@ export class Table {
   }
 
   addPlayerChair() {
-    this.playerChairs[this.chairIndex] = new Chair()
+    const newChair = new Chair()
+    this.playerChairs[this.chairIndex] = newChair
     this.chairIndex++
+
+    const payload: ModelPropertyChangeEvent = {
+      model: 'table',
+      event: CHAIR_EVENT,
+      value: newChair,
+      previous: undefined,
+      target: this,
+    }
+    modelEvents.emit(modelChangeEvent, payload)
+    modelEvents.emit(modelCustomEvent('table', CHAIR_EVENT), payload)
   }
   removePlayerChair(index: number) {
     const playerChair = this.playerChairs[index]
@@ -70,7 +90,18 @@ export class Table {
       throw new Error('No chair at this index');
     }
     this.playerChairs[index] = null
+
+    const payload: ModelPropertyChangeEvent = {
+      model: 'table',
+      event: CHAIR_EVENT,
+      value: null,
+      previous: playerChair,
+      target: this,
+    }
+    modelEvents.emit(modelChangeEvent, payload)
+    modelEvents.emit(modelCustomEvent('table', CHAIR_EVENT), payload)
   }
+
   deal(chair: Chair, n: number = 1) {
     for (let i = 0; i < n; i++) {
       chair.deal(this.dealer.dealCard())
@@ -162,6 +193,11 @@ export class Table {
     if (this.roundInitialCost <= 0) {
       throw new Error('No bets placed');
     }
+    for (const chair of this.playerChairArray) {
+      if (chair.bet < 0) {
+        throw new Error('No negative bets allowed');
+      }
+    }
     // for (const chair of this.playerChairArray) {
     //   if (chair.bet <= 0) {
     //     throw new Error('All chairs must have a bet placed');
@@ -172,3 +208,10 @@ export class Table {
     }
   }
 }
+
+attachModelEventEmitter(Table, {
+  model: 'table',
+  props: ['chairTurnIndex'],
+  trackInstance: false,
+})
+

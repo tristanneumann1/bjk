@@ -1,9 +1,10 @@
 import { Card } from '@/models/card';
 import { Hand } from '@/models/hand';
 import {Session} from "@/models/session.ts";
+import {attachModelEventEmitter} from "@/lib/modelEvents";
 
 export class Dealer {
-  private dealIndex = 0;
+  dealIndex = 0;
   constructor(readonly shoe: Card[] = []) {
   }
 
@@ -41,3 +42,9 @@ export class Dealer {
     }
   }
 }
+
+attachModelEventEmitter(Dealer, {
+  model: 'dealer',
+  props: ['dealIndex'],
+  trackInstance: false,
+})

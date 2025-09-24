@@ -3,7 +3,7 @@ import {type Action, Hand} from '@/models/hand';
 import { Dealer } from '@/models/dealer';
 import chalk, { type ColorName, type ModifierName } from 'chalk';
 import {Session} from "@/models/session.ts";
-import {ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
+import {attachModelEventEmitter, ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
 import {
   modelChangeEvent,
   modelCustomEvent,
@@ -25,7 +25,7 @@ export const NEW_HAND_EVENT = 'new_hand'
 
 export class Chair {
   private betValue: number = 0;
-  private activeHandIndex = 0;
+  activeHandIndex = 0;
   constructor(public hands: Hand[] = []) {
     ensureInstanceId(Chair, 'chair', this as Record<string | symbol, unknown>)
   }
@@ -178,3 +178,9 @@ export class Chair {
     return handString
   }
 }
+
+attachModelEventEmitter(Chair, {
+  model: 'chair',
+  props: ['bet', 'activeHandIndex'],
+  trackInstance: true,
+})
