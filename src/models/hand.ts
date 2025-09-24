@@ -1,8 +1,6 @@
 import { Card } from '@/models/card';
 import { type HandResult } from '@/models/chair';
 export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
-import { Rules } from '@/models/rules';
-import { Player } from '@/models/player';
 import {Session} from "@/models/session.ts";
 
 export class Hand {

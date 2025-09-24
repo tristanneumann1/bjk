@@ -12,8 +12,8 @@ const playerStore = usePlayerStore()
 
 const formattedBalance = computed(() =>
   `$${(playerStore.balance / 100).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   })}`,
 )
 </script>

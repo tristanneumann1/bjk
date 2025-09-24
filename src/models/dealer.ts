@@ -1,5 +1,4 @@
 import { Card } from '@/models/card';
-import { Rules } from '@/models/rules';
 import { Hand } from '@/models/hand';
 import {Session} from "@/models/session.ts";
 
