@@ -1,9 +1,8 @@
 import { Card } from '@/models/card';
 import { type Action, Hand } from '@/models/hand';
 import { Dealer } from '@/models/dealer';
-import { Player } from '@/models/player';
 import chalk, { type ColorName, type ModifierName } from 'chalk';
-import { Rules } from '@/models/rules';
+import {Session} from "@/models/session.ts";
 
 export type HandResult = 'Win' | 'Lose' | 'Push' | 'BlackJackWin' | 'Double' | 'Double_Push';
 const HAND_VIEW_COLORS: { [result in HandResult]: ColorName | ModifierName} = {
@@ -71,7 +70,7 @@ export class Chair {
       case 'Push':
         return this.bet;
       case 'BlackJackWin':
-        return Math.floor(this.bet * (1 + Rules.getInstance().blackjackPayout));
+        return Math.floor(this.bet * (1 + Session.getInstance().rules.blackjackPayout));
       case 'Lose':
         return 0
       case "Double":
@@ -101,7 +100,7 @@ export class Chair {
         this.moveToNextHand(dealer);
         break;
       case 'Double':
-        Player.getInstance().removeMoney(this.betValue)
+        Session.getInstance().player.removeMoney(this.betValue)
         this.activeHand.isDoubled = true;
         this.activeHand.addCard(dealer.dealCard())
         this.moveToNextHand(dealer);

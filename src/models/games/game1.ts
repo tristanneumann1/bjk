@@ -1,19 +1,19 @@
-import { buildNDeckShoe } from 'models/card';
-import { Chair } from 'models/chair';
-import { Player } from 'models/player';
-import { Dealer } from 'models/dealer';
-import { Table } from 'models/table';
-import { Rules } from 'models/rules';
+import { buildNDeckShoe } from '@/models/card';
+import { Chair } from '@/models/chair';
+import { Player } from '@/models/player';
+import { Dealer } from '@/models/dealer';
+import { Table } from '@/models/table';
+import { Rules } from '@/models/rules';
+import {Session} from "@/models/session.ts";
 
 export class Game1 {
   public table: Table;
   constructor() {
     const rules = new Rules();
-    Rules.initialize(rules);
     const shoe = buildNDeckShoe(rules.deckCount)
     const dealerChair = new Chair()
     const player = new Player(100_000)
-    Player.initialize(player)
+    Session.initialize({ player, rules})
     const dealer = new Dealer(shoe)
     this.table = new Table(dealer, dealerChair, [], { logAfterAction: true })
     dealer.shuffle()

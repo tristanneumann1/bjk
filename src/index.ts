@@ -1,7 +1,5 @@
 import prompt from 'prompt';
 import { type Action } from '@/models/hand';
-// import { GameRigged } from 'models/games/gameRigged';
-// import { Card } from 'models/card';
 import { Game3Chair } from '@/models/games/game3Chair';
 
 async function run () {

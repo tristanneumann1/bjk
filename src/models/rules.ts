@@ -1,17 +1,5 @@
 
 export class Rules {
-  private static instance: Rules;
-  static initialize(rules: Rules) {
-    Rules.instance = rules;
-  }
-
-  static getInstance(): Rules {
-    if (!Rules.instance) {
-      Rules.instance = new Rules();
-    }
-    return Rules.instance;
-  }
-
   deckCount: number;
   dealerHitsSoft17: boolean;
   doubleAllowedAfterSplit: boolean;

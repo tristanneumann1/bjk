@@ -2,10 +2,13 @@ import { Hand } from '@/models/hand';
 import { Card } from '@/models/card';
 import { Player } from '@/models/player';
 import { Rules } from '@/models/rules';
+import {Session} from "@/models/session.ts";
 
 describe('Hand Model', () => {
-  Player.initialize(new Player(100))
-  Rules.initialize(new Rules())
+  Session.initialize({
+    player: new Player(100),
+    rules: new Rules()
+  })
 
   const hand17 = new Hand([new Card('Hearts', '10'), new Card('Diamonds', '7')]);
   const handMismatch20 = new Hand([new Card('Hearts', '10'), new Card('Diamonds', 'J')]);

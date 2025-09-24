@@ -1,6 +1,7 @@
 import { Card } from '@/models/card';
 import { Rules } from '@/models/rules';
 import { Hand } from '@/models/hand';
+import {Session} from "@/models/session.ts";
 
 export class Dealer {
   private dealIndex = 0;
@@ -8,7 +9,7 @@ export class Dealer {
   }
 
   pastPenetration(): boolean {
-    return (this.shoe.length - 1 - this.dealIndex) < Rules.getInstance().penetration + 1; // account for first tossed card
+    return (this.shoe.length - 1 - this.dealIndex) < Session.getInstance().rules.penetration + 1; // account for first tossed card
   }
 
   resetDealIndex() {
@@ -36,7 +37,7 @@ export class Dealer {
     while(dealerHand.bestValue < 17) {
       dealerHand.addCard(this.dealCard())
     };
-    if (dealerHand.bestValue === 17 && dealerHand.isSoft && Rules.getInstance().dealerHitsSoft17) {
+    if (dealerHand.bestValue === 17 && dealerHand.isSoft && Session.getInstance().rules.dealerHitsSoft17) {
       dealerHand.addCard(this.dealCard())
     }
   }

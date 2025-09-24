@@ -3,6 +3,7 @@ import { type HandResult } from '@/models/chair';
 export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
 import { Rules } from '@/models/rules';
 import { Player } from '@/models/player';
+import {Session} from "@/models/session.ts";
 
 export class Hand {
   public isSplit = false;
@@ -78,21 +79,21 @@ export class Hand {
       case 'Hit':
         return this.softValue < 21 ? null : 'Cannot hit on 21 or more'
       case "Double":
-        if (Player.getInstance().balance < betValue) return 'Not enough balance to double'
+        if (Session.getInstance().player.balance < betValue) return 'Not enough balance to double'
         if (this.cards.length !== 2) return 'Can only double on first two cards'
-        if (this.isSplit && !Rules.getInstance().doubleAllowedAfterSplit) {
+        if (this.isSplit && !Session.getInstance().rules.doubleAllowedAfterSplit) {
           return 'Can not double after split'
         }
         return null
       case 'Split':
         if (this.cards.length !== 2) return 'Can only split with two cards'
         if (this.cards[0].value !== this.cards[1].value) return 'Can only split matching values'
-        if (this.splitCount >= Rules.getInstance().maxSplits) return 'maximum split count reached'
-        if (this.cards[0].isAce() && this.isSplit && !Rules.getInstance().resplitAcesAllowed) return 'Can not resplit aces'
+        if (this.splitCount >= Session.getInstance().rules.maxSplits) return 'maximum split count reached'
+        if (this.cards[0].isAce() && this.isSplit && !Session.getInstance().rules.resplitAcesAllowed) return 'Can not resplit aces'
         return null
       case "Surrender":
         if (this.cards.length !== 2) return 'Can only surrender on first two cards'
-        if (!Rules.getInstance().surrenderAllowed) return 'Surrender not allowed'
+        if (!Session.getInstance().rules.surrenderAllowed) return 'Surrender not allowed'
         return  null
     }
   }

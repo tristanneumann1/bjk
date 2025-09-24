@@ -1,4 +1,4 @@
-import { Card } from 'models/card';
+import { Card } from '@/models/card';
 import { Game1 } from './game1';
 
 export class GameRigged extends Game1 {

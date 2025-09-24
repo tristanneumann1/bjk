@@ -1,8 +1,7 @@
-import { Chair } from 'models/chair';
-import { Player } from 'models/player';
-import { Dealer } from 'models/dealer';
-import { Action } from 'models/hand';
-import { Rules } from 'models/rules';
+import { Chair } from '@/models/chair';
+import { Dealer } from '@/models/dealer';
+import { type Action } from '@/models/hand';
+import {Session} from "@/models/session.ts";
 
 interface PlayerChair {
   [chairId: number]: Chair | null;
@@ -22,7 +21,7 @@ export class Table {
   constructor(public dealer: Dealer, public dealerChair: Chair, public playerChairs: PlayerChair = {}, public configuration: TableConfiguration = DEFAULT_TABLE_CONFIGURATION) {}
 
   get dealerPeekedBlackjack(): boolean {
-    return Rules.getInstance().dealerPeekA10 &&
+    return Session.getInstance().rules.dealerPeekA10 &&
       this.dealerChair.hands[0].isBlackJack
   }
 
@@ -79,7 +78,7 @@ export class Table {
   }
   startRound() {
     this.validateRoundCanStart();
-    Player.getInstance().removeMoney(this.roundInitialCost);
+    Session.getInstance().player.removeMoney(this.roundInitialCost);
     this.dealerChair.start()
     this.deal(this.dealerChair, 2);
     for (let chair of this.playerChairArray) {
@@ -136,10 +135,10 @@ export class Table {
     for (let chair of this.playerChairArray) {
       const payout = chair.payout(this.dealerChair.hands[0])
       if (payout > 0) {
-        Player.getInstance().addMoney(payout)
+        Session.getInstance().player.addMoney(payout)
       }
     }
-    console.log('currentBalance', Player.getInstance().balance)
+    console.log('currentBalance', Session.getInstance().player.balance)
     this.resetAllChairs()
     this.chairTurnIndex = 0
   }
@@ -157,7 +156,7 @@ export class Table {
     if (this.playerChairArray.length === 0) {
       throw new Error('No players at the table');
     }
-    if (this.roundInitialCost > Player.getInstance().balance) {
+    if (this.roundInitialCost > Session.getInstance().player.balance) {
       throw new Error('Player does not have enough balance for the round');
     }
     if (this.roundInitialCost <= 0) {
