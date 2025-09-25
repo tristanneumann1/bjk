@@ -1,11 +1,17 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import {Session} from "@/models/session.ts";
+import { onScopeDispose, ref } from 'vue'
+import { Session } from '@/models/session'
 import {
   modelEvents,
-  type ModelPropertyChangeEvent, modelPropertyEvent
-} from "@/lib/mitt.ts";
-import {Dealer} from "@/models/dealer.ts";
+  modelInstanceCustomEvent,
+  modelInstancePropertyEvent,
+  modelPropertyEvent,
+  type ModelPropertyChangeEvent,
+} from '@/lib/mitt'
+import { Dealer } from '@/models/dealer'
+import { getModelInstanceId } from '@/lib/modelEvents'
+import type { Chair } from '@/models/chair'
+import { Hand, NEW_CARD_EVENT } from '@/models/hand'
 
 export type DealerCard = {
   value?: string | number
@@ -61,10 +67,14 @@ export const useDealerStore = defineStore('dealer', () => {
     runningCount.value = 0
   }
 
-  console.log('Registering dealer store model event listeners')
-  modelEvents.on(modelPropertyEvent('dealer', 'dealerIndex'), (event: ModelPropertyChangeEvent) => {
-    const dealerChair = event.target as Dealer
-    const dealtCard = dealerChair.shoe[event.value as number]
+  const cleanupFns: Array<() => void> = []
+
+  const dealerDealIndexEvent = modelPropertyEvent('dealer', 'dealIndex')
+
+  const onDealIndexChange = (event: ModelPropertyChangeEvent) => {
+    remainingShoeSize.value--
+    const dealer = event.target as Dealer
+    const dealtCard = dealer.shoe[event.value as number]
     switch (dealtCard.value) {
       case 1:
       case 10:
@@ -76,8 +86,72 @@ export const useDealerStore = defineStore('dealer', () => {
       case 5:
       case 6:
         adjustRunningCount(1)
+        break
     }
+  }
+
+  modelEvents.on(dealerDealIndexEvent, onDealIndexChange)
+  cleanupFns.push(() => modelEvents.off(dealerDealIndexEvent, onDealIndexChange))
+
+  const dealerChair = Session.getInstance().table.dealerChair
+  const dealerChairId = getModelInstanceId(dealerChair)
+  if (!dealerChairId) {
+    throw new Error('dealer chair not found')
+  }
+
+  let activeHandEventKey: string | null = null
+
+  const detachActiveHandListener = () => {
+    if (!activeHandEventKey) {
+      return
+    }
+    modelEvents.off(activeHandEventKey, dealerNewCardHandler)
+    activeHandEventKey = null
+  }
+
+  const onDealerActiveHandChange = (event: ModelPropertyChangeEvent) => {
+    if (event.value !== 0) {
+      return
+    }
+
+    detachActiveHandListener()
+
+    const dealerChairInstance = event.target as Chair
+    const dealerHand = dealerChairInstance.hands[0]
+    const dealerHandIndex = getModelInstanceId(dealerHand)
+    if (!dealerHandIndex) {
+      throw new Error('dealer hand not found')
+    }
+
+    activeHandEventKey = modelInstanceCustomEvent('hand', NEW_CARD_EVENT, dealerHandIndex)
+    modelEvents.on(activeHandEventKey, dealerNewCardHandler)
+  }
+
+  const activeHandEvent = modelInstancePropertyEvent('chair', 'activeHandIndex', dealerChairId)
+  modelEvents.on(activeHandEvent, onDealerActiveHandChange)
+
+  cleanupFns.push(() => {
+    modelEvents.off(activeHandEvent, onDealerActiveHandChange)
+    detachActiveHandListener()
   })
+
+  function dealerNewCardHandler(e: ModelPropertyChangeEvent) {
+    const dealerHand = e.target as Hand
+    setCards(dealerHand.cards)
+  }
+
+  onScopeDispose(() => {
+    cleanupFns.forEach((cleanup) => {
+      try {
+        cleanup()
+      } catch (error) {
+        console.error('Failed to cleanup dealer store listener', error)
+      }
+    })
+    cleanupFns.length = 0
+    detachActiveHandListener()
+  })
+
 
   return {
     cards,

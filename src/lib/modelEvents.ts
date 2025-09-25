@@ -69,11 +69,6 @@ export function attachModelEventEmitter<T extends Constructor>(
         const previous = this[storageKey]
         const instanceId = trackInstance ? ensureInstanceId(ctor, model, this as Record<string | symbol, unknown>) : undefined
 
-        if (Object.is(previous, value)) {
-          this[storageKey] = value
-          return
-        }
-
         this[storageKey] = value
 
         const payload: ModelPropertyChangeEvent = {

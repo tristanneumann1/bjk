@@ -61,8 +61,8 @@ export class Chair {
   }
 
   start() {
-    this.activeHandIndex = 0;
     this.hands = [new Hand()];
+    this.activeHandIndex = 0;
   }
   deal(card: Card) {
     if (!this.activeHand) {

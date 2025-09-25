@@ -28,6 +28,7 @@ Session.initialize({
 
 document['_session'] = Session.getInstance()
 document['_hand'] = new Hand()
+document['_events'] = modelEvents
 modelEvents.on(modelChangeEvent, (e) => {
   console.log('e', e)
 })
