@@ -13,9 +13,9 @@ export class Game1 {
     const shoe = buildNDeckShoe(rules.deckCount)
     const dealerChair = new Chair()
     const player = new Player(100_000)
-    Session.initialize({ player, rules})
     const dealer = new Dealer(shoe)
     this.table = new Table(dealer, dealerChair, [], { logAfterAction: true })
+    Session.initialize({ player, rules, table: this.table})
     dealer.shuffle()
     this.table.addPlayerChair()
   }

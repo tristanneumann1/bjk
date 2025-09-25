@@ -25,7 +25,7 @@ export const NEW_HAND_EVENT = 'new_hand'
 
 export class Chair {
   private betValue: number = 0;
-  activeHandIndex = 0;
+  private _activeHandIndex = 0;
   constructor(public hands: Hand[] = []) {
     ensureInstanceId(Chair, 'chair', this as Record<string | symbol, unknown>)
   }
@@ -38,6 +38,12 @@ export class Chair {
       throw new Error('can not change bet during round');
     }
     this.betValue = amount;
+  }
+  get activeHandIndex(): number {
+    return this._activeHandIndex;
+  }
+  set activeHandIndex(value: number) {
+    this._activeHandIndex = value;
   }
   get activeHand(): Hand | undefined {
     return this.hands[this.activeHandIndex];

@@ -3,11 +3,15 @@ import { Card } from '@/models/card';
 import { Player } from '@/models/player';
 import { Rules } from '@/models/rules';
 import {Session} from "@/models/session.ts";
+import {Table} from "@/models/table.ts";
+import {Dealer} from "@/models/dealer.ts";
+import {Chair} from "@/models/chair.ts";
 
 describe('Hand Model', () => {
   Session.initialize({
     player: new Player(100),
-    rules: new Rules()
+    rules: new Rules(),
+    table: new Table(new Dealer(), new Chair(), [], {})
   })
 
   const hand17 = new Hand([new Card('Hearts', '10'), new Card('Diamonds', '7')]);

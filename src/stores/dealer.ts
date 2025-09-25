@@ -1,17 +1,21 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+import {Session} from "@/models/session.ts";
+import {
+  modelEvents,
+  type ModelPropertyChangeEvent, modelPropertyEvent
+} from "@/lib/mitt.ts";
+import {Dealer} from "@/models/dealer.ts";
 
 export type DealerCard = {
   value?: string | number
   suit?: string
 }
 
-const DEFAULT_SHOE_SIZE = 312
-
 export const useDealerStore = defineStore('dealer', () => {
-  const cards = ref<DealerCard[]>([{}, {value: 'A', suit: 'H'}])
-  const totalShoeSize = ref(DEFAULT_SHOE_SIZE)
-  const remainingShoeSize = ref(DEFAULT_SHOE_SIZE / 2)
+  const cards = ref<DealerCard[]>([])
+  const totalShoeSize = ref(Session.getInstance().rules.deckCount * 52)
+  const remainingShoeSize = ref(Session.getInstance().rules.deckCount * 52)
   const runningCount = ref(0)
 
   const setCards = (nextCards: DealerCard[]) => {
@@ -39,8 +43,8 @@ export const useDealerStore = defineStore('dealer', () => {
   }
 
   const resetShoe = () => {
-    totalShoeSize.value = DEFAULT_SHOE_SIZE
-    remainingShoeSize.value = DEFAULT_SHOE_SIZE / 2
+    totalShoeSize.value = Session.getInstance().rules.deckCount * 52
+    remainingShoeSize.value = Session.getInstance().rules.deckCount * 52
   }
 
   const setRunningCount = (count: number) => {
@@ -56,6 +60,24 @@ export const useDealerStore = defineStore('dealer', () => {
     resetShoe()
     runningCount.value = 0
   }
+
+  console.log('Registering dealer store model event listeners')
+  modelEvents.on(modelPropertyEvent('dealer', 'dealerIndex'), (event: ModelPropertyChangeEvent) => {
+    const dealerChair = event.target as Dealer
+    const dealtCard = dealerChair.shoe[event.value as number]
+    switch (dealtCard.value) {
+      case 1:
+      case 10:
+        adjustRunningCount(-1)
+        break
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        adjustRunningCount(1)
+    }
+  })
 
   return {
     cards,

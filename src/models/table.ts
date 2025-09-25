@@ -1,13 +1,13 @@
 import { Chair } from '@/models/chair';
 import { Dealer } from '@/models/dealer';
-import {type Action, NEW_CARD_EVENT} from '@/models/hand';
+import {type Action} from '@/models/hand';
 import {Session} from "@/models/session.ts";
-import {attachModelEventEmitter, getModelInstanceId} from "@/lib/modelEvents";
+import {attachModelEventEmitter} from "@/lib/modelEvents";
 import {
   modelChangeEvent,
   modelCustomEvent,
-  modelEvents, modelInstanceCustomEvent,
-  ModelPropertyChangeEvent
+  modelEvents,
+  type ModelPropertyChangeEvent
 } from "@/lib/mitt";
 
 interface PlayerChair {
@@ -26,9 +26,15 @@ export const CHAIR_EVENT = 'chair'
 
 export class Table {
   chairIndex = 0;
-  chairTurnIndex = 0;
+  private _chairTurnIndex = 0;
   constructor(public dealer: Dealer, public dealerChair: Chair, public playerChairs: PlayerChair = {}, public configuration: TableConfiguration = DEFAULT_TABLE_CONFIGURATION) {}
 
+  get chairTurnIndex(): number {
+    return this._chairTurnIndex;
+  }
+  set chairTurnIndex(value: number) {
+    this._chairTurnIndex = value;
+  }
   get dealerPeekedBlackjack(): boolean {
     return Session.getInstance().rules.dealerPeekA10 &&
       this.dealerChair.hands[0].isBlackJack

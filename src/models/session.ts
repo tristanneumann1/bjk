@@ -1,9 +1,11 @@
 import type {Player} from "@/models/player.ts";
 import type {Rules} from "@/models/rules.ts";
+import {Table} from "@/models/table";
 
 export class Session {
   public player: Player;
   public rules: Rules;
+  public table: Table
   private static instance: Session;
 
   static initialize(session: Session) {
@@ -16,8 +18,9 @@ export class Session {
     return Session.instance;
   }
 
-  constructor({ player, rules }: { player: Player; rules: Rules }) {
+  constructor({ player, rules, table }: { player: Player; rules: Rules, table: Table }) {
     this.player = player;
     this.rules = rules;
+    this.table = table;
   }
 }
