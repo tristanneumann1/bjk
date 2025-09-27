@@ -19,6 +19,9 @@ export class Dealer {
     return (this.shoe.length - 1 - this.dealIndex) < Session.getInstance().rules.penetration + 1; // account for first tossed card
   }
 
+  reset() {
+    this.shuffle()
+  }
   resetDealIndex() {
     this.dealIndex = 0;
   }

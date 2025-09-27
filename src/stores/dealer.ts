@@ -25,7 +25,7 @@ export const useDealerStore = defineStore('dealer', () => {
   const runningCount = ref(0)
 
   const setCards = (nextCards: DealerCard[]) => {
-    cards.value = nextCards
+    cards.value = [...nextCards]
   }
 
   const addCard = (card: DealerCard) => {
@@ -72,9 +72,15 @@ export const useDealerStore = defineStore('dealer', () => {
   const dealerDealIndexEvent = modelPropertyEvent('dealer', 'dealIndex')
 
   const onDealIndexChange = (event: ModelPropertyChangeEvent) => {
+    if(event.value === 0) {
+      // shoe reset
+      setRunningCount(0)
+      remainingShoeSize.value = Session.getInstance().rules.deckCount * 52
+      return
+    }
     remainingShoeSize.value--
     const dealer = event.target as Dealer
-    const dealtCard = dealer.shoe[event.value as number]
+    const dealtCard = dealer.shoe[event.value as number - 1]
     switch (dealtCard.value) {
       case 1:
       case 10:
