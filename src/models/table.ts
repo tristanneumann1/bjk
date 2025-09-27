@@ -69,9 +69,9 @@ export class Table {
 
   }
 
-  addPlayerChair() {
+  addPlayerChair(index?: number) {
     const newChair = new Chair()
-    this.playerChairs[this.chairIndex] = newChair
+    this.playerChairs[index ?? this.chairIndex] = newChair
     this.chairIndex++
 
     const payload: ModelPropertyChangeEvent = {
@@ -83,6 +83,9 @@ export class Table {
     }
     modelEvents.emit(modelChangeEvent, payload)
     modelEvents.emit(modelCustomEvent('table', CHAIR_EVENT), payload)
+  }
+  getPlayerChair(index: number): Chair | null {
+    return this.playerChairs[index] ?? null
   }
   removePlayerChair(index: number) {
     const playerChair = this.playerChairs[index]

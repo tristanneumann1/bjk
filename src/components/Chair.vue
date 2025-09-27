@@ -1,16 +1,6 @@
 <template>
   <div class="chair" aria-label="Player Spot" :style="{width: '272px' }">
-    <button
-      v-if="isInactive"
-      class="chair__empty-button"
-      type="button"
-      aria-label="Sit at this chair"
-      @click="onSitClick"
-    >
-      <span aria-hidden="true">+</span>
-    </button>
-
-    <div v-else class="hand__top" aria-label="Inactive hands">
+    <div class="hand__top" aria-label="Inactive hands">
       <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
         <span
           v-if="leftHiddenCount > 0"
@@ -59,7 +49,7 @@
         </button>
       </div>
     </div>
-    <div v-if="!isInactive" class="hand" role="group" aria-label="Card hands">
+    <div class="hand" role="group" aria-label="Card hands">
       <div v-if="activeEntry" class="hand__frame">
 
         <button
@@ -76,7 +66,6 @@
       </div>
     </div>
     <BettingSlider
-      v-if="!isInactive"
       :initial-value="currentBet"
       @change="onBetChange"
     />
@@ -89,6 +78,7 @@ import CardHand from '@/components/CardHand.vue'
 import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
+import type { Chair as ChairState } from '@/stores/chairs'
 
 type CardLike = {
   value?: string | number
@@ -109,6 +99,7 @@ const MAX_VISIBLE_STACK = 2
 
 const props = defineProps<{
   chairId: number
+  chair: ChairState
   maxWidth?: number
   initialActiveHand?: number
 }>()
@@ -116,20 +107,28 @@ const props = defineProps<{
 
 const chairsStore = useChairsStore()
 
-const chairState = computed(() => chairsStore.getChair(props.chairId))
+const trimmedHands = computed(() => props.chair.hands.slice(0, MAX_HAND_SETS))
 
-const trimmedHands = computed(() => chairState.value.hands.slice(0, MAX_HAND_SETS))
+const normalizeHand = (hand: unknown): CardLike[] => {
+  if (Array.isArray(hand)) {
+    return hand as CardLike[]
+  }
+  if (hand && typeof hand === 'object' && 'cards' in (hand as Record<string, unknown>)) {
+    const cards = (hand as { cards?: CardLike[] }).cards
+    return Array.isArray(cards) ? cards : []
+  }
+  return []
+}
 
 const displayHands = computed(() =>
-  trimmedHands.value.map(hand => (Array.isArray(hand) ? hand : [])),
+  trimmedHands.value.map(hand => normalizeHand(hand)),
 )
 
 const cardHandMaxWidth = computed(() => props.maxWidth)
 
-const isInactive = computed(() => !chairState)
-const currentBet = computed(() => chairState.value?.bet ?? 0)
+const currentBet = computed(() => props.chair.bet ?? 0)
 
-const activeHandIndex = computed(() => chairState.value.activeHandIndex)
+const activeHandIndex = computed(() => props.chair.activeHandIndex)
 
 const handEntries = computed<HandEntry[]>(() =>
   displayHands.value.map((hand, index) => ({ hand, index })),
@@ -169,12 +168,8 @@ const leftStack = computed(() => buildStack(leftDisplayEntries.value))
 
 const rightStack = computed(() => buildStack(rightDisplayEntries.value))
 
-const onSitClick = () => {
-  chairsStore.emitSit(props.chairId)
-}
-
 const onBetChange = (value: number) => {
-  chairsStore.emitAdjustBet(props.chairId, value)
+  chairsStore.adjustBet(props.chairId, value)
 }
 </script>
 
@@ -261,26 +256,4 @@ const onBetChange = (value: number) => {
   opacity: 1;
 }
 
-.chair__empty-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  border: 2px dashed rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 4rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}
-
-.chair__empty-button:hover,
-.chair__empty-button:focus-visible {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.7);
-  transform: translateY(-2px);
-}
 </style>

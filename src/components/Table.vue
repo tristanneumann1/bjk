@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import Chair from "@/components/Chair.vue";
+import InactiveChair from "@/components/InactiveChair.vue";
 import PlayerBalanceDisplay from "@/components/PlayerBalanceDisplay.vue";
 import ActionSection from "@/components/ActionSection.vue";
 import DealerSection from "@/components/DealerSection.vue";
+import { useChairsStore } from '@/stores/chairs'
+
+const { getChair } = useChairsStore()
+const chairSlots = [0, 1, 2]
 </script>
 
 <template>
@@ -12,9 +17,14 @@ import DealerSection from "@/components/DealerSection.vue";
   </div>
 
   <div class="table-lower">
-    <Chair :hands="[]" :chair-id="0" />
-    <Chair :hands="[]" :chair-id="1" />
-    <Chair :hands="[]" :chair-id="2" />
+    <template v-for="chairId in chairSlots" :key="chairId">
+      <Chair
+        v-if="getChair(chairId)"
+        :chair-id="chairId"
+        :chair="getChair(chairId)"
+      />
+      <InactiveChair v-else :chair-id="chairId" />
+    </template>
   </div>
   <PlayerBalanceDisplay/>
 </template>
