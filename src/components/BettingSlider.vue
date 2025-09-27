@@ -23,7 +23,7 @@
         </button>
       </div>
       <input
-        v-show="props.showSlider === true"
+        v-show="props.showSlider"
         ref="sliderRef"
         class="betting-slider__range"
         type="range"
@@ -72,7 +72,7 @@ const emitValueChange = () => {
 watch(
   () => props.initialValue,
   value => {
-    if (typeof value === 'number' && !Number.isNaN(value)) {
+    if (value !== undefined && !Number.isNaN(value)) {
       const sanitized = clampToStep(value)
       if (sanitized !== currentValue.value) {
         currentValue.value = sanitized

@@ -46,7 +46,7 @@ export class Dealer {
   completeDealerHand(dealerHand: Hand): void {
     while(dealerHand.bestValue < 17) {
       dealerHand.addCard(this.dealCard())
-    };
+    }
     if (dealerHand.bestValue === 17 && dealerHand.isSoft && Session.getInstance().rules.dealerHitsSoft17) {
       dealerHand.addCard(this.dealCard())
     }

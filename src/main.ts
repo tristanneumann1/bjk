@@ -9,7 +9,7 @@ import {buildNDeckShoe, Card} from "@/models/card.ts";
 import {Chair} from "@/models/chair.ts";
 import {Dealer} from "@/models/dealer.ts";
 import {Table} from "@/models/table.ts";
-import {modelChangeEvent, modelEvents} from "@/lib/mitt.ts";
+import {modelEvents} from "@/lib/mitt.ts";
 import {Hand} from "@/models/hand.ts";
 import {initializeHandlers} from "@/lib/handlers.ts"; //initialize modelEvents
 

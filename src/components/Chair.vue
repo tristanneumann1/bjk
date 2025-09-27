@@ -5,6 +5,7 @@
       class="chair__empty-button"
       type="button"
       aria-label="Sit at this chair"
+      @click="onSitClick"
     >
       <span aria-hidden="true">+</span>
     </button>
@@ -26,7 +27,6 @@
           role="listitem"
           :style="entry.style"
           :aria-pressed="entry.index === activeHandIndex"
-          @click="setActiveHand(entry.index)"
         >
           <CardHand
             :cards="entry.hand"
@@ -51,7 +51,6 @@
           role="listitem"
           :style="entry.style"
           :aria-pressed="entry.index === activeHandIndex"
-          @click="setActiveHand(entry.index)"
         >
           <CardHand
             :cards="entry.hand"
@@ -67,7 +66,6 @@
           class="hand__entry hand__entry--active"
           type="button"
           :aria-pressed="true"
-          @click="setActiveHand(activeEntry.index)"
         >
           <CardHand
             :cards="activeEntry.hand"
@@ -77,15 +75,20 @@
         </button>
       </div>
     </div>
-    <BettingSlider v-if="!isInactive" :initial-value="15" />
+    <BettingSlider
+      v-if="!isInactive"
+      :initial-value="currentBet"
+      @change="onBetChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import CardHand from '@/components/CardHand.vue'
 import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
+import { useChairsStore } from '@/stores/chairs'
 
 type CardLike = {
   value?: string | number
@@ -105,18 +108,17 @@ const STACK_OVERLAP = BASE_SMALL_CARD_HEIGHT / 2
 const MAX_VISIBLE_STACK = 2
 
 const props = defineProps<{
-  hands: CardLike[][]
+  chairId: number
   maxWidth?: number
   initialActiveHand?: number
-  inactive?: boolean
 }>()
 
-const emit = defineEmits<{
-  (event: 'update:activeHand', index: number): void
-  (event: 'handSelected', index: number): void
-}>()
 
-const trimmedHands = computed(() => props.hands.slice(0, MAX_HAND_SETS))
+const chairsStore = useChairsStore()
+
+const chairState = computed(() => chairsStore.getChair(props.chairId))
+
+const trimmedHands = computed(() => chairState.value.hands.slice(0, MAX_HAND_SETS))
 
 const displayHands = computed(() =>
   trimmedHands.value.map(hand => (Array.isArray(hand) ? hand : [])),
@@ -124,50 +126,10 @@ const displayHands = computed(() =>
 
 const cardHandMaxWidth = computed(() => props.maxWidth)
 
-const isInactive = computed(() => props.inactive === true)
+const isInactive = computed(() => !chairState)
+const currentBet = computed(() => chairState.value?.bet ?? 0)
 
-const activeHandIndex = ref(-1)
-
-const clampIndex = (index: number | undefined): number => {
-  const count = displayHands.value.length
-  if (count === 0) {
-    return -1
-  }
-
-  if (index === undefined || Number.isNaN(index)) {
-    return 0
-  }
-
-  return Math.min(Math.max(index, 0), count - 1)
-}
-
-let isInitialized = false
-
-watch(
-  displayHands,
-  hands => {
-    if (hands.length === 0) {
-      activeHandIndex.value = -1
-      isInitialized = false
-      return
-    }
-
-    const baseIndex = isInitialized
-      ? activeHandIndex.value
-      : clampIndex(props.initialActiveHand)
-
-    activeHandIndex.value = clampIndex(baseIndex)
-    isInitialized = true
-  },
-  { immediate: true },
-)
-
-watch(isInactive, value => {
-  if (value) {
-    activeHandIndex.value = -1
-    isInitialized = false
-  }
-})
+const activeHandIndex = computed(() => chairState.value.activeHandIndex)
 
 const handEntries = computed<HandEntry[]>(() =>
   displayHands.value.map((hand, index) => ({ hand, index })),
@@ -207,18 +169,12 @@ const leftStack = computed(() => buildStack(leftDisplayEntries.value))
 
 const rightStack = computed(() => buildStack(rightDisplayEntries.value))
 
-const setActiveHand = (index: number) => {
-  if (isInactive.value) {
-    return
-  }
-  const nextIndex = clampIndex(index)
-  if (nextIndex === -1 || nextIndex === activeHandIndex.value) {
-    return
-  }
+const onSitClick = () => {
+  chairsStore.emitSit(props.chairId)
+}
 
-  activeHandIndex.value = nextIndex
-  emit('update:activeHand', nextIndex)
-  emit('handSelected', nextIndex)
+const onBetChange = (value: number) => {
+  chairsStore.emitAdjustBet(props.chairId, value)
 }
 </script>
 

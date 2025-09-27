@@ -11,8 +11,8 @@ const TILE_HEIGHT = 64
 const TILE_SPACING = 1
 const TILE_COLUMNS = 14
 const TILE_ROWS = 4
-const TILEMAP_WIDTH = TILE_COLUMNS * TILE_WIDTH + (TILE_COLUMNS - 1) * TILE_SPACING
-const TILEMAP_HEIGHT = TILE_ROWS * TILE_HEIGHT + (TILE_ROWS - 1) * TILE_SPACING
+const TILE_MAP_WIDTH = TILE_COLUMNS * TILE_WIDTH + (TILE_COLUMNS - 1) * TILE_SPACING
+const TILE_MAP_HEIGHT = TILE_ROWS * TILE_HEIGHT + (TILE_ROWS - 1) * TILE_SPACING
 
 const CARD_BACK_TILE = { row: 1, column: 13 }
 
@@ -135,7 +135,7 @@ const tileStyle = computed(() => {
     height: `${TILE_HEIGHT * scaleValue}px`,
     backgroundImage: `url(${cardsTilemapUrl})`,
     backgroundPosition: `${offsetX * scaleValue}px ${offsetY * scaleValue}px`,
-    backgroundSize: `${TILEMAP_WIDTH * scaleValue}px ${TILEMAP_HEIGHT * scaleValue}px`,
+    backgroundSize: `${TILE_MAP_WIDTH * scaleValue}px ${TILE_MAP_HEIGHT * scaleValue}px`,
   }
 })
 

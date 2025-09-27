@@ -12,9 +12,9 @@ import DealerSection from "@/components/DealerSection.vue";
   </div>
 
   <div class="table-lower">
-    <Chair :hands="[]" inactive />
-    <Chair :hands="[]" inactive />
-    <Chair :hands="[]" inactive />
+    <Chair :hands="[]" :chair-id="0" />
+    <Chair :hands="[]" :chair-id="1" />
+    <Chair :hands="[]" :chair-id="2" />
   </div>
   <PlayerBalanceDisplay/>
 </template>

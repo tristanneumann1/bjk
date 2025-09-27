@@ -19,7 +19,7 @@ function playerActionHandler(table: Table) {
 }
 
 function playerPlayHandler(table: Table) {
-  modelEvents.on(userEvent(userEvents.PLAY), (event: UserEventMap) => {
+  modelEvents.on(userEvent(userEvents.PLAY), (_event: UserEventMap) => {
     // table.payout()
     // table.resetAllChairs()
     table.startRound();

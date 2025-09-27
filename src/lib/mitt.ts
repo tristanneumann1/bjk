@@ -1,8 +1,10 @@
 import mitt from "mitt";
 
-export interface UserEventMap {
+export interface UserEventMap<T = unknown> {
   event: string,
+  // TODO action and value are same, make instance id tracking or something
   action?: string,
+  value?: T
 }
 
 export interface ModelPropertyChangeEvent<T = unknown> {

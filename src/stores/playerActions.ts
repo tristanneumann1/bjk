@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import {modelEvents, userEvent, userEventAction, type UserEventMap} from "@/lib/mitt.ts";
 import {PLAY, PLAYER_ACTION} from "@/lib/userEvents.ts";
 
@@ -27,9 +27,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
 
   const setMany = (updates: Partial<Record<PlayerAction, boolean>>) => {
     Object.entries(updates).forEach(([key, value]) => {
-      if (typeof value === 'boolean') {
-        enabledMap[key as PlayerAction] = value
-      }
+      enabledMap[key as PlayerAction] = value
     })
   }
 

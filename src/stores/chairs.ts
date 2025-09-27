@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
-import { computed, reactive } from 'vue'
+import {computed, reactive, ref} from 'vue'
+import { modelEvents, userEvent, type UserEventMap } from '@/lib/mitt'
+import { ADJUST_BET, SIT } from '@/lib/userEvents'
 
 export type ChairCard = {
   value?: string | number
@@ -8,33 +10,38 @@ export type ChairCard = {
 
 export type ChairHand = {
   cards: ChairCard[]
-  activeHandIndex: number
 }
 
 export type Chair = {
+  activeHandIndex: number
   hands: ChairHand[]
   bet: number
 }
 
-const CHAIRS_COUNT = 3
+const CHAIRS_COUNT = 0
 const DEFAULT_BET = 10
 
 const buildDefaultChair = (): Chair => ({
-  hands: [{ cards: [], activeHandIndex: 0 }],
+  hands: [],
   bet: DEFAULT_BET,
+  activeHandIndex: -1
 })
 
 const buildInitialState = (): Chair[] => Array.from({ length: CHAIRS_COUNT }, buildDefaultChair)
 
 export const useChairsStore = defineStore('chairs', () => {
   const chairs = reactive<Chair[]>(buildInitialState())
+  const activeChairId = ref<number | null>(null)
 
-  const getChair = (index: number) => chairs[index] ?? null
+  // TODO handle no chair with new component i guess
+  const getChair = (index: number) => chairs[index] ?? buildDefaultChair()
 
   const setChairBet = (index: number, bet: number) => {
     const chair = getChair(index)
-    if (!chair) return
-    chair.bet = Math.max(0, Math.floor(bet))
+    if (!chair) return 0
+    const sanitized = Math.max(0, Math.floor(bet))
+    chair.bet = sanitized
+    return sanitized
   }
 
   const setChairHands = (index: number, hands: ChairHand[]) => {
@@ -42,7 +49,6 @@ export const useChairsStore = defineStore('chairs', () => {
     if (!chair) return
     chair.hands = hands.map(hand => ({
       cards: hand.cards.slice(),
-      activeHandIndex: Math.max(0, Math.floor(hand.activeHandIndex ?? 0)),
     }))
   }
 
@@ -58,12 +64,22 @@ export const useChairsStore = defineStore('chairs', () => {
     chair.hands[handIndex].cards = [...chair.hands[handIndex].cards, card]
   }
 
-  const setActiveHand = (chairIndex: number, handIndex: number, activeIndex: number) => {
+  const setActiveHand = (chairIndex: number, handIndex: number) => {
     const chair = getChair(chairIndex)
     if (!chair || !chair.hands[handIndex]) return
-    const hand = chair.hands[handIndex]
-    const clampedIndex = Math.max(0, Math.min(activeIndex, hand.cards.length - 1))
-    hand.activeHandIndex = clampedIndex
+  }
+
+  const emitSit = (index: number) => {
+    modelEvents.emit(userEvent(SIT), { event: SIT, chairIndex: index } as UserEventMap)
+  }
+
+  const emitAdjustBet = (index: number, bet: number) => {
+    const sanitized = setChairBet(index, bet)
+    modelEvents.emit(
+      userEvent(ADJUST_BET),
+      { event: ADJUST_BET, chairIndex: index, value: sanitized } as UserEventMap,
+    )
+    return sanitized
   }
 
   const reset = () => {
@@ -86,6 +102,9 @@ export const useChairsStore = defineStore('chairs', () => {
     setChairCards,
     addCardToHand,
     setActiveHand,
+    emitSit,
+    emitAdjustBet,
+    activeChairId,
     reset,
   }
 })

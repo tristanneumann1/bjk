@@ -143,7 +143,7 @@ export class Hand {
         if (this.cards.length !== 2) return 'Can only split with two cards'
         if (this.cards[0].value !== this.cards[1].value) return 'Can only split matching values'
         if (this.splitCount >= Session.getInstance().rules.maxSplits) return 'maximum split count reached'
-        if (this.cards[0].isAce() && this.isSplit && !Session.getInstance().rules.resplitAcesAllowed) return 'Can not resplit aces'
+        if (this.cards[0].isAce() && this.isSplit && !Session.getInstance().rules.resplitAcesAllowed) return 'Can not re-split aces'
         return null
       case "Surrender":
         if (this.cards.length !== 2) return 'Can only surrender on first two cards'
