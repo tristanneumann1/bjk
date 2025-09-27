@@ -8,13 +8,13 @@ import DealerSection from "@/components/DealerSection.vue";
 <template>
   <div class="table-upper">
     <DealerSection />
-    <ActionSection />
+    <ActionSection :active="false"/>
   </div>
 
   <div class="table-lower">
-    <Chair :hands="[]" />
-    <Chair :hands="[]" />
-    <Chair :hands="[]" />
+    <Chair :hands="[]" inactive />
+    <Chair :hands="[]" inactive />
+    <Chair :hands="[]" inactive />
   </div>
   <PlayerBalanceDisplay/>
 </template>

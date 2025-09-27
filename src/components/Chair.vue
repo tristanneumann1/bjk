@@ -1,6 +1,15 @@
 <template>
   <div class="chair" aria-label="Player Spot" :style="{width: '272px' }">
-    <div class="hand__top" aria-label="Inactive hands">
+    <button
+      v-if="isInactive"
+      class="chair__empty-button"
+      type="button"
+      aria-label="Sit at this chair"
+    >
+      <span aria-hidden="true">+</span>
+    </button>
+
+    <div v-else class="hand__top" aria-label="Inactive hands">
       <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
         <span
           v-if="leftHiddenCount > 0"
@@ -51,7 +60,7 @@
         </button>
       </div>
     </div>
-    <div class="hand" role="group" aria-label="Card hands">
+    <div v-if="!isInactive" class="hand" role="group" aria-label="Card hands">
       <div v-if="activeEntry" class="hand__frame">
 
         <button
@@ -68,7 +77,7 @@
         </button>
       </div>
     </div>
-    <BettingSlider :initial-value="15" />
+    <BettingSlider v-if="!isInactive" :initial-value="15" />
   </div>
 </template>
 
@@ -99,6 +108,7 @@ const props = defineProps<{
   hands: CardLike[][]
   maxWidth?: number
   initialActiveHand?: number
+  inactive?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -113,6 +123,8 @@ const displayHands = computed(() =>
 )
 
 const cardHandMaxWidth = computed(() => props.maxWidth)
+
+const isInactive = computed(() => props.inactive === true)
 
 const activeHandIndex = ref(-1)
 
@@ -149,6 +161,13 @@ watch(
   },
   { immediate: true },
 )
+
+watch(isInactive, value => {
+  if (value) {
+    activeHandIndex.value = -1
+    isInitialized = false
+  }
+})
 
 const handEntries = computed<HandEntry[]>(() =>
   displayHands.value.map((hand, index) => ({ hand, index })),
@@ -189,6 +208,9 @@ const leftStack = computed(() => buildStack(leftDisplayEntries.value))
 const rightStack = computed(() => buildStack(rightDisplayEntries.value))
 
 const setActiveHand = (index: number) => {
+  if (isInactive.value) {
+    return
+  }
   const nextIndex = clampIndex(index)
   if (nextIndex === -1 || nextIndex === activeHandIndex.value) {
     return
@@ -281,5 +303,28 @@ const setActiveHand = (index: number) => {
 .hand__entry--stack:hover,
 .hand__entry--stack:focus-visible {
   opacity: 1;
+}
+
+.chair__empty-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.chair__empty-button:hover,
+.chair__empty-button:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
 }
 </style>
