@@ -10,7 +10,8 @@ import {Chair} from "@/models/chair.ts";
 import {Dealer} from "@/models/dealer.ts";
 import {Table} from "@/models/table.ts";
 import {modelChangeEvent, modelEvents} from "@/lib/mitt.ts";
-import {Hand} from "@/models/hand.ts"; //initialize modelEvents
+import {Hand} from "@/models/hand.ts";
+import {initializeHandlers} from "@/lib/handlers.ts"; //initialize modelEvents
 
 
 const rules = new Rules()
@@ -20,6 +21,7 @@ const dealer = new Dealer(shoe)
 dealer.shuffle()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 
+initializeHandlers(table)
 Session.initialize({
   player: new Player(10_000),
   rules,
@@ -29,8 +31,9 @@ Session.initialize({
 document['_session'] = Session.getInstance()
 document['_hand'] = new Hand()
 document['_events'] = modelEvents
-modelEvents.on(modelChangeEvent, (e) => {
-  console.log('e', e)
+modelEvents.on('*', (type, e) => {
+  console.log('type', type)
+  console.log('e value', e.value)
 })
 const app = createApp(App)
 

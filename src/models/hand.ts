@@ -1,6 +1,9 @@
 import { Card } from '@/models/card';
 import { type HandResult } from '@/models/chair';
 export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
+export function isAction(value: string): value is Action {
+  return ['Hit', 'Stand', 'Double', 'Split', 'Surrender'].includes(value);
+}
 import {Session} from "@/models/session.ts";
 import {
   modelChangeEvent,
@@ -48,6 +51,17 @@ export class Hand {
       return this.softValue + 10;
     }
     return this.softValue;
+  }
+
+  listViableActions(betNumber: number): { [action in Action]: boolean } {
+    return {
+      Hit: !this.validateAction('Hit', betNumber),
+      Stand: !this.validateAction('Stand', betNumber),
+      Double: !this.validateAction('Double', betNumber),
+      Split: !this.validateAction('Split', betNumber),
+      Surrender: !this.validateAction('Surrender', betNumber),
+      // Insurance: !this.validateAction('Insurance', betNumber),
+    }
   }
 
   addCard (card: Card) {

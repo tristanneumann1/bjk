@@ -26,18 +26,12 @@ export const CHAIR_EVENT = 'chair'
 
 export class Table {
   chairIndex = 0;
-  private _chairTurnIndex = 0;
+  chairTurnIndex = 0;
   constructor(public dealer: Dealer, public dealerChair: Chair, public playerChairs: PlayerChair = {}, public configuration: TableConfiguration = DEFAULT_TABLE_CONFIGURATION) {}
 
-  get chairTurnIndex(): number {
-    return this._chairTurnIndex;
-  }
-  set chairTurnIndex(value: number) {
-    this._chairTurnIndex = value;
-  }
   get dealerPeekedBlackjack(): boolean {
     return Session.getInstance().rules.dealerPeekA10 &&
-      this.dealerChair.hands[0].isBlackJack
+      this.dealerChair.hands[0]?.isBlackJack
   }
 
   get roundInitialCost(): number {
@@ -114,7 +108,10 @@ export class Table {
     }
   }
   startRound() {
-    this.validateRoundCanStart();
+    const roundCannotStartError = this.validateRoundCanStart()
+    if (roundCannotStartError) {
+      throw new Error(roundCannotStartError)
+    }
     Session.getInstance().player.removeMoney(this.roundInitialCost);
     this.dealerChair.start()
     this.deal(this.dealerChair, 2);
@@ -133,6 +130,9 @@ export class Table {
 
     if (this.configuration.logAfterAction) {
       this.view()
+    }
+    if (!this.activeChair) {
+      this.payout()
     }
   }
 
@@ -156,12 +156,16 @@ export class Table {
     if (this.configuration.logAfterAction) {
       this.view()
     }
+    if (!this.activeChair) {
+      this.payout()
+    }
   }
 
   nextChair() {
     this.chairTurnIndex++
     if(this.activeChair && this.activeChair.chairDone) {
       this.nextChair()
+      return
     }
   }
 
@@ -186,32 +190,33 @@ export class Table {
     }
   }
 
-  private validateRoundCanStart() {
+  validateRoundCanStart(): string | null {
     if (this.dealerChair.hands[0]?.cards.length > 0) {
-      throw new Error('Round already in progress');
+      return 'Round already in progress';
     }
     if (this.playerChairArray.length === 0) {
-      throw new Error('No players at the table');
+      return 'No players at the table';
     }
     if (this.roundInitialCost > Session.getInstance().player.balance) {
-      throw new Error('Player does not have enough balance for the round');
+      return 'Player does not have enough balance for the round';
     }
     if (this.roundInitialCost <= 0) {
-      throw new Error('No bets placed');
+      return 'No bets placed';
     }
     for (const chair of this.playerChairArray) {
       if (chair.bet < 0) {
-        throw new Error('No negative bets allowed');
+        return 'No negative bets allowed';
       }
     }
     // for (const chair of this.playerChairArray) {
     //   if (chair.bet <= 0) {
-    //     throw new Error('All chairs must have a bet placed');
+    //     return 'All chairs must have a bet placed';
     //   }
     // }
     if (this.dealer.pastPenetration()) {
-      throw new Error('Dealer is out of cards, needs to reshuffle');
+      return 'Dealer is out of cards, needs to reshuffle';
     }
+    return null
   }
 }
 

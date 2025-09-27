@@ -99,13 +99,12 @@ export const useDealerStore = defineStore('dealer', () => {
   modelEvents.on(dealerDealIndexEvent, onDealIndexChange)
   cleanupFns.push(() => modelEvents.off(dealerDealIndexEvent, onDealIndexChange))
 
-  const dealerChair = Session.getInstance().table.dealerChair
-  const dealerChairId = getModelInstanceId(dealerChair)
+  const dealerChairId = getModelInstanceId(Session.getInstance().table.dealerChair)
   if (!dealerChairId) {
     throw new Error('dealer chair not found')
   }
 
-  let activeHandEventKey: string | null = null
+  let activeHandEventKey: `mod_${string}` | null = null
 
   const detachActiveHandListener = () => {
     if (!activeHandEventKey) {

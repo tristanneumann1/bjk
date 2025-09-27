@@ -8,7 +8,7 @@ import DealerSection from "@/components/DealerSection.vue";
 <template>
   <div class="table-upper">
     <DealerSection />
-    <ActionSection :active="false"/>
+    <ActionSection />
   </div>
 
   <div class="table-lower">

@@ -1,10 +1,11 @@
 <template>
   <section class="action-section" aria-label="Player actions">
     <button
-      v-if="!isActiveRound"
+      v-if="!activeRound"
       class="action-section__play"
       type="button"
-      :disabled="isPlayDisabled"
+      :disabled="!active"
+      @click="onPlayClick()"
     >
       Play
     </button>
@@ -24,23 +25,56 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import {ref} from 'vue'
 import { PLAYER_ACTIONS, type PlayerAction, usePlayerActionsStore } from '@/stores/playerActions'
+import {
+  modelCustomEvent,
+  modelEvents,
+  type ModelPropertyChangeEvent,
+  modelPropertyEvent
+} from "@/lib/mitt.ts";
+import {NEW_CARD_EVENT} from "@/models/hand.ts";
+import {Session} from "@/models/session.ts";
 
-const props = defineProps<{
-  activeRound?: boolean
-  active?: boolean
-}>()
+const activeRound = ref<boolean>(false)
+const active = ref<boolean>(false)
 
 const playerActions = usePlayerActionsStore()
 const actions = PLAYER_ACTIONS
 
-const isActiveRound = computed(() => props.activeRound !== false)
-const isPlayDisabled = computed(() => props.active === false)
-
 const onActionClick = (action: PlayerAction) => {
   playerActions.triggerAction(action)
 }
+
+const onPlayClick = () => {
+  playerActions.play()
+}
+
+function setCurrentActions() {
+  active.value = !Session.getInstance().table.validateRoundCanStart()
+  if (Session.getInstance().table.playerRoundsComplete) activeRound.value = false
+  const activeChair = Session.getInstance().table.activeChair
+  if (!activeChair) return
+
+  const activeHand = activeChair.activeHand
+  if (!activeHand) return
+  activeRound.value = true
+
+  const viableActions = activeHand.listViableActions(activeChair.bet)
+  if (viableActions) playerActions.setMany(viableActions)
+}
+
+modelEvents.on(modelPropertyEvent('chair', 'activeHandIndex'), (_event: ModelPropertyChangeEvent) => {
+  setCurrentActions()
+});
+
+modelEvents.on(modelCustomEvent('hand', NEW_CARD_EVENT), (_event: ModelPropertyChangeEvent) => {
+  setCurrentActions()
+})
+
+modelEvents.on(modelPropertyEvent('chair', 'bet'), (_event: ModelPropertyChangeEvent) => {
+  setCurrentActions()
+})
 </script>
 
 <style scoped>

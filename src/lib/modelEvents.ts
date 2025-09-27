@@ -81,7 +81,6 @@ export function attachModelEventEmitter<T extends Constructor>(
         }
 
         modelEvents.emit(modelChangeEvent, payload)
-        modelEvents.emit(model, payload)
         modelEvents.emit(modelPropertyEvent(model, property), payload)
         if (instanceId) {
           modelEvents.emit(modelInstanceEvent(model, instanceId), payload)
