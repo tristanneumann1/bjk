@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-const MIN_BET = 5
+const MIN_BET = 0
 const MAX_BET = 300
 const STEP = 5
 

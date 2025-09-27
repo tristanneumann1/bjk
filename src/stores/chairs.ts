@@ -1,40 +1,30 @@
 import { defineStore } from 'pinia'
 import {ref} from 'vue'
 import {Session} from "@/models/session.ts";
-
-export type ChairCard = {
-  value?: string | number
-  suit?: string
-}
-
-export type ChairHand = {
-  cards: ChairCard[]
-}
-
-export type Chair = {
-  activeHandIndex: number
-  hands: ChairHand[]
-  bet: number
-}
-
-const CHAIRS_COUNT = 0
-const DEFAULT_BET = 10
-
-const buildDefaultChair = (): Chair => ({
-  hands: [],
-  bet: DEFAULT_BET,
-  activeHandIndex: -1
-})
+import {
+  modelCustomEvent,
+  modelEvents,
+  type ModelPropertyChangeEvent
+} from "@/lib/mitt.ts";
+import {CHAIR_EVENT} from "@/models/table.ts";
+import type {Chair} from "@/models/chair.ts";
 
 export const useChairsStore = defineStore('chairs', () => {
   const activeChairId = ref<number | null>(null)
+  const chairs = ref<{ [key: number]: Chair | null }>({})
 
   const getChair = (index: number) => {
-    console.log('player chairs', Session.getInstance().table.playerChairs)
-    return Session.getInstance().table.getPlayerChair(index)
+    return chairs.value[index]
   }
 
   const sit = (index: number) => {
+    const addNewChairToThisSpot = (event: ModelPropertyChangeEvent) => {
+      if (!event.value) return
+      chairs.value[index] = event.value as Chair
+      modelEvents.off(modelCustomEvent('table', CHAIR_EVENT), addNewChairToThisSpot)
+    }
+    modelEvents.on(modelCustomEvent('table', CHAIR_EVENT), addNewChairToThisSpot)
+
     Session.getInstance().table.addPlayerChair(index)
   }
 
@@ -45,7 +35,9 @@ export const useChairsStore = defineStore('chairs', () => {
     chair.bet = sanitized
   }
 
+
   return {
+    chairs,
     activeChairId,
     getChair,
     sit,

@@ -78,7 +78,7 @@ import CardHand from '@/components/CardHand.vue'
 import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
-import type { Chair as ChairState } from '@/stores/chairs'
+import type {Chair} from "@/models/chair.ts";
 
 type CardLike = {
   value?: string | number
@@ -99,7 +99,7 @@ const MAX_VISIBLE_STACK = 2
 
 const props = defineProps<{
   chairId: number
-  chair: ChairState
+  chair: Chair
   maxWidth?: number
   initialActiveHand?: number
 }>()
