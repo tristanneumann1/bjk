@@ -24,27 +24,12 @@ const HAND_VIEW_COLORS: { [result in HandResult]: ColorName | ModifierName} = {
 export const NEW_HAND_EVENT = 'new_hand'
 
 export class Chair {
-  private betValue: number = 0;
-  private _activeHandIndex = 0;
+  public bet = 0;
+  public activeHandIndex = 0;
   constructor(public hands: Hand[] = []) {
     ensureInstanceId(Chair, 'chair', this as Record<string | symbol, unknown>)
   }
 
-  get bet(): number {
-    return this.betValue;
-  }
-  set bet(amount: number) {
-    if (this.hands.length > 0) {
-      throw new Error('can not change bet during round');
-    }
-    this.betValue = amount;
-  }
-  get activeHandIndex(): number {
-    return this._activeHandIndex;
-  }
-  set activeHandIndex(value: number) {
-    this._activeHandIndex = value;
-  }
   get activeHand(): Hand | undefined {
     return this.hands[this.activeHandIndex];
   }
@@ -105,7 +90,7 @@ export class Chair {
       throw new Error('No active hand');
     }
 
-    const actionNotValidError = this.activeHand.validateAction(action, this.betValue);
+    const actionNotValidError = this.activeHand.validateAction(action, this.bet);
     if (actionNotValidError) {
       throw new Error(actionNotValidError)
     }
@@ -116,7 +101,7 @@ export class Chair {
         this.moveToNextHand(dealer);
         break;
       case 'Double':
-        Session.getInstance().player.removeMoney(this.betValue)
+        Session.getInstance().player.removeMoney(this.bet)
         this.activeHand.isDoubled = true;
         this.activeHand.addCard(dealer.dealCard())
         this.moveToNextHand(dealer);

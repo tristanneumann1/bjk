@@ -4,15 +4,8 @@ import {Session} from "@/models/session.ts";
 import {attachModelEventEmitter} from "@/lib/modelEvents";
 
 export class Dealer {
-  public _dealIndex: number = 0;
+  public dealIndex: number = 0;
   constructor(public shoe: Card[] = []) {
-  }
-
-  get dealIndex(): number {
-    return this._dealIndex;
-  }
-  set dealIndex (newIndex: number) {
-    this._dealIndex = newIndex;
   }
 
   pastPenetration(): boolean {

@@ -7,7 +7,13 @@
       :disabled="chairsStore.roundInProgress"
       @click="onSitClick"
     >
-      <span aria-hidden="true">+</span>
+      <span
+        v-if="chairsStore.roundInProgress"
+        class="chair__inactive-label"
+      >
+        Round Active
+      </span>
+      <span v-else aria-hidden="true">+</span>
     </button>
   </div>
 </template>
@@ -55,5 +61,20 @@ const onSitClick = () => {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.7);
   transform: translateY(-2px);
+}
+
+.chair__empty-button:disabled {
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.5);
+  transform: none;
+}
+
+.chair__inactive-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 </style>

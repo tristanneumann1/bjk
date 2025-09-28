@@ -35,6 +35,7 @@ import {
 } from "@/lib/mitt.ts";
 import {NEW_CARD_EVENT} from "@/models/hand.ts";
 import {Session} from "@/models/session.ts";
+import {CHAIR_EVENT} from "@/models/table.ts";
 
 const activeRound = ref<boolean>(false)
 const active = ref<boolean>(false)
@@ -80,6 +81,10 @@ modelEvents.on(modelPropertyEvent('chair', 'bet'), (_event: ModelPropertyChangeE
 })
 
 modelEvents.on(modelPropertyEvent('table', 'chairTurnIndex'), (_event: ModelPropertyChangeEvent) => {
+  setCurrentActions()
+})
+
+modelEvents.on(modelCustomEvent('table', CHAIR_EVENT), (_event: ModelPropertyChangeEvent) => {
   setCurrentActions()
 })
 </script>
