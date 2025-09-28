@@ -78,7 +78,6 @@ import CardHand from '@/components/CardHand.vue'
 import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
-import type {Chair} from "@/models/chair.ts";
 
 type CardLike = {
   value?: string | number
@@ -99,15 +98,16 @@ const MAX_VISIBLE_STACK = 2
 
 const props = defineProps<{
   chairId: number
-  chair: Chair
   maxWidth?: number
   initialActiveHand?: number
 }>()
 
-
 const chairsStore = useChairsStore()
 
-const trimmedHands = computed(() => props.chair.hands.slice(0, MAX_HAND_SETS))
+const chair = chairsStore.getChair(props.chairId)
+if (!chair) throw new Error('Chair not found')
+
+const trimmedHands = computed(() => chair.hands.slice(0, MAX_HAND_SETS) ?? [])
 
 const normalizeHand = (hand: unknown): CardLike[] => {
   if (Array.isArray(hand)) {
@@ -126,9 +126,9 @@ const displayHands = computed(() =>
 
 const cardHandMaxWidth = computed(() => props.maxWidth)
 
-const currentBet = computed(() => props.chair.bet ?? 0)
+const currentBet = computed(() => chair.bet ?? 0)
 
-const activeHandIndex = computed(() => props.chair.activeHandIndex)
+const activeHandIndex = computed(() => chair.activeHandIndex)
 
 const handEntries = computed<HandEntry[]>(() =>
   displayHands.value.map((hand, index) => ({ hand, index })),

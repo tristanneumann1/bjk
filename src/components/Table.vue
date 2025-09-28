@@ -6,7 +6,7 @@ import ActionSection from "@/components/ActionSection.vue";
 import DealerSection from "@/components/DealerSection.vue";
 import { useChairsStore } from '@/stores/chairs'
 
-const { chairs } = useChairsStore()
+const chairStore = useChairsStore()
 const chairSlots = [0, 1, 2]
 </script>
 
@@ -18,11 +18,9 @@ const chairSlots = [0, 1, 2]
 
   <div class="table-lower">
     <template v-for="chairId in chairSlots" :key="chairId">
-      {{chairs[chairId]?.hands.length}}
       <Chair
-        v-if="chairs[chairId]"
+        v-if="chairStore.getChair(chairId)"
         :chair-id="chairId"
-        :chair="chairs[chairId]"
       />
       <InactiveChair v-else :chair-id="chairId" />
     </template>
