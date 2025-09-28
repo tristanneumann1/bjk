@@ -48,7 +48,7 @@ const isLarge = computed(() => props.large ?? false)
 
 const displayCards = computed(() =>
   visibleCards.value.map(card => ({
-    value: card.value ?? card.rank ?? undefined,
+    value: card.rank ?? card.value ?? undefined,
     suit: card.suit,
   })),
 )
