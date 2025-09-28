@@ -10,7 +10,6 @@ import {Chair} from "@/models/chair.ts";
 import {Dealer} from "@/models/dealer.ts";
 import {Table} from "@/models/table.ts";
 import {modelEvents} from "@/lib/mitt.ts";
-import {Hand} from "@/models/hand.ts";
 import {initializeHandlers} from "@/lib/handlers.ts"; //initialize modelEvents
 
 
@@ -28,9 +27,9 @@ Session.initialize({
   table
 })
 
-document['_session'] = Session.getInstance()
-document['_hand'] = new Hand()
-document['_events'] = modelEvents
+// document['_session'] = Session.getInstance()
+// document['_hand'] = new Hand()
+// document['_events'] = modelEvents
 modelEvents.on('*', (type, e) => {
   console.log('type', type)
   console.log('e value', e.value)

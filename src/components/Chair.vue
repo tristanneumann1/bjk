@@ -104,10 +104,10 @@ const props = defineProps<{
 
 const chairsStore = useChairsStore()
 
-const chair = chairsStore.getChair(props.chairId)
-if (!chair) throw new Error('Chair not found')
+const chairView = computed(() => chairsStore.getChairView(props.chairId))
+if (!chairView.value) throw new Error('Chair not found')
 
-const trimmedHands = computed(() => chair.hands.slice(0, MAX_HAND_SETS) ?? [])
+const trimmedHands = computed(() => chairView.value?.hands.slice(0, MAX_HAND_SETS) ?? [])
 
 const normalizeHand = (hand: unknown): CardLike[] => {
   if (Array.isArray(hand)) {
@@ -126,9 +126,9 @@ const displayHands = computed(() =>
 
 const cardHandMaxWidth = computed(() => props.maxWidth)
 
-const currentBet = computed(() => chair.bet ?? 0)
+const currentBet = computed(() => chairView.value?.bet ?? 0)
 
-const activeHandIndex = computed(() => chair.activeHandIndex)
+const activeHandIndex = computed(() => chairView.value?.activeHandIndex ?? 0)
 
 const handEntries = computed<HandEntry[]>(() =>
   displayHands.value.map((hand, index) => ({ hand, index })),

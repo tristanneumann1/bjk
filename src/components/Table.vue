@@ -19,7 +19,7 @@ const chairSlots = [0, 1, 2]
   <div class="table-lower">
     <template v-for="chairId in chairSlots" :key="chairId">
       <Chair
-        v-if="chairStore.getChair(chairId)"
+        v-if="chairStore.getChairView(chairId)"
         :chair-id="chairId"
       />
       <InactiveChair v-else :chair-id="chairId" />
