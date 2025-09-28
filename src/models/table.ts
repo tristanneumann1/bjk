@@ -26,7 +26,7 @@ export const CHAIR_EVENT = 'chair'
 
 export class Table {
   chairIndex = 0;
-  chairTurnIndex = 0;
+  private _chairTurnIndex = 0;
   constructor(public dealer: Dealer, public dealerChair: Chair, public playerChairs: PlayerChair = {}, public configuration: TableConfiguration = DEFAULT_TABLE_CONFIGURATION) {}
 
   get dealerPeekedBlackjack(): boolean {
@@ -34,6 +34,12 @@ export class Table {
       this.dealerChair.hands[0]?.isBlackJack
   }
 
+  get chairTurnIndex(): number {
+    return this._chairTurnIndex;
+  }
+  set chairTurnIndex(value: number) {
+    this._chairTurnIndex = value;
+  }
   get roundInitialCost(): number {
     let roundCost = 0
     for (const chair of this.playerChairArray) {
@@ -211,11 +217,11 @@ export class Table {
         return 'No negative bets allowed';
       }
     }
-    // for (const chair of this.playerChairArray) {
-    //   if (chair.bet <= 0) {
-    //     return 'All chairs must have a bet placed';
-    //   }
-    // }
+    for (const chair of this.playerChairArray) {
+      if (chair.bet <= 0) {
+        return 'All chairs must have a bet placed';
+      }
+    }
     if (this.dealer.pastPenetration()) {
       return 'Dealer is out of cards, needs to reshuffle';
     }

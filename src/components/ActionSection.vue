@@ -75,6 +75,10 @@ modelEvents.on(modelCustomEvent('hand', NEW_CARD_EVENT), (_event: ModelPropertyC
 modelEvents.on(modelPropertyEvent('chair', 'bet'), (_event: ModelPropertyChangeEvent) => {
   setCurrentActions()
 })
+
+modelEvents.on(modelPropertyEvent('table', 'chairTurnIndex'), (_event: ModelPropertyChangeEvent) => {
+  setCurrentActions()
+})
 </script>
 
 <style scoped>

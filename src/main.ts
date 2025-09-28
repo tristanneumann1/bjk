@@ -18,6 +18,28 @@ const shoe: Card[] = buildNDeckShoe(rules.deckCount)
 const dealerChair = new Chair()
 const dealer = new Dealer(shoe)
 dealer.shuffle()
+
+const playerSplitIntoBlackJack = [
+  new Card('Spades', '2'),
+  new Card( 'Hearts', '3'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'K'),
+  new Card('Spades', 'A'),
+  new Card( 'Hearts', 'K')
+]
+
+const doubleWith2Players = [
+  new Card('Spades', '2'),
+  new Card( 'Hearts', '3'),
+  new Card('Spades', '5'),
+  new Card( 'Hearts', '6'),
+  new Card('Spades', '6'),
+  new Card( 'Hearts', 'J'),
+  new Card( 'Hearts', '7')
+]
+
+dealer.shoe.unshift(...doubleWith2Players)
+dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 
 initializeHandlers(table)
@@ -27,12 +49,10 @@ Session.initialize({
   table
 })
 
-// document['_session'] = Session.getInstance()
-// document['_hand'] = new Hand()
-// document['_events'] = modelEvents
+document['_session'] = Session.getInstance()
+document['_events'] = modelEvents
 modelEvents.on('*', (type, e) => {
-  console.log('type', type)
-  console.log('e value', e.value)
+  console.log('type, value',type, e.value)
 })
 const app = createApp(App)
 

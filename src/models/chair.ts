@@ -131,6 +131,9 @@ export class Chair {
         this.activeHand.split();
         this.addHand(newHand)
         this.activeHand.addCard(dealer.dealCard())
+        if (this.activeHand.isDone) {
+          this.moveToNextHand(dealer);
+        }
         break;
       case 'Hit':
         this.activeHand.addCard(dealer.dealCard())
