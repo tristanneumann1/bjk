@@ -7,7 +7,7 @@
           class="betting-slider__control"
           aria-label="Decrease bet"
           @click="decrement"
-          :disabled="isAtMinimum"
+          :disabled="isDisabled || isAtMinimum"
         >
           −
         </button>
@@ -17,7 +17,7 @@
           class="betting-slider__control"
           aria-label="Increase bet"
           @click="increment"
-          :disabled="isAtMaximum"
+          :disabled="isDisabled || isAtMaximum"
         >
           +
         </button>
@@ -32,6 +32,7 @@
         :step="STEP"
         :value="currentValue"
         aria-label="Bet amount slider"
+        :disabled="isDisabled"
         @input="onSliderInput"
       />
     </div>
@@ -48,6 +49,7 @@ const STEP = 5
 const props = defineProps<{
   initialValue?: number
   showSlider?: boolean
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -62,6 +64,7 @@ const clampToStep = (value: number) => {
 }
 
 const currentValue = ref(clampToStep(props.initialValue ?? MIN_BET))
+const isDisabled = computed(() => props.disabled ?? false)
 
 const emitValueChange = () => {
   const value = currentValue.value
@@ -93,16 +96,19 @@ const setValue = (value: number) => {
 }
 
 const increment = () => {
+  if (isDisabled.value) return
   if (isAtMaximum.value) return
   setValue(currentValue.value + STEP)
 }
 
 const decrement = () => {
+  if (isDisabled.value) return
   if (isAtMinimum.value) return
   setValue(currentValue.value - STEP)
 }
 
 const onSliderInput = (event: Event) => {
+  if (isDisabled.value) return
   const target = event.target as HTMLInputElement | null
   if (!target) return
   const parsed = Number.parseInt(target.value, 10)

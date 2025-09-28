@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { onScopeDispose, reactive, ref } from 'vue'
+import { computed, onScopeDispose, reactive, ref } from 'vue'
 import { Session } from '@/models/session.ts'
 import { type Chair, NEW_HAND_EVENT } from '@/models/chair.ts'
 import { getModelInstanceId } from '@/lib/modelEvents.ts'
@@ -36,6 +36,10 @@ export const useChairsStore = defineStore('chairs', () => {
   const cleanupFns: Array<() => void> = []
 
   const table = Session.getInstance().table
+
+  const roundInProgress = computed(() =>
+    Object.values(chairs).some(view => view.hands.some(hand => hand.length > 0)),
+  )
 
   const findSeatIndex = (chair: Chair | null | undefined): number | null => {
     if (!chair) {
@@ -295,10 +299,12 @@ export const useChairsStore = defineStore('chairs', () => {
   }
 
   const sit = (index: number) => {
+    if (roundInProgress.value) return
     Session.getInstance().table.addPlayerChair(index)
   }
 
   const adjustBet = (index: number, bet: number) => {
+    if (roundInProgress.value) return
     const chair = chairRegistry.get(index)?.chair
     if (!chair) return
     chair.bet = Math.max(bet, 0)
@@ -307,6 +313,7 @@ export const useChairsStore = defineStore('chairs', () => {
   return {
     activeChairId,
     getChairView,
+    roundInProgress,
     sit,
     adjustBet,
   }

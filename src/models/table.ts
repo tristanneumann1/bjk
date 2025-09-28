@@ -53,6 +53,9 @@ export class Table {
   get activeChair(): Chair| undefined {
     return this.playerChairArray[this.chairTurnIndex]
   }
+  get aPlayerHasCards() {
+    return this.playerChairArray.some(chair => chair.hands.some(hand => hand.cards.length > 0))
+  }
   get playerRoundsComplete(): boolean {
     return this.dealerPeekedBlackjack || !this.playerChairArray.find(pc => !pc.chairDone)
   }
@@ -123,7 +126,7 @@ export class Table {
     }
     Session.getInstance().player.removeMoney(this.roundInitialCost);
     this.dealerChair.start()
-    this.deal(this.dealerChair, 2);
+    this.deal(this.dealerChair, 1);
     for (let chair of this.playerChairArray) {
       chair.start()
       this.deal(chair, 2);

@@ -4,6 +4,7 @@
       class="chair__empty-button"
       type="button"
       aria-label="Sit at this chair"
+      :disabled="chairsStore.roundInProgress"
       @click="onSitClick"
     >
       <span aria-hidden="true">+</span>
@@ -21,6 +22,7 @@ const props = defineProps<{
 const chairsStore = useChairsStore()
 
 const onSitClick = () => {
+  if (chairsStore.roundInProgress) return
   chairsStore.sit(props.chairId)
 }
 </script>

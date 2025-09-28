@@ -68,6 +68,7 @@
     <BettingSlider
       :initial-value="currentBet"
       @change="onBetChange"
+      :disabled="!canAdjustBet"
     />
   </div>
 </template>
@@ -106,6 +107,8 @@ const chairsStore = useChairsStore()
 
 const chairView = computed(() => chairsStore.getChairView(props.chairId))
 if (!chairView.value) throw new Error('Chair not found')
+
+const canAdjustBet = computed(() => !chairsStore.roundInProgress)
 
 const trimmedHands = computed(() => chairView.value?.hands.slice(0, MAX_HAND_SETS) ?? [])
 

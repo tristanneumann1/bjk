@@ -52,7 +52,10 @@ const onPlayClick = () => {
 
 function setCurrentActions() {
   active.value = !Session.getInstance().table.validateRoundCanStart()
-  if (Session.getInstance().table.playerRoundsComplete) activeRound.value = false
+  if (!Session.getInstance().table.aPlayerHasCards) {
+    activeRound.value = false
+    return;
+  }
   const activeChair = Session.getInstance().table.activeChair
   if (!activeChair) return
 
