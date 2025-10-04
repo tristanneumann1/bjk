@@ -6,6 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/bjk/',
   plugins: [vue(), vueDevTools()],
   test: {
     globals: true,
