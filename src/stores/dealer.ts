@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { onScopeDispose, ref } from 'vue'
+import { computed, onScopeDispose, ref } from 'vue'
 import { Session } from '@/models/session'
 import {
   modelEvents,
@@ -12,6 +12,8 @@ import { Dealer } from '@/models/dealer'
 import { getModelInstanceId } from '@/lib/modelEvents'
 import type { Chair } from '@/models/chair'
 import { Hand, NEW_CARD_EVENT } from '@/models/hand'
+import type { Card } from '@/models/card'
+import type { Table } from '@/models/table'
 
 export type DealerCard = {
   value?: string | number
@@ -23,9 +25,14 @@ export const useDealerStore = defineStore('dealer', () => {
   const totalShoeSize = ref(Session.getInstance().rules.deckCount * 52)
   const remainingShoeSize = ref(Session.getInstance().rules.deckCount * 52)
   const runningCount = ref(0)
+  const pendingHoleCardDelta = ref(0)
+  const holeCardHidden = ref(false)
 
   const setCards = (nextCards: DealerCard[]) => {
     cards.value = [...nextCards]
+    if (nextCards.length === 0) {
+      revealHoleCard()
+    }
   }
 
   const addCard = (card: DealerCard) => {
@@ -33,7 +40,7 @@ export const useDealerStore = defineStore('dealer', () => {
   }
 
   const resetCards = () => {
-    cards.value = []
+    setCards([])
   }
 
   const setShoeSizes = (remaining: number, total: number) => {
@@ -51,6 +58,7 @@ export const useDealerStore = defineStore('dealer', () => {
   const resetShoe = () => {
     totalShoeSize.value = Session.getInstance().rules.deckCount * 52
     remainingShoeSize.value = Session.getInstance().rules.deckCount * 52
+    runningCount.value = 0
   }
 
   const setRunningCount = (count: number) => {
@@ -64,14 +72,84 @@ export const useDealerStore = defineStore('dealer', () => {
   const reset = () => {
     resetCards()
     resetShoe()
-    runningCount.value = 0
   }
 
   const cleanupFns: Array<() => void> = []
 
   const dealerDealIndexEvent = modelPropertyEvent('dealer', 'dealIndex')
 
-  const onDealIndexChange = (event: ModelPropertyChangeEvent) => {
+  const getCountDelta = (card: Card | DealerCard | undefined): number => {
+    if (!card || card.value === undefined || card.value === null) {
+      return 0
+    }
+    const value = typeof card.value === 'number' ? card.value : Number(card.value)
+    switch (value) {
+      case 1:
+      case 10:
+        return -1
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        return 1
+      default:
+        return 0
+    }
+  }
+
+  const revealHoleCard = () => {
+    if (!holeCardHidden.value) {
+      return
+    }
+    holeCardHidden.value = false
+    pendingHoleCardDelta.value = 0
+  }
+
+  /* HANDLERS */
+  function onDealerActiveHandChange (event: ModelPropertyChangeEvent) {
+    if (event.value !== 0) {
+      return
+    }
+
+    detachActiveHandListener()
+
+    const dealerChairInstance = event.target as Chair
+    const dealerHand = dealerChairInstance.hands[0]
+    const dealerHandIndex = getModelInstanceId(dealerHand)
+    if (!dealerHandIndex) {
+      throw new Error('dealer hand not found')
+    }
+
+    activeHandEventKey = modelInstanceCustomEvent('hand', NEW_CARD_EVENT, dealerHandIndex)
+    modelEvents.on(activeHandEventKey, dealerNewCardHandler)
+  }
+  function dealerNewCardHandler(e: ModelPropertyChangeEvent) {
+    const dealerHand = e.target as Hand
+    setCards(dealerHand.cards)
+
+    const tableInstance = Session.getInstance().table
+
+    if (dealerHand.cards.length === 2) {
+      const shouldHide = !tableInstance.playerChairArray[0]?.hands.length || !tableInstance.playerRoundsComplete
+      if (shouldHide && !holeCardHidden.value) {
+        holeCardHidden.value = true
+        const newCard = e.value as Card | undefined
+        const delta = getCountDelta(newCard)
+        pendingHoleCardDelta.value = delta
+      } else if (!shouldHide) {
+        revealHoleCard()
+      }
+      return
+    }
+  }
+  function onChairTurnIndexChange (event: ModelPropertyChangeEvent) {
+    const tableInstance = event.target as Table
+    if (holeCardHidden.value && tableInstance.playerRoundsComplete) {
+      revealHoleCard()
+    }
+  }
+  function onDealIndexChange (event: ModelPropertyChangeEvent) {
     if(event.value === 0) {
       // shoe reset
       setRunningCount(0)
@@ -81,20 +159,12 @@ export const useDealerStore = defineStore('dealer', () => {
     remainingShoeSize.value--
     const dealer = event.target as Dealer
     const dealtCard = dealer.shoe[event.value as number - 1]
-    switch (dealtCard.value) {
-      case 1:
-      case 10:
-        adjustRunningCount(-1)
-        break
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-        adjustRunningCount(1)
-        break
+    const delta = getCountDelta(dealtCard)
+    if (delta !== 0) {
+      adjustRunningCount(delta)
     }
   }
+  /* END HANDLERS */
 
   modelEvents.on(dealerDealIndexEvent, onDealIndexChange)
   cleanupFns.push(() => modelEvents.off(dealerDealIndexEvent, onDealIndexChange))
@@ -114,24 +184,6 @@ export const useDealerStore = defineStore('dealer', () => {
     activeHandEventKey = null
   }
 
-  const onDealerActiveHandChange = (event: ModelPropertyChangeEvent) => {
-    if (event.value !== 0) {
-      return
-    }
-
-    detachActiveHandListener()
-
-    const dealerChairInstance = event.target as Chair
-    const dealerHand = dealerChairInstance.hands[0]
-    const dealerHandIndex = getModelInstanceId(dealerHand)
-    if (!dealerHandIndex) {
-      throw new Error('dealer hand not found')
-    }
-
-    activeHandEventKey = modelInstanceCustomEvent('hand', NEW_CARD_EVENT, dealerHandIndex)
-    modelEvents.on(activeHandEventKey, dealerNewCardHandler)
-  }
-
   const activeHandEvent = modelInstancePropertyEvent('chair', 'activeHandIndex', dealerChairId)
   modelEvents.on(activeHandEvent, onDealerActiveHandChange)
 
@@ -140,10 +192,17 @@ export const useDealerStore = defineStore('dealer', () => {
     detachActiveHandListener()
   })
 
-  function dealerNewCardHandler(e: ModelPropertyChangeEvent) {
-    const dealerHand = e.target as Hand
-    setCards(dealerHand.cards)
-  }
+  const chairTurnEvent = modelPropertyEvent('table', 'chairTurnIndex')
+
+  modelEvents.on(chairTurnEvent, onChairTurnIndexChange)
+  cleanupFns.push(() => modelEvents.off(chairTurnEvent, onChairTurnIndexChange))
+
+  const perceivedRunningCount = computed(() => {
+    const perceived = holeCardHidden.value
+      ? runningCount.value - pendingHoleCardDelta.value
+      : runningCount.value
+    return Math.trunc(perceived)
+  })
 
   onScopeDispose(() => {
     cleanupFns.forEach((cleanup) => {
@@ -163,6 +222,8 @@ export const useDealerStore = defineStore('dealer', () => {
     totalShoeSize,
     remainingShoeSize,
     runningCount,
+    perceivedRunningCount,
+    holeCardHidden,
     setCards,
     addCard,
     resetCards,

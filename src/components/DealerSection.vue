@@ -9,7 +9,7 @@
           <div class="dealer-shoe__fill" :style="{ height: `${shoeFillPercent}%` }" />
         </div>
       </div>
-      <CardHand :cards="dealer.cards" :maxWidth="handMaxWidth" large />
+      <CardHand :cards="displayCards" :maxWidth="handMaxWidth" large />
     </div>
   </section>
 </template>
@@ -18,10 +18,32 @@
 import { computed } from 'vue'
 import CardHand from '@/components/CardHand.vue'
 import { useDealerStore } from '@/stores/dealer'
+import { Session } from '@/models/session'
 
 const dealer = useDealerStore()
 
 const handMaxWidth = computed(() => 360)
+
+const shouldHideHoleCard = computed(() => {
+  if (!dealer.holeCardHidden) {
+    return false
+  }
+  const table = Session.getInstance().table
+  return !table.playerRoundsComplete
+})
+
+const displayCards = computed(() => {
+  if (!shouldHideHoleCard.value) {
+    return dealer.cards
+  }
+
+  const [firstCard, ...rest] = dealer.cards
+  if (!firstCard) {
+    return []
+  }
+
+  return [firstCard, {}, ...rest.slice(1)]
+})
 
 const shoeFillPercent = computed(() => {
   const total = dealer.totalShoeSize || 1
@@ -30,7 +52,7 @@ const shoeFillPercent = computed(() => {
 })
 
 const formattedRunningCount = computed(() => {
-  const count = dealer.runningCount
+  const count = dealer.perceivedRunningCount
   const sign = count > 0 ? '+' : ''
   return `${sign}${count}`
 })
