@@ -163,6 +163,7 @@ export class Table {
       this.view()
     }
     if (!this.activeChair) {
+      console.log('paying out after action')
       this.payout()
     }
   }
