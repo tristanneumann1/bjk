@@ -1,5 +1,11 @@
 <template>
-  <div class="chair" aria-label="Player Spot" :style="{width: '272px' }">
+  <div
+    class="chair"
+    :class="{ 'chair--active': isActiveChair }"
+    aria-label="Player Spot"
+    :aria-current="isActiveChair ? 'true' : undefined"
+    :style="{ width: '272px' }"
+  >
     <div class="hand__top" aria-label="Inactive hands">
       <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
         <span
@@ -104,6 +110,8 @@ const props = defineProps<{
 }>()
 
 const chairsStore = useChairsStore()
+
+const isActiveChair = computed(() => chairsStore.activeChairId === props.chairId)
 
 const chairView = computed(() => chairsStore.getChairView(props.chairId))
 if (!chairView.value) throw new Error('Chair not found')
@@ -224,6 +232,14 @@ const onBetChange = (value: number) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-radius: 12px;
+  padding: 0.5rem 0.25rem;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.chair--active {
+  box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.4);
+  transform: translateY(-2px);
 }
 
 .hand {
