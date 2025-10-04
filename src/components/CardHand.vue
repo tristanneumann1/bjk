@@ -2,8 +2,9 @@
   <div class="card-hand" :style="handStyle" role="group" aria-label="Card hand">
     <PlayingCard
       v-for="(card, index) in displayCards"
-      :key="index"
+      :key="card.id"
       class="card-hand__card"
+      :class="{ 'card-hand__card--entering': card.isEntering }"
       :style="cardPositions[index]"
       :value="card.value"
       :suit="card.suit"
@@ -13,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onScopeDispose, ref, watch } from 'vue'
 import PlayingCard from '@/components/PlayingCard.vue'
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 
@@ -26,6 +27,8 @@ type CardLike = {
 const BASE_CARD_WIDTH = 46
 const BASE_CARD_HEIGHT = 64
 const MAX_CARDS = 13
+const REVEAL_STAGGER_MS = 220
+const ENTER_ANIMATION_MS = 320
 
 const props = defineProps<{
   cards: CardLike[]
@@ -42,19 +45,33 @@ const defaultMaxWidth = computed(() => cardWidth.value + (MAX_CARDS - 1) * (card
 
 const maxWidth = computed(() => props.maxWidth ?? defaultMaxWidth.value)
 
-const visibleCards = computed(() => props.cards.slice(0, MAX_CARDS))
-
 const isLarge = computed(() => props.large ?? false)
 
-const displayCards = computed(() =>
-  visibleCards.value.map(card => ({
-    value: card.rank ?? card.value ?? undefined,
-    suit: card.suit,
-  })),
+type NormalizedCard = {
+  value?: string | number
+  suit?: string
+}
+
+type DisplayCard = NormalizedCard & {
+  id: number
+  isEntering: boolean
+}
+
+const normalizeCard = (card: CardLike): NormalizedCard => ({
+  value: card.rank ?? card.value ?? undefined,
+  suit: card.suit,
+})
+
+const targetCards = computed<NormalizedCard[]>(() =>
+  props.cards.slice(0, MAX_CARDS).map(normalizeCard),
 )
 
+const renderedCards = ref<DisplayCard[]>([])
+
+const displayCards = computed(() => renderedCards.value)
+
 const cardSpacing = computed(() => {
-  const count = visibleCards.value.length
+  const count = renderedCards.value.length
   if (count <= 1) {
     return 0
   }
@@ -67,7 +84,7 @@ const cardSpacing = computed(() => {
 })
 
 const handWidth = computed(() => {
-  const count = visibleCards.value.length
+  const count = renderedCards.value.length
   if (count === 0) {
     return 0
   }
@@ -82,11 +99,135 @@ const handStyle = computed(() => ({
 }))
 
 const cardPositions = computed(() =>
-  visibleCards.value.map((_, index) => ({
+  renderedCards.value.map((_, index) => ({
     left: `${index * cardSpacing.value}px`,
     zIndex: index + 1,
   })),
 )
+
+const revealQueue: NormalizedCard[] = []
+const activeTimeouts: Array<ReturnType<typeof setTimeout>> = []
+let cardIdCounter = 0
+let processingReveal = false
+
+const clearActiveTimeouts = () => {
+  while (activeTimeouts.length) {
+    const timeoutId = activeTimeouts.pop()
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
+
+const markCardSettled = (id: number) => {
+  renderedCards.value = renderedCards.value.map(card =>
+    card.id === id ? { ...card, isEntering: false } : card,
+  )
+}
+
+const schedule = (handler: () => void, delay: number) => {
+  const timeoutId = setTimeout(() => {
+    const index = activeTimeouts.indexOf(timeoutId)
+    if (index !== -1) {
+      activeTimeouts.splice(index, 1)
+    }
+    handler()
+  }, delay)
+  activeTimeouts.push(timeoutId)
+}
+
+const processRevealQueue = () => {
+  if (processingReveal) {
+    return
+  }
+  processingReveal = true
+
+  const step = () => {
+    const nextCard = revealQueue.shift()
+    if (!nextCard) {
+      processingReveal = false
+      return
+    }
+
+    const displayCard: DisplayCard = {
+      id: ++cardIdCounter,
+      value: nextCard.value,
+      suit: nextCard.suit,
+      isEntering: true,
+    }
+
+    renderedCards.value = [...renderedCards.value, displayCard]
+
+    schedule(() => markCardSettled(displayCard.id), ENTER_ANIMATION_MS)
+    schedule(step, REVEAL_STAGGER_MS)
+  }
+
+  step()
+}
+
+const enqueueReveals = (cards: NormalizedCard[]) => {
+  if (cards.length === 0) {
+    return
+  }
+
+  revealQueue.push(...cards)
+  processRevealQueue()
+}
+
+const resetRenderedCards = (nextCards: NormalizedCard[]) => {
+  clearActiveTimeouts()
+  revealQueue.length = 0
+  processingReveal = false
+  renderedCards.value = nextCards.map(card => ({
+    id: ++cardIdCounter,
+    value: card.value,
+    suit: card.suit,
+    isEntering: false,
+  }))
+}
+
+watch(
+  targetCards,
+  nextCards => {
+    const existing = renderedCards.value
+    const nextLength = nextCards.length
+
+    if (existing.length === 0 && nextLength === 0) {
+      return
+    }
+
+    if (existing.length > 0 && nextLength === 0) {
+      resetRenderedCards([])
+      return
+    }
+
+    const syncedLength = Math.min(existing.length, nextLength)
+    const updatedExisting = existing.slice(0, syncedLength).map((card, index) => {
+      const nextCard = nextCards[index]
+      if (card.value === nextCard.value && card.suit === nextCard.suit) {
+        return card
+      }
+      return { ...card, value: nextCard.value, suit: nextCard.suit, isEntering: false }
+    })
+
+    renderedCards.value = updatedExisting
+
+    if (nextLength < existing.length) {
+      clearActiveTimeouts()
+      revealQueue.length = 0
+      processingReveal = false
+      return
+    }
+
+    const newCards = nextCards.slice(updatedExisting.length)
+    enqueueReveals(newCards)
+  },
+  { immediate: true },
+)
+
+onScopeDispose(() => {
+  clearActiveTimeouts()
+})
 </script>
 
 <style scoped>
@@ -98,5 +239,20 @@ const cardPositions = computed(() =>
 .card-hand__card {
   position: absolute;
   top: 0;
+}
+
+.card-hand__card--entering {
+  animation: card-hand-enter var(--card-enter-duration, 0.32s) ease;
+}
+
+@keyframes card-hand-enter {
+  0% {
+    transform: translateY(-18%) scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 </style>
