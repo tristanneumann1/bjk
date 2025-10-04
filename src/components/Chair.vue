@@ -144,13 +144,18 @@ const resolvedActiveHandIndex = computed(() => {
     return 0
   }
 
-  const { hands, activeHandIndex } = view
+  const { hands, activeHandIndex, displayActiveHandIndex } = view
   const handCount = hands.length
-  const inRange = activeHandIndex >= 0 && activeHandIndex < handCount
+  const inRange = displayActiveHandIndex !== null
+    ? displayActiveHandIndex >= 0 && displayActiveHandIndex < handCount
+    : activeHandIndex >= 0 && activeHandIndex < handCount
 
   if (inRange) {
-    lastResolvedActiveIndex.value = activeHandIndex
-    return activeHandIndex
+    const resolved = displayActiveHandIndex !== null
+      ? displayActiveHandIndex
+      : activeHandIndex
+    lastResolvedActiveIndex.value = resolved
+    return resolved
   }
 
   if (handCount === 0) {

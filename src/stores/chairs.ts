@@ -19,9 +19,7 @@ type ChairView = {
   modelHands: Hand['cards'][]
   activeHandIndex: number
   bet: number
-  pendingClearTimeout: ReturnType<typeof setTimeout> | null
-  pendingClearHands: Hand['cards'][] | null
-  deferredHands: Hand['cards'][] | null
+  displayActiveHandIndex: number | null
 }
 
 type ChairRegistryEntry = {
@@ -52,8 +50,6 @@ export const useChairsStore = defineStore('chairs', () => {
 
   const totalCards = (hands: Hand['cards'][]): number =>
     hands.reduce((sum, cards) => sum + cards.length, 0)
-
-  const ROUND_CLEAR_DELAY_MS = 650
 
   const findSeatIndex = (chair: Chair | null | undefined): number | null => {
     if (!chair) {
@@ -86,38 +82,21 @@ export const useChairsStore = defineStore('chairs', () => {
 
     const nextTotal = totalCards(nextHands)
     const currentTotal = totalCards(view.hands)
-
-    const applyHands = (hands: Hand['cards'][]) => {
-      view.hands = cloneHandCards(hands)
-    }
-
-    const finishPendingClear = () => {
-      const nextDisplay = view.deferredHands ?? view.pendingClearHands ?? []
-      applyHands(nextDisplay)
-      view.pendingClearHands = null
-      view.deferredHands = null
-    }
-
-    const hasPendingClear = view.pendingClearTimeout !== null
+    const nextActiveIndex = entry.chair.activeHandIndex
 
     if (nextTotal === 0 && currentTotal > 0) {
-      if (view.pendingClearTimeout) {
-        clearTimeout(view.pendingClearTimeout)
-      }
-      view.pendingClearHands = cloneHandCards(nextHands)
-      view.pendingClearTimeout = setTimeout(() => {
-        finishPendingClear()
-        view.pendingClearTimeout = null
-      }, ROUND_CLEAR_DELAY_MS)
       return
     }
 
-    if (hasPendingClear) {
-      view.deferredHands = cloneHandCards(nextHands)
+    if (nextHands.length === 0) {
+      view.displayActiveHandIndex = null
+      view.hands = []
       return
     }
 
-    applyHands(nextHands)
+    const clampedActiveIndex = Math.min(Math.max(nextActiveIndex, 0), nextHands.length - 1)
+    view.displayActiveHandIndex = clampedActiveIndex
+    view.hands = cloneHandCards(nextHands)
   }
 
   const detachHandListener = (entry: ChairRegistryEntry, handId: string) => {
@@ -195,16 +174,6 @@ export const useChairsStore = defineStore('chairs', () => {
       return
     }
 
-    const view = chairs[index]
-    if (view?.pendingClearTimeout) {
-      clearTimeout(view.pendingClearTimeout)
-      view.pendingClearTimeout = null
-    }
-    if (view) {
-      view.pendingClearHands = null
-      view.deferredHands = null
-    }
-
     for (const cleanup of entry.cleanupFns) {
       try {
         cleanup()
@@ -237,9 +206,9 @@ export const useChairsStore = defineStore('chairs', () => {
       modelHands: cloneHandCards(initialHands),
       activeHandIndex: chair.activeHandIndex,
       bet: chair.bet ?? 0,
-      pendingClearTimeout: null,
-      pendingClearHands: null,
-      deferredHands: null,
+      displayActiveHandIndex: initialHands.length > 0
+        ? Math.min(Math.max(chair.activeHandIndex, 0), initialHands.length - 1)
+        : null,
     }
 
     const entry: ChairRegistryEntry = {
