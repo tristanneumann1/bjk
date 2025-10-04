@@ -2,7 +2,7 @@ import { Card } from '@/models/card';
 import {type Action, Hand} from '@/models/hand';
 import { Dealer } from '@/models/dealer';
 import chalk, { type ColorName, type ModifierName } from 'chalk';
-import {Session} from "@/models/session.ts";
+import {Session} from "@/models/session";
 import {attachModelEventEmitter, ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
 import {
   modelChangeEvent,

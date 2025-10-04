@@ -1,6 +1,6 @@
 import { Card } from '@/models/card';
 import { Hand } from '@/models/hand';
-import {Session} from "@/models/session.ts";
+import {Session} from "@/models/session";
 import {attachModelEventEmitter} from "@/lib/modelEvents";
 
 export class Dealer {

@@ -4,7 +4,7 @@ import { Player } from '@/models/player';
 import { Dealer } from '@/models/dealer';
 import { Table } from '@/models/table';
 import { Rules } from '@/models/rules';
-import {Session} from "@/models/session.ts";
+import {Session} from "@/models/session";
 
 export class Game1 {
   public table: Table;

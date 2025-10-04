@@ -4,7 +4,7 @@ export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
 export function isAction(value: string): value is Action {
   return ['Hit', 'Stand', 'Double', 'Split', 'Surrender'].includes(value);
 }
-import {Session} from "@/models/session.ts";
+import {Session} from "@/models/session";
 import {
   modelChangeEvent,
   modelCustomEvent,

@@ -1,7 +1,7 @@
 import { Chair } from '@/models/chair';
 import { Dealer } from '@/models/dealer';
 import {type Action} from '@/models/hand';
-import {Session} from "@/models/session.ts";
+import {Session} from "@/models/session";
 import {attachModelEventEmitter} from "@/lib/modelEvents";
 import {
   modelChangeEvent,

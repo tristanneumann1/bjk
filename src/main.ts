@@ -59,8 +59,8 @@ Session.initialize({
   table
 })
 
-document['_session'] = Session.getInstance()
-document['_events'] = modelEvents
+// document['_session'] = Session.getInstance()
+// document['_events'] = modelEvents
 modelEvents.on('*', (type, e) => {
   console.log('type, value',type, e.value)
 })
