@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import CardHand from '@/components/CardHand.vue'
 import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
@@ -131,15 +131,55 @@ const cardHandMaxWidth = computed(() => props.maxWidth)
 
 const currentBet = computed(() => chairView.value?.bet ?? 0)
 
-const activeHandIndex = computed(() => chairView.value?.activeHandIndex ?? 0)
-
 const handEntries = computed<HandEntry[]>(() =>
   displayHands.value.map((hand, index) => ({ hand, index })),
 )
 
-const activeEntry = computed(() =>
-  handEntries.value.find(entry => entry.index === activeHandIndex.value) ?? null,
+const lastResolvedActiveIndex = ref<number | null>(null)
+
+const resolvedActiveHandIndex = computed(() => {
+  const view = chairView.value
+  if (!view) {
+    lastResolvedActiveIndex.value = null
+    return 0
+  }
+
+  const { hands, activeHandIndex } = view
+  const handCount = hands.length
+  const inRange = activeHandIndex >= 0 && activeHandIndex < handCount
+
+  if (inRange) {
+    lastResolvedActiveIndex.value = activeHandIndex
+    return activeHandIndex
+  }
+
+  if (handCount === 0) {
+    lastResolvedActiveIndex.value = null
+    return 0
+  }
+
+  const fallback = lastResolvedActiveIndex.value !== null && lastResolvedActiveIndex.value < handCount
+    ? lastResolvedActiveIndex.value
+    : handCount - 1
+
+  lastResolvedActiveIndex.value = fallback
+  return fallback
+})
+
+watch(
+  () => displayHands.value.length,
+  length => {
+    if (length === 0) {
+      lastResolvedActiveIndex.value = null
+    }
+  },
 )
+
+const activeEntry = computed(() =>
+  handEntries.value.find(entry => entry.index === resolvedActiveHandIndex.value) ?? null,
+)
+
+const activeHandIndex = resolvedActiveHandIndex
 
 const buildStack = (entries: HandEntry[]) =>
   entries.map((entry, stackIndex, source) => ({
@@ -151,13 +191,11 @@ const buildStack = (entries: HandEntry[]) =>
   }))
 
 const leftEntries = computed(() =>
-  handEntries.value
-    .filter(entry => entry.index < activeHandIndex.value)
+  handEntries.value.filter(entry => entry.index < resolvedActiveHandIndex.value),
 )
 
 const rightEntries = computed(() =>
-  handEntries.value
-    .filter(entry => entry.index > activeHandIndex.value),
+  handEntries.value.filter(entry => entry.index > resolvedActiveHandIndex.value),
 )
 
 const leftDisplayEntries = computed(() => leftEntries.value.slice(Math.max(leftEntries.value.length - MAX_VISIBLE_STACK, 0), leftEntries.value.length))

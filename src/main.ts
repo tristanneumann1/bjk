@@ -38,7 +38,17 @@ const doubleWith2Players = [
   new Card( 'Hearts', '7')
 ]
 
-dealer.shoe.unshift(...doubleWith2Players)
+const secondHandBlackJack = [
+  new Card('Spades', '2'),
+  new Card( 'Hearts', '3'),
+  new Card('Spades', '5'),
+  new Card( 'Hearts', '6'),
+  new Card('Spades', 'A'),
+  new Card( 'Hearts', 'J'),
+]
+
+
+dealer.shoe.unshift(...secondHandBlackJack)
 dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 
