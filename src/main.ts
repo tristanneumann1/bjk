@@ -25,7 +25,7 @@ const playerSplitIntoBlackJack = [
   new Card('Spades', 'K'),
   new Card( 'Hearts', 'K'),
   new Card('Spades', 'A'),
-  new Card( 'Hearts', 'K')
+  new Card( 'Hearts', 'A')
 ]
 
 const doubleWith2Players = [
@@ -48,7 +48,7 @@ const secondHandBlackJack = [
 ]
 
 
-dealer.shoe.unshift(...secondHandBlackJack)
+// dealer.shoe.unshift(...playerSplitIntoBlackJack)
 dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 

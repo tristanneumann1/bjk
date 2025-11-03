@@ -84,6 +84,9 @@ export class Chair {
     if(this.activeHand && this.activeHand.cards.length < 2) {
       this.activeHand.addCard(dealer.dealCard())
     }
+    if (this.activeHand && this.activeHand.isDone) {
+      this.moveToNextHand(dealer);
+    }
   }
   act (action: Action, dealer: Dealer) {
     if (!this.activeHand) {
