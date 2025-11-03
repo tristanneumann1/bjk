@@ -6,6 +6,15 @@
     :aria-current="isActiveChair ? 'true' : undefined"
     :style="{ width: '272px' }"
   >
+    <button
+      v-if="!chairsStore.roundInProgress"
+      class="chair__deactivate"
+      type="button"
+      aria-label="Make this chair inactive"
+      @click="chairsStore.leave(props.chairId)"
+    >
+      ×
+    </button>
     <div class="hand__top" aria-label="Inactive hands">
       <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
         <span
@@ -235,6 +244,7 @@ const onBetChange = (value: number) => {
   border-radius: 12px;
   padding: 0.5rem 0.25rem;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
+  position: relative; /* allow floating controls without affecting layout */
 }
 
 .chair--active {
@@ -316,6 +326,32 @@ const onBetChange = (value: number) => {
 .hand__entry--stack:hover,
 .hand__entry--stack:focus-visible {
   opacity: 1;
+}
+
+/* Small deactivate button shown between rounds; fully floated, no layout impact */
+.chair__deactivate {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.chair__deactivate:hover,
+.chair__deactivate:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 </style>

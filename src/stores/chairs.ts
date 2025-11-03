@@ -345,11 +345,17 @@ export const useChairsStore = defineStore('chairs', () => {
     chair.bet = Math.max(bet, 0)
   }
 
+  const leave = (index: number) => {
+    if (roundInProgress.value) return
+    Session.getInstance().table.removePlayerChair(index)
+  }
+
   return {
     activeChairId,
     getChairView,
     roundInProgress,
     sit,
     adjustBet,
+    leave,
   }
 })
