@@ -216,7 +216,6 @@ export class Table {
       }
     }
     for (const chair of this.playerChairArray) {
-      console.log('chair.bet', chair.bet)
       if (chair.bet <= 0) {
         return 'All chairs must have a bet placed';
       }

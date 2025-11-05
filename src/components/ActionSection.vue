@@ -4,10 +4,10 @@
       v-if="!activeRound"
       class="action-section__play"
       type="button"
-      :disabled="!active"
+      :disabled="!active && !needsReshuffle"
       @click="onPlayClick()"
     >
-      Play
+      {{ needsReshuffle ? 'Reshuffle' : 'Play' }}
     </button>
     <template v-else>
       <button
@@ -36,11 +36,14 @@ import {
 import {NEW_CARD_EVENT} from "@/models/hand.ts";
 import {Session} from "@/models/session.ts";
 import {CHAIR_EVENT} from "@/models/table.ts";
+import {useDealerStore} from '@/stores/dealer'
 
 const activeRound = ref<boolean>(false)
 const active = ref<boolean>(false)
+const needsReshuffle = ref<boolean>(false)
 
 const playerActions = usePlayerActionsStore()
+const dealerStore = useDealerStore()
 const actions = PLAYER_ACTIONS
 
 const onActionClick = (action: PlayerAction) => {
@@ -48,16 +51,22 @@ const onActionClick = (action: PlayerAction) => {
 }
 
 const onPlayClick = () => {
+  // If shoe is nearly over, reshuffle before starting the round
+  if (needsReshuffle.value) {
+    dealerStore.resetShoe()
+  }
   playerActions.play()
 }
 
 function setCurrentActions() {
-  active.value = !Session.getInstance().table.validateRoundCanStart()
-  if (!Session.getInstance().table.aPlayerHasCards) {
+  const table = Session.getInstance().table
+  needsReshuffle.value = dealerStore.pastPenetration
+  active.value = !table.validateRoundCanStart()
+  if (!table.aPlayerHasCards) {
     activeRound.value = false
     return;
   }
-  const activeChair = Session.getInstance().table.activeChair
+  const activeChair = table.activeChair
   if (!activeChair) return
 
   const activeHand = activeChair.activeHand
@@ -85,6 +94,10 @@ modelEvents.on(modelPropertyEvent('table', 'chairTurnIndex'), (_event: ModelProp
 })
 
 modelEvents.on(modelCustomEvent('table', CHAIR_EVENT), (_event: ModelPropertyChangeEvent) => {
+  setCurrentActions()
+})
+
+modelEvents.on(modelPropertyEvent('dealer', 'dealIndex'), (_event: ModelPropertyChangeEvent) => {
   setCurrentActions()
 })
 </script>

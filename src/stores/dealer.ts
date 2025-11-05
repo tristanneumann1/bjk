@@ -27,6 +27,7 @@ export const useDealerStore = defineStore('dealer', () => {
   const runningCount = ref(0)
   const pendingHoleCardDelta = ref(0)
   const holeCardHidden = ref(false)
+  const pastPenetration = ref(false)
 
   const setCards = (nextCards: DealerCard[]) => {
     cards.value = [...nextCards]
@@ -58,6 +59,9 @@ export const useDealerStore = defineStore('dealer', () => {
   const resetShoe = () => {
     totalShoeSize.value = Session.getInstance().rules.deckCount * 52
     remainingShoeSize.value = Session.getInstance().rules.deckCount * 52
+    Session.getInstance().table.dealer.reset()
+    Session.getInstance().table.dealer.resetDealIndex()
+    pastPenetration.value = false
     runningCount.value = 0
   }
 
@@ -150,6 +154,10 @@ export const useDealerStore = defineStore('dealer', () => {
     }
   }
   function onDealIndexChange (event: ModelPropertyChangeEvent) {
+    if (Session.getInstance().table.dealer.pastPenetration()) {
+      pastPenetration.value = true
+    }
+
     if(event.value === 0) {
       // shoe reset
       setRunningCount(0)
@@ -222,6 +230,7 @@ export const useDealerStore = defineStore('dealer', () => {
     totalShoeSize,
     remainingShoeSize,
     runningCount,
+    pastPenetration,
     perceivedRunningCount,
     holeCardHidden,
     setCards,

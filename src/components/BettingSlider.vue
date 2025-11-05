@@ -43,8 +43,8 @@
 import { computed, ref, watch } from 'vue'
 
 const MIN_BET = 0
-const MAX_BET = 300
-const STEP = 5
+const MAX_BET = 30000
+const STEP = 500
 
 const props = defineProps<{
   initialValue?: number
@@ -89,7 +89,7 @@ watch(currentValue, emitValueChange)
 const isAtMinimum = computed(() => currentValue.value <= MIN_BET)
 const isAtMaximum = computed(() => currentValue.value >= MAX_BET)
 
-const formattedValue = computed(() => `$${currentValue.value.toLocaleString('en-US')}`)
+const formattedValue = computed(() => `$${(currentValue.value / 100).toLocaleString('en-US')}`)
 
 const setValue = (value: number) => {
   currentValue.value = clampToStep(value)
