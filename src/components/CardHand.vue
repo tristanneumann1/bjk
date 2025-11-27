@@ -110,6 +110,13 @@ const activeTimeouts: Array<ReturnType<typeof setTimeout>> = []
 let cardIdCounter = 0
 let processingReveal = false
 
+const createDisplayCard = (card: NormalizedCard, isEntering: boolean): DisplayCard => ({
+  id: ++cardIdCounter,
+  value: card.value,
+  suit: card.suit,
+  isEntering,
+})
+
 const clearActiveTimeouts = () => {
   while (activeTimeouts.length) {
     const timeoutId = activeTimeouts.pop()
@@ -149,12 +156,7 @@ const processRevealQueue = () => {
       return
     }
 
-    const displayCard: DisplayCard = {
-      id: ++cardIdCounter,
-      value: nextCard.value,
-      suit: nextCard.suit,
-      isEntering: true,
-    }
+    const displayCard = createDisplayCard(nextCard, true)
 
     renderedCards.value = [...renderedCards.value, displayCard]
 
@@ -178,12 +180,7 @@ const resetRenderedCards = (nextCards: NormalizedCard[]) => {
   clearActiveTimeouts()
   revealQueue.length = 0
   processingReveal = false
-  renderedCards.value = nextCards.map(card => ({
-    id: ++cardIdCounter,
-    value: card.value,
-    suit: card.suit,
-    isEntering: false,
-  }))
+  renderedCards.value = nextCards.map(card => createDisplayCard(card, false))
 }
 
 watch(
@@ -200,18 +197,18 @@ watch(
       resetRenderedCards([])
       return
     }
-
     const syncedLength = Math.min(existing.length, nextLength)
     const updatedExisting = existing.slice(0, syncedLength).map((card, index) => {
       const nextCard = nextCards[index]
       if (card.value === nextCard.value && card.suit === nextCard.suit) {
         return card
       }
-      return { ...card, value: nextCard.value, suit: nextCard.suit, isEntering: false }
+      const replacement = createDisplayCard(nextCard, true)
+      schedule(() => markCardSettled(replacement.id), ENTER_ANIMATION_MS)
+      return replacement
     })
 
     renderedCards.value = updatedExisting
-
     if (nextLength < existing.length) {
       clearActiveTimeouts()
       revealQueue.length = 0

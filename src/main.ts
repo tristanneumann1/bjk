@@ -38,6 +38,19 @@ const doubleWith2Players = [
   new Card( 'Hearts', '7')
 ]
 
+const manySplits = [
+  new Card('Spades', '2'),
+  new Card( 'Hearts', '3'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'K'),
+  new Card('Spades', 'J'),
+  new Card( 'Hearts', 'Q'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'K'),
+  new Card('Spades', 'J'),
+  new Card( 'Hearts', 'Q')
+]
+
 const secondHandBlackJack = [
   new Card('Spades', '2'),
   new Card( 'Hearts', '3'),
