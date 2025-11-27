@@ -26,6 +26,7 @@ export const NEW_HAND_EVENT = 'new_hand'
 export class Chair {
   public bet = 0;
   public activeHandIndex = 0;
+  public splitCount = 0;
   constructor(public hands: Hand[] = []) {
     ensureInstanceId(Chair, 'chair', this as Record<string | symbol, unknown>)
   }
@@ -48,6 +49,7 @@ export class Chair {
   start() {
     this.hands = [new Hand()];
     this.activeHandIndex = 0;
+    this.splitCount = 0;
   }
   deal(card: Card) {
     if (!this.activeHand) {
@@ -88,12 +90,75 @@ export class Chair {
       this.moveToNextHand(dealer);
     }
   }
+  private static readonly ACTIONS: Action[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender']
+
+  listViableActions(): Record<Action, boolean> {
+    return Chair.ACTIONS.reduce((result, action) => {
+      result[action] = !this.validateAction(action)
+      return result
+    }, {} as Record<Action, boolean>)
+  }
+
+  validateAction(action: Action): string | null {
+    const activeHand = this.activeHand
+    if (!activeHand) {
+      return 'No active hand'
+    }
+
+    if (activeHand.isDone) {
+      return 'Hand not active'
+    }
+
+    const rules = Session.getInstance().rules
+    switch (action) {
+      case 'Stand':
+        return null
+      case 'Hit':
+        return activeHand.softValue < 21 ? null : 'Cannot hit on 21 or more'
+      case 'Double': {
+        if (Session.getInstance().player.balance < this.bet) {
+          return 'Not enough balance to double'
+        }
+        if (activeHand.cards.length !== 2) {
+          return 'Can only double on first two cards'
+        }
+        if (activeHand.isSplit && !rules.doubleAllowedAfterSplit) {
+          return 'Can not double after split'
+        }
+        return null
+      }
+      case 'Split': {
+        if (activeHand.cards.length !== 2) {
+          return 'Can only split with two cards'
+        }
+        if (activeHand.cards[0].value !== activeHand.cards[1].value) {
+          return 'Can only split matching values'
+        }
+        if (this.splitCount >= rules.maxSplits) {
+          return 'maximum split count reached'
+        }
+        if (activeHand.cards[0].isAce() && activeHand.isSplit && !rules.resplitAcesAllowed) {
+          return 'Can not re-split aces'
+        }
+        return null
+      }
+      case 'Surrender':
+        if (activeHand.cards.length !== 2) {
+          return 'Can only surrender on first two cards'
+        }
+        if (!rules.surrenderAllowed) {
+          return 'Surrender not allowed'
+        }
+        return null
+    }
+  }
+
   act (action: Action, dealer: Dealer) {
     if (!this.activeHand) {
       throw new Error('No active hand');
     }
 
-    const actionNotValidError = this.activeHand.validateAction(action, this.bet);
+    const actionNotValidError = this.validateAction(action);
     if (actionNotValidError) {
       throw new Error(actionNotValidError)
     }
@@ -117,6 +182,7 @@ export class Chair {
         const newHand = new Hand([splitCard]);
         newHand.split();
         this.activeHand.split();
+        this.splitCount++
         this.addHand(newHand)
         this.activeHand.addCard(dealer.dealCard())
         if (this.activeHand.isDone) {

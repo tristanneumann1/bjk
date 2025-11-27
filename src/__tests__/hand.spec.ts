@@ -6,6 +6,7 @@ import {Session} from "@/models/session.ts";
 import {Table} from "@/models/table.ts";
 import {Dealer} from "@/models/dealer.ts";
 import {Chair} from "@/models/chair.ts";
+import type {Action} from '@/models/hand'
 
 describe('Hand Model', () => {
   Session.initialize({
@@ -27,6 +28,12 @@ describe('Hand Model', () => {
   handSplit2.split();
   const handSplit13 = new Hand([new Card('Hearts', '4'), new Card('Diamonds', '7'), new Card('Diamonds', '2')]);
   handSplit13.split();
+
+  const validateAction = (hand: Hand, action: Action, bet: number = 10) => {
+    const chair = new Chair([hand])
+    chair.bet = bet
+    return chair.validateAction(action)
+  }
 
   it('should show correct value', () => {
 
@@ -89,33 +96,42 @@ describe('Hand Model', () => {
 
   describe('validating actions', () => {
     it('should validate Stand action', () => {
-      expect(hand17.validateAction('Stand', 10)).toBe(null)
-      expect(handStood18.validateAction('Stand', 10)).toBe('Hand not active')
-      expect(handBlackjack.validateAction('Stand', 10)).toBe('Hand not active')
+      expect(validateAction(hand17, 'Stand')).toBe(null)
+      expect(validateAction(handStood18, 'Stand')).toBe('Hand not active')
+      expect(validateAction(handBlackjack, 'Stand')).toBe('Hand not active')
     })
 
     it('should validate Hit action', () => {
-      expect(hand17.validateAction('Hit', 10)).toBe(null)
-      expect(handBlackjack.validateAction('Hit', 10)).toBe('Hand not active')
-      expect(hand24.validateAction('Hit', 10)).toBe('Hand not active')
+      expect(validateAction(hand17, 'Hit')).toBe(null)
+      expect(validateAction(handBlackjack, 'Hit')).toBe('Hand not active')
+      expect(validateAction(hand24, 'Hit')).toBe('Hand not active')
     })
 
     it('should validate Double action', () => {
-      expect(hand17.validateAction('Double', 10)).toBe(null)
-      expect(hand17.validateAction('Double', 10000)).toBe('Not enough balance to double')
-      expect(handSplit13.validateAction('Double', 10)).toBe('Can only double on first two cards')
+      expect(validateAction(hand17, 'Double')).toBe(null)
+      expect(validateAction(hand17, 'Double', 10000)).toBe('Not enough balance to double')
+      expect(validateAction(handSplit13, 'Double')).toBe('Can only double on first two cards')
     })
 
     it('should validate Split action', () => {
-      expect(handSplit2.validateAction('Split', 10)).toBe(null)
-      expect(handMismatch20.validateAction('Split', 10)).toBe(null)
-      expect(handSplit13.validateAction('Split', 10)).toBe('Can only split with two cards')
-      expect(hand17.validateAction('Split', 10)).toBe('Can only split matching values')
+      expect(validateAction(handSplit2, 'Split')).toBe(null)
+      expect(validateAction(handMismatch20, 'Split')).toBe(null)
+      expect(validateAction(handSplit13, 'Split')).toBe('Can only split with two cards')
+      expect(validateAction(hand17, 'Split')).toBe('Can only split matching values')
     })
 
     it('should validate Surrender action', () => {
-      expect(hand17.validateAction('Surrender', 10)).toBe(null)
-      expect(handSplit13.validateAction('Surrender', 10)).toBe('Can only surrender on first two cards')
+      expect(validateAction(hand17, 'Surrender')).toBe(null)
+      expect(validateAction(handSplit13, 'Surrender')).toBe('Can only surrender on first two cards')
+    })
+
+    it('limits total splits per chair', () => {
+      const pair = new Hand([new Card('Spades', '8'), new Card('Clubs', '8')])
+      const chair = new Chair([pair])
+      chair.bet = 10
+      expect(chair.validateAction('Split')).toBe(null)
+      chair.splitCount = Session.getInstance().rules.maxSplits
+      expect(chair.validateAction('Split')).toBe('maximum split count reached')
     })
   })
 })

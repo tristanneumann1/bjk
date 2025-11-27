@@ -61,7 +61,7 @@ const secondHandBlackJack = [
 ]
 
 
-// dealer.shoe.unshift(...playerSplitIntoBlackJack)
+// dealer.shoe.unshift(...manySplits)
 dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 

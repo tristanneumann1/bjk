@@ -73,7 +73,7 @@ function setCurrentActions() {
   if (!activeHand) return
   activeRound.value = true
 
-  const viableActions = activeHand.listViableActions(activeChair.bet)
+  const viableActions = activeChair.listViableActions()
   if (viableActions) playerActions.setMany(viableActions)
 }
 

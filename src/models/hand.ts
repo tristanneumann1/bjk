@@ -4,7 +4,6 @@ export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
 export function isAction(value: string): value is Action {
   return ['Hit', 'Stand', 'Double', 'Split', 'Surrender'].includes(value);
 }
-import {Session} from "@/models/session";
 import {
   modelChangeEvent,
   modelCustomEvent,
@@ -19,7 +18,6 @@ export const SPLIT_CARDS_EVENT = 'split_cards'
 
 export class Hand {
   public isSplit = false;
-  private splitCount = 0;
   public isDoubled = false;
   public hasStood = false;
   public isSurrendered = false
@@ -51,17 +49,6 @@ export class Hand {
       return this.softValue + 10;
     }
     return this.softValue;
-  }
-
-  listViableActions(betNumber: number): { [action in Action]: boolean } {
-    return {
-      Hit: !this.validateAction('Hit', betNumber),
-      Stand: !this.validateAction('Stand', betNumber),
-      Double: !this.validateAction('Double', betNumber),
-      Split: !this.validateAction('Split', betNumber),
-      Surrender: !this.validateAction('Surrender', betNumber),
-      // Insurance: !this.validateAction('Insurance', betNumber),
-    }
   }
 
   addCard (card: Card) {
@@ -100,7 +87,6 @@ export class Hand {
 
   split() {
     this.isSplit = true
-    this.splitCount++
   }
 
   beatsHand(other: Hand): HandResult {
@@ -123,32 +109,5 @@ export class Hand {
       return 'Lose';
     }
     return this.isDoubled ? 'Double_Push' : 'Push';
-  }
-
-  validateAction(action: Action, betValue: number): string | null {
-    if (this.isDone) return 'Hand not active'
-    switch (action) {
-      case 'Stand':
-        return null
-      case 'Hit':
-        return this.softValue < 21 ? null : 'Cannot hit on 21 or more'
-      case "Double":
-        if (Session.getInstance().player.balance < betValue) return 'Not enough balance to double'
-        if (this.cards.length !== 2) return 'Can only double on first two cards'
-        if (this.isSplit && !Session.getInstance().rules.doubleAllowedAfterSplit) {
-          return 'Can not double after split'
-        }
-        return null
-      case 'Split':
-        if (this.cards.length !== 2) return 'Can only split with two cards'
-        if (this.cards[0].value !== this.cards[1].value) return 'Can only split matching values'
-        if (this.splitCount >= Session.getInstance().rules.maxSplits) return 'maximum split count reached'
-        if (this.cards[0].isAce() && this.isSplit && !Session.getInstance().rules.resplitAcesAllowed) return 'Can not re-split aces'
-        return null
-      case "Surrender":
-        if (this.cards.length !== 2) return 'Can only surrender on first two cards'
-        if (!Session.getInstance().rules.surrenderAllowed) return 'Surrender not allowed'
-        return  null
-    }
   }
 }
