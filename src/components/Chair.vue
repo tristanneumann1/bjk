@@ -121,14 +121,13 @@ import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
 import type { HandResult } from '@/models/chair'
 import { Session } from '@/models/session.ts'
+import type { ResultVariant } from '@/types/results'
 
 type CardLike = {
   value?: string | number
   rank?: string | number
   suit?: string
 }
-
-type ResultVariant = 'win' | 'loss' | 'push'
 
 type HandEntry = {
   hand: CardLike[]

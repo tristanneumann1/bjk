@@ -15,21 +15,26 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import type { ResultVariant } from '@/types/results'
 
-type Variant = 'loss' | 'win'
 type Direction = 'up' | 'down'
 
-const props = defineProps<{ amount: number; active: boolean; durationMs?: number; variant?: Variant; direction?: Direction }>()
+const props = defineProps<{ amount: number; active: boolean; durationMs?: number; variant?: ResultVariant; direction?: Direction }>()
 
 const displayValue = ref(0)
 const visible = ref(false)
 let rafId: number | null = null
 
-const resolvedVariant = computed<Variant>(() => props.variant ?? 'loss')
+const resolvedVariant = computed<ResultVariant>(() => props.variant ?? 'loss')
 const resolvedDirection = computed<Direction>(() => props.direction ?? (resolvedVariant.value === 'win' ? 'up' : 'down'))
 const duration = computed(() => props.durationMs ?? 900)
 
-const prefix = computed(() => (resolvedVariant.value === 'win' ? '+' : '-'))
+const prefix = computed(() => {
+  if (resolvedVariant.value === 'win') return '+'
+  if (resolvedVariant.value === 'loss') return '-'
+  return '±'
+})
+
 const variantClass = computed(() => `result-counter--${resolvedVariant.value}`)
 
 const cancelAnimation = () => {
@@ -145,6 +150,12 @@ const formattedValue = computed(() => displayValue.value.toLocaleString())
   background: rgba(22, 101, 52, 0.9);
   border: 1px solid rgba(187, 247, 208, 0.8);
   color: #ecfccb;
+}
+
+.result-counter--push {
+  background: rgba(30, 64, 175, 0.85);
+  border: 1px solid rgba(147, 197, 253, 0.8);
+  color: #dbeafe;
 }
 
 .result-counter__prefix {

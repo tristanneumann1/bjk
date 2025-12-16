@@ -144,8 +144,7 @@ export const useChairsStore = defineStore('chairs', () => {
       return
     }
 
-    const handleHandMutation = (_event) => {
-      console.log('event', _event)
+    const handleHandMutation = () => {
       updateChairHands(index)
     }
 
