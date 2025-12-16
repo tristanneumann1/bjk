@@ -27,16 +27,24 @@
         <button
           v-for="entry in leftStack"
           :key="entry.index"
-          class="hand__entry hand__entry--stack"
+          :class="['hand__entry', 'hand__entry--stack', entryResultClass(entry)]"
           type="button"
           role="listitem"
           :style="entry.style"
           :aria-pressed="entry.index === activeHandIndex"
         >
-          <CardHand
-            :cards="entry.hand"
-            :maxWidth="cardHandMaxWidth"
-          />
+          <div class="hand__entry-body">
+            <CardHand
+              :cards="entry.hand"
+              :maxWidth="cardHandMaxWidth"
+            />
+            <ResultCounter
+              v-if="entry.resultVariant && entry.resultAmount > 0"
+              :amount="entry.resultAmount"
+              :active="entry.showResultHighlight"
+              :variant="entry.resultVariant"
+            />
+          </div>
         </button>
       </div>
 
@@ -51,16 +59,24 @@
         <button
           v-for="entry in rightStack"
           :key="entry.index"
-          class="hand__entry hand__entry--stack"
+          :class="['hand__entry', 'hand__entry--stack', entryResultClass(entry)]"
           type="button"
           role="listitem"
           :style="entry.style"
           :aria-pressed="entry.index === activeHandIndex"
         >
-          <CardHand
-            :cards="entry.hand"
-            :maxWidth="cardHandMaxWidth"
-          />
+          <div class="hand__entry-body">
+            <CardHand
+              :cards="entry.hand"
+              :maxWidth="cardHandMaxWidth"
+            />
+            <ResultCounter
+              v-if="entry.resultVariant && entry.resultAmount > 0"
+              :amount="entry.resultAmount"
+              :active="entry.showResultHighlight"
+              :variant="entry.resultVariant"
+            />
+          </div>
         </button>
       </div>
     </div>
@@ -68,15 +84,23 @@
       <div v-if="activeEntry" class="hand__frame">
 
         <button
-          class="hand__entry hand__entry--active"
+          :class="['hand__entry', 'hand__entry--active', entryResultClass(activeEntry)]"
           type="button"
           :aria-pressed="true"
         >
-          <CardHand
-            :cards="activeEntry.hand"
-            :large="true"
-            :maxWidth="cardHandMaxWidth"
-          />
+          <div class="hand__entry-body">
+            <CardHand
+              :cards="activeEntry.hand"
+              :large="true"
+              :maxWidth="cardHandMaxWidth"
+            />
+            <ResultCounter
+              v-if="activeEntry.resultVariant && activeEntry.resultAmount > 0"
+              :amount="activeEntry.resultAmount"
+              :active="activeEntry.showResultHighlight"
+              :variant="activeEntry.resultVariant"
+            />
+          </div>
         </button>
       </div>
     </div>
@@ -91,9 +115,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import CardHand from '@/components/CardHand.vue'
+import ResultCounter from '@/components/ResultCounter.vue'
 import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
+import type { HandResult } from '@/models/chair'
+import { Session } from '@/models/session.ts'
 
 type CardLike = {
   value?: string | number
@@ -101,9 +128,15 @@ type CardLike = {
   suit?: string
 }
 
+type ResultVariant = 'win' | 'loss' | 'push'
+
 type HandEntry = {
   hand: CardLike[]
   index: number
+  result: HandResult | null | undefined
+  resultVariant: ResultVariant | null
+  resultAmount: number
+  showResultHighlight: boolean
 }
 
 const MAX_HAND_SETS = 8
@@ -111,6 +144,19 @@ const BASE_SMALL_CARD_HEIGHT = 64 * CARD_SCALE_SMALL
 const BASE_LARGE_CARD_HEIGHT = 64 * CARD_SCALE_LARGE
 const STACK_OVERLAP = BASE_SMALL_CARD_HEIGHT / 2
 const MAX_VISIBLE_STACK = 2
+
+const WIN_RESULTS = new Set<HandResult>(['Win', 'BlackJack_Win', 'Double_Win'])
+const LOSE_RESULTS = new Set<HandResult>(['Lose', 'Double_Lose'])
+const LOSS_MULTIPLIERS: Partial<Record<HandResult, number>> = {
+  Lose: 1,
+  Double_Lose: 2,
+}
+const WIN_MULTIPLIERS: Partial<Record<HandResult, number>> = {
+  Win: 2,
+  Double_Win: 4,
+}
+const PUSH_RESULTS = new Set<HandResult>(['Push', 'Double_Push'])
+const BLACKJACK_WIN_MULTIPLIER = 1 + Session.getInstance().rules.blackjackPayout
 
 const props = defineProps<{
   chairId: number
@@ -128,6 +174,7 @@ if (!chairView.value) throw new Error('Chair not found')
 const canAdjustBet = computed(() => !chairsStore.roundInProgress)
 
 const trimmedHands = computed(() => chairView.value?.hands.slice(0, MAX_HAND_SETS) ?? [])
+const trimmedResults = computed(() => chairView.value?.handResults.slice(0, MAX_HAND_SETS) ?? [])
 
 const normalizeHand = (hand: unknown): CardLike[] => {
   if (Array.isArray(hand)) {
@@ -148,9 +195,62 @@ const cardHandMaxWidth = computed(() => props.maxWidth)
 
 const currentBet = computed(() => chairView.value?.bet ?? 0)
 
-const handEntries = computed<HandEntry[]>(() =>
-  displayHands.value.map((hand, index) => ({ hand, index })),
-)
+const entryResultClass = (entry: HandEntry | null | undefined) => {
+  const hasCards = Boolean(entry?.hand.length)
+  const isWin = Boolean(entry?.resultVariant === 'win' && hasCards)
+  const isLoss = Boolean(entry?.resultVariant === 'loss' && hasCards)
+  const isPush = Boolean(entry?.resultVariant === 'push' && hasCards)
+  const highlight = Boolean(entry?.showResultHighlight)
+
+  return {
+    'hand__entry--win': isWin,
+    'hand__entry--lose': isLoss,
+    'hand__entry--push': isPush,
+    'hand__entry--win-active': Boolean(isWin && highlight),
+    'hand__entry--loss-active': Boolean(isLoss && highlight),
+    'hand__entry--push-active': Boolean(isPush && highlight),
+  }
+}
+
+const resolveResultMeta = (result: HandResult | null | undefined, betAmount: number): {
+  variant: ResultVariant | null
+  amount: number
+} => {
+  if (!result || betAmount <= 0) {
+    return { variant: null, amount: 0 }
+  }
+  if (LOSE_RESULTS.has(result)) {
+    const lossMultiplier = LOSS_MULTIPLIERS[result] ?? 1
+    return { variant: 'loss', amount: lossMultiplier * betAmount / 100 } // / 100 for cents
+  }
+  if (WIN_RESULTS.has(result)) {
+    if (result === 'BlackJack_Win') {
+      return { variant: 'win', amount: Math.floor(betAmount * BLACKJACK_WIN_MULTIPLIER) }
+    }
+    const winMultiplier = WIN_MULTIPLIERS[result] ?? 2
+    return { variant: 'win', amount: winMultiplier * betAmount / 100  } // / 100 for cents
+  }
+  if (PUSH_RESULTS.has(result)) {
+    return { variant: 'push', amount: 0 }
+  }
+  return { variant: null, amount: 0 }
+}
+
+const handEntries = computed<HandEntry[]>(() => {
+  const betAmount = currentBet.value ?? 0
+  return displayHands.value.map((hand, index) => {
+    const result = trimmedResults.value[index] ?? null
+    const { variant, amount } = resolveResultMeta(result, betAmount)
+    return {
+      hand,
+      index,
+      result,
+      resultVariant: variant,
+      resultAmount: amount,
+      showResultHighlight: Boolean(variant && hand.length > 0),
+    }
+  })
+})
 
 const lastResolvedActiveIndex = ref<number | null>(null)
 
@@ -267,6 +367,8 @@ const onBetChange = (value: number) => {
   display: inline-flex;
   align-items: flex-end;
   transition: transform 0.2s ease, opacity 0.2s ease;
+  position: relative;
+  overflow: visible;
 }
 
 .hand__entry:focus-visible {
@@ -323,6 +425,41 @@ const onBetChange = (value: number) => {
   pointer-events: auto;
 }
 
+.hand__entry-body {
+  position: relative;
+  border-radius: 18px;
+  padding: 0.35rem;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hand__entry--win .hand__entry-body {
+  border-color: rgba(74, 222, 128, 0.85);
+  box-shadow: 0 0 0 13px rgba(74, 222, 128, 0.35);
+}
+
+.hand__entry--lose .hand__entry-body {
+  border-color: rgba(248, 113, 113, 0.95);
+  box-shadow: 0 0 0 13px rgba(248, 113, 113, 0.4);
+}
+
+.hand__entry--push .hand__entry-body {
+  border-color: rgba(96, 165, 250, 0.9);
+  box-shadow: 0 0 0 13px rgba(96, 165, 250, 0.4);
+}
+
+.hand__entry--loss-active .hand__entry-body {
+  animation: hand-loss-outline 0.55s ease-in-out infinite;
+}
+
+.hand__entry--win-active .hand__entry-body {
+  animation: hand-win-outline 0.55s ease-in-out infinite;
+}
+
+.hand__entry--push-active .hand__entry-body {
+  animation: hand-push-outline 0.55s ease-in-out infinite;
+}
+
 .hand__entry--stack:hover,
 .hand__entry--stack:focus-visible {
   opacity: 1;
@@ -352,6 +489,33 @@ const onBetChange = (value: number) => {
 .chair__deactivate:focus-visible {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes hand-loss-outline {
+  0% {
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(248, 113, 113, 0);
+  }
+}
+
+@keyframes hand-win-outline {
+  0% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(74, 222, 128, 0);
+  }
+}
+
+@keyframes hand-push-outline {
+  0% {
+    box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(96, 165, 250, 0);
+  }
 }
 
 </style>

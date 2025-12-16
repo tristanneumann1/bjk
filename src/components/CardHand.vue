@@ -100,7 +100,7 @@ const handStyle = computed(() => ({
 
 const cardPositions = computed(() =>
   renderedCards.value.map((_, index) => ({
-    left: `${index * cardSpacing.value}px`,
+    left: `${index * cardSpacing.value - 8}px`,
     zIndex: index + 1,
   })),
 )
@@ -239,7 +239,7 @@ onScopeDispose(() => {
 }
 
 .card-hand__card--entering {
-  animation: card-hand-enter var(--card-enter-duration, 0.32s) ease;
+  animation: card-hand-enter 0.32s ease;
 }
 
 @keyframes card-hand-enter {

@@ -10,7 +10,7 @@ import {Chair} from "@/models/chair.ts";
 import {Dealer} from "@/models/dealer.ts";
 import {Table} from "@/models/table.ts";
 import {modelEvents} from "@/lib/mitt.ts";
-import {initializeHandlers} from "@/lib/handlers.ts"; //initialize modelEvents
+import {initializeHandlers} from "@/lib/handlers.ts";
 
 
 const rules = new Rules()
@@ -60,8 +60,27 @@ const secondHandBlackJack = [
   new Card( 'Hearts', 'J'),
 ]
 
+const tens = [
+  new Card('Spades', 'K'),
+  new Card('Diamonds', 'Q'),
+  new Card( 'Clubs', 'J'),
+  new Card( 'Hearts', '10'),
+  new Card('Spades', 'K'),
+  new Card('Diamonds', 'Q'),
+  new Card( 'Clubs', 'J'),
+  new Card( 'Hearts', '10'),
+  new Card('Spades', 'K'),
+  new Card('Diamonds', 'Q'),
+  new Card( 'Clubs', 'J'),
+  new Card( 'Hearts', '10'),
+  new Card('Spades', 'K'),
+  new Card('Diamonds', 'Q'),
+  new Card( 'Clubs', 'J'),
+  new Card( 'Hearts', '10'),
 
-// dealer.shoe.unshift(...manySplits)
+]
+
+dealer.shoe.unshift(...tens)
 dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 
@@ -74,8 +93,10 @@ Session.initialize({
 
 // document['_session'] = Session.getInstance()
 // document['_events'] = modelEvents
+// const eventsToLog = [HAND_OUTCOME_EVENT]
 modelEvents.on('*', (type, e) => {
-  console.log('type, value',type, e.value)
+  // if(type)
+  // console.log('[Event]',type, e.value)
 })
 const app = createApp(App)
 

@@ -15,12 +15,14 @@ import {ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
 
 export const NEW_CARD_EVENT = 'new_card'
 export const SPLIT_CARDS_EVENT = 'split_cards'
+export const HAND_OUTCOME_EVENT = 'hand_outcome'
 
 export class Hand {
   public isSplit = false;
   public isDoubled = false;
   public hasStood = false;
   public isSurrendered = false
+  public lastOutcome: HandResult | null = null
   constructor(public cards: Card[] = []) {
     ensureInstanceId(Hand, 'hand', this as Record<string | symbol, unknown>)
   }
@@ -89,25 +91,53 @@ export class Hand {
     this.isSplit = true
   }
 
+  private emitOutcomeChange(nextOutcome: HandResult, previous: HandResult | null) {
+    const instanceId = getModelInstanceId(this)
+    const payload: ModelPropertyChangeEvent = {
+      model: 'hand',
+      instanceId,
+      event: HAND_OUTCOME_EVENT,
+      value: nextOutcome,
+      previous,
+      target: this,
+    }
+
+    modelEvents.emit(modelChangeEvent, payload)
+    modelEvents.emit(modelCustomEvent('hand', HAND_OUTCOME_EVENT), payload)
+    if (instanceId) {
+      modelEvents.emit(modelInstanceCustomEvent('hand', HAND_OUTCOME_EVENT, instanceId), payload)
+    }
+  }
+
+  private setOutcome(result: HandResult) {
+    console.log('setting Outcome to, ', result)
+    if (this.lastOutcome === result) {
+      return
+    }
+    const previous = this.lastOutcome
+    this.lastOutcome = result
+    this.emitOutcomeChange(result, previous)
+  }
+
   beatsHand(other: Hand): HandResult {
+    let result: HandResult
     if (this.isBlackJack && !other.isBlackJack) {
-      return 'BlackJackWin';
+      result = 'BlackJack_Win'
+    } else if (!this.isBlackJack && other.isBlackJack) {
+      result = 'Lose'
+    } else if (this.isBusted) {
+      result = this.isDoubled ? 'Double_Lose' : 'Lose'
+    } else if (other.isBusted) {
+      result = this.isDoubled ? 'Double_Win' : 'Win'
+    } else if (this.bestValue > other.bestValue) {
+      result = this.isDoubled ? 'Double_Win' : 'Win'
+    } else if (this.bestValue < other.bestValue) {
+      result = this.isDoubled ? 'Double_Lose' : 'Lose'
+    } else {
+      result = this.isDoubled ? 'Double_Push' : 'Push'
     }
-    if (!this.isBlackJack && other.isBlackJack) {
-      return 'Lose';
-    }
-    if (this.isBusted) {
-      return 'Lose';
-    }
-    if (other.isBusted) {
-      return this.isDoubled ? 'Double' : 'Win';
-    }
-    if (this.bestValue > other.bestValue) {
-      return this.isDoubled ? 'Double' : 'Win';
-    }
-    if (this.bestValue < other.bestValue) {
-      return 'Lose';
-    }
-    return this.isDoubled ? 'Double_Push' : 'Push';
+
+    this.setOutcome(result)
+    return result
   }
 }

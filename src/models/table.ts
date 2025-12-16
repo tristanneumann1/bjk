@@ -163,7 +163,6 @@ export class Table {
       this.view()
     }
     if (!this.activeChair) {
-      console.log('paying out after action')
       this.payout()
     }
   }
@@ -186,7 +185,6 @@ export class Table {
         Session.getInstance().player.addMoney(payout)
       }
     }
-    console.log('currentBalance', Session.getInstance().player.balance)
     this.resetAllChairs()
     this.chairTurnIndex = 0
   }

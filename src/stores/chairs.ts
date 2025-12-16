@@ -11,12 +11,13 @@ import {
   modelPropertyEvent,
   type ModelPropertyChangeEvent,
 } from '@/lib/mitt.ts'
-import { Hand, NEW_CARD_EVENT, SPLIT_CARDS_EVENT } from '@/models/hand.ts'
+import { Hand, HAND_OUTCOME_EVENT, NEW_CARD_EVENT, SPLIT_CARDS_EVENT } from '@/models/hand.ts'
 import { CHAIR_EVENT } from '@/models/table.ts'
 
 type ChairView = {
   hands: Hand['cards'][]
   modelHands: Hand['cards'][]
+  handResults: (Hand['lastOutcome'])[]
   activeHandIndex: number
   bet: number
   displayActiveHandIndex: number | null
@@ -33,6 +34,14 @@ export const useChairsStore = defineStore('chairs', () => {
   const activeChairId = ref<number | null>(null)
 
   const chairs = reactive<Record<number, ChairView>>({})
+  const activeChair = computed(() => {
+    const chairId = activeChairId.value
+    if (typeof chairId !== 'number') {
+      return null
+    }
+    return chairs[chairId]
+  })
+
   const chairRegistry = new Map<number, ChairRegistryEntry>()
   const cleanupFns: Array<() => void> = []
 
@@ -47,6 +56,9 @@ export const useChairsStore = defineStore('chairs', () => {
 
   const extractChairHands = (chair: Chair): Hand['cards'][] =>
     chair.hands.map(hand => [...hand.cards])
+
+  const extractChairHandResults = (chair: Chair): (Hand['lastOutcome'])[] =>
+    chair.hands.map(hand => hand.lastOutcome ?? null)
 
   const totalCards = (hands: Hand['cards'][]): number =>
     hands.reduce((sum, cards) => sum + cards.length, 0)
@@ -78,6 +90,11 @@ export const useChairsStore = defineStore('chairs', () => {
       return
     }
     const nextHands = extractChairHands(entry.chair)
+    // console.log('index', index)
+    // console.log('view', view)
+    console.log('entry.chair', entry.chair, entry.chair.hands[0]?.lastOutcome)
+    const nextResults = extractChairHandResults(entry.chair)
+    console.log('nextResults', nextResults)
     view.modelHands = cloneHandCards(nextHands)
 
     const nextTotal = totalCards(nextHands)
@@ -91,12 +108,14 @@ export const useChairsStore = defineStore('chairs', () => {
     if (nextHands.length === 0) {
       view.displayActiveHandIndex = null
       view.hands = []
+      view.handResults = []
       return
     }
 
     const clampedActiveIndex = Math.min(Math.max(nextActiveIndex, 0), nextHands.length - 1)
     view.displayActiveHandIndex = clampedActiveIndex
     view.hands = cloneHandCards(nextHands)
+    view.handResults = [...nextResults]
   }
 
   const detachHandListener = (entry: ChairRegistryEntry, handId: string) => {
@@ -125,19 +144,23 @@ export const useChairsStore = defineStore('chairs', () => {
       return
     }
 
-    const handleHandMutation = () => {
+    const handleHandMutation = (_event) => {
+      console.log('event', _event)
       updateChairHands(index)
     }
 
     const newCardEvent = modelInstanceCustomEvent('hand', NEW_CARD_EVENT, handInstanceId)
     const splitCardsEvent = modelInstanceCustomEvent('hand', SPLIT_CARDS_EVENT, handInstanceId)
+    const outcomeEvent = modelInstanceCustomEvent('hand', HAND_OUTCOME_EVENT, handInstanceId)
 
     modelEvents.on(newCardEvent, handleHandMutation)
     modelEvents.on(splitCardsEvent, handleHandMutation)
+    modelEvents.on(outcomeEvent, handleHandMutation)
 
     entry.handListeners.set(handInstanceId, () => {
       modelEvents.off(newCardEvent, handleHandMutation)
       modelEvents.off(splitCardsEvent, handleHandMutation)
+      modelEvents.off(outcomeEvent, handleHandMutation)
     })
   }
 
@@ -200,10 +223,12 @@ export const useChairsStore = defineStore('chairs', () => {
     }
 
     const initialHands = extractChairHands(chair)
+    const initialResults = extractChairHandResults(chair)
 
     chairs[index] = {
       hands: initialHands,
       modelHands: cloneHandCards(initialHands),
+      handResults: [...initialResults],
       activeHandIndex: chair.activeHandIndex,
       bet: chair.bet ?? 0,
       displayActiveHandIndex: initialHands.length > 0
@@ -352,6 +377,7 @@ export const useChairsStore = defineStore('chairs', () => {
 
   return {
     activeChairId,
+    activeChair,
     getChairView,
     roundInProgress,
     sit,

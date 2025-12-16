@@ -11,13 +11,14 @@ import {
   type ModelPropertyChangeEvent
 } from "@/lib/mitt";
 
-export type HandResult = 'Win' | 'Lose' | 'Push' | 'BlackJackWin' | 'Double' | 'Double_Push';
+export type HandResult = 'Win' | 'Lose' | 'Double_Lose' | 'Push' | 'BlackJack_Win' | 'Double_Win' | 'Double_Push';
 const HAND_VIEW_COLORS: { [result in HandResult]: ColorName | ModifierName} = {
   'Win': 'blue',          // Green
   'Lose': 'red',         // Red
+  'Double_Lose': 'red',         // Red
   'Push': 'white',         // Yellow
-  'BlackJackWin': 'bgYellow', // Magenta
-  'Double': 'blue',       // Blue
+  'BlackJack_Win': 'bgYellow', // Magenta
+  'Double_Win': 'blue',       // Blue
   'Double_Push': 'white'   // Cyan
 }
 
@@ -72,11 +73,12 @@ export class Chair {
         return this.bet * 2;
       case 'Push':
         return this.bet;
-      case 'BlackJackWin':
+      case 'BlackJack_Win':
         return Math.floor(this.bet * (1 + Session.getInstance().rules.blackjackPayout));
       case 'Lose':
+      case 'Double_Lose':
         return 0
-      case "Double":
+      case "Double_Win":
         return this.bet * 4;
     }
   }
@@ -234,7 +236,7 @@ export class Chair {
       const color = HAND_VIEW_COLORS[result]
       handString = chalk[color](handString)
     }
-    if (hand.isDoubled || result == 'BlackJackWin') {
+    if (hand.isDoubled || result == 'BlackJack_Win') {
       handString = chalk.underline(handString)
     }
 
