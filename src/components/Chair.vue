@@ -44,6 +44,13 @@
               :active="entry.showResultHighlight"
               :variant="entry.resultVariant"
             />
+            <div
+              v-if="entry.resultVariant === 'surrender' && entry.showResultHighlight"
+              class="hand__surrender-flag"
+              aria-hidden="true"
+            >
+              <img src="/flag-wave.gif" alt="Surrender flag" />
+            </div>
           </div>
         </button>
       </div>
@@ -76,6 +83,13 @@
               :active="entry.showResultHighlight"
               :variant="entry.resultVariant"
             />
+            <div
+              v-if="entry.resultVariant === 'surrender' && entry.showResultHighlight"
+              class="hand__surrender-flag"
+              aria-hidden="true"
+            >
+              <img src="/flag-wave.gif" alt="Surrender flag" />
+            </div>
           </div>
         </button>
       </div>
@@ -100,6 +114,13 @@
               :active="activeEntry.showResultHighlight"
               :variant="activeEntry.resultVariant"
             />
+            <div
+              v-if="activeEntry.resultVariant === 'surrender' && activeEntry.showResultHighlight"
+              class="hand__surrender-flag"
+              aria-hidden="true"
+            >
+              <img src="/flag-wave.gif" alt="Surrender flag" />
+            </div>
           </div>
         </button>
       </div>
@@ -145,6 +166,7 @@ const STACK_OVERLAP = BASE_SMALL_CARD_HEIGHT / 2
 const MAX_VISIBLE_STACK = 2
 
 const WIN_RESULTS = new Set<HandResult>(['Win', 'BlackJack_Win', 'Double_Win'])
+const SURRENDER_RESULTS = new Set<HandResult>(['Surrendered'])
 const LOSE_RESULTS = new Set<HandResult>(['Lose', 'Double_Lose'])
 const LOSS_MULTIPLIERS: Partial<Record<HandResult, number>> = {
   Lose: 1,
@@ -199,35 +221,51 @@ const entryResultClass = (entry: HandEntry | null | undefined) => {
   const isWin = Boolean(entry?.resultVariant === 'win' && hasCards)
   const isLoss = Boolean(entry?.resultVariant === 'loss' && hasCards)
   const isPush = Boolean(entry?.resultVariant === 'push' && hasCards)
+  const isSurrender = Boolean(entry?.resultVariant === 'surrender' && hasCards)
   const highlight = Boolean(entry?.showResultHighlight)
 
   return {
     'hand__entry--win': isWin,
     'hand__entry--lose': isLoss,
     'hand__entry--push': isPush,
+    'hand__entry--surrender': isSurrender,
     'hand__entry--win-active': Boolean(isWin && highlight),
     'hand__entry--loss-active': Boolean(isLoss && highlight),
     'hand__entry--push-active': Boolean(isPush && highlight),
+    'hand__entry--surrender-active': Boolean(isSurrender && highlight),
   }
 }
 
-const resolveResultMeta = (result: HandResult | null | undefined, betAmount: number): {
+const resolveResultMeta = (
+  result: HandResult | null | undefined,
+  betAmount: number,
+): {
   variant: ResultVariant | null
   amount: number
 } => {
-  if (!result || betAmount <= 0) {
+  const normalizedBet = betAmount / 100
+  if (normalizedBet <= 0) {
     return { variant: null, amount: 0 }
+  }
+
+  if (!result) {
+    return { variant: null, amount: 0 }
+  }
+
+
+  if (SURRENDER_RESULTS.has(result)) {
+    return { variant: 'surrender', amount: normalizedBet / 2 }
   }
   if (LOSE_RESULTS.has(result)) {
     const lossMultiplier = LOSS_MULTIPLIERS[result] ?? 1
-    return { variant: 'loss', amount: lossMultiplier * betAmount / 100 } // / 100 for cents
+    return { variant: 'loss', amount: lossMultiplier * normalizedBet }
   }
   if (WIN_RESULTS.has(result)) {
     if (result === 'BlackJack_Win') {
-      return { variant: 'win', amount: Math.floor(betAmount * BLACKJACK_WIN_MULTIPLIER) }
+      return { variant: 'win', amount: Math.floor(normalizedBet * BLACKJACK_WIN_MULTIPLIER) }
     }
     const winMultiplier = WIN_MULTIPLIERS[result] ?? 2
-    return { variant: 'win', amount: winMultiplier * betAmount / 100  } // / 100 for cents
+    return { variant: 'win', amount: winMultiplier * normalizedBet }
   }
   if (PUSH_RESULTS.has(result)) {
     return { variant: 'push', amount: 0 }
@@ -237,16 +275,18 @@ const resolveResultMeta = (result: HandResult | null | undefined, betAmount: num
 
 const handEntries = computed<HandEntry[]>(() => {
   const betAmount = currentBet.value ?? 0
+
   return displayHands.value.map((hand, index) => {
     const result = trimmedResults.value[index] ?? null
     const { variant, amount } = resolveResultMeta(result, betAmount)
+    const hasCards = hand.length > 0
     return {
       hand,
       index,
       result,
       resultVariant: variant,
       resultAmount: amount,
-      showResultHighlight: Boolean(variant && hand.length > 0),
+      showResultHighlight: Boolean((variant) && hasCards),
     }
   })
 })
@@ -464,6 +504,22 @@ const onBetChange = (value: number) => {
   opacity: 1;
 }
 
+.hand__surrender-flag {
+  z-index: 3;
+  position: absolute;
+  top: -14px;
+  right: -8px;
+  width: 56px;
+  pointer-events: none;
+  animation: hand-surrender-flag 1.1s ease forwards;
+}
+
+.hand__surrender-flag img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* Small deactivate button shown between rounds; fully floated, no layout impact */
 .chair__deactivate {
   position: absolute;
@@ -514,6 +570,21 @@ const onBetChange = (value: number) => {
   }
   100% {
     box-shadow: 0 0 0 14px rgba(96, 165, 250, 0);
+  }
+}
+
+@keyframes hand-surrender-flag {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.9);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1);
   }
 }
 

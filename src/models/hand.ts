@@ -110,7 +110,6 @@ export class Hand {
   }
 
   private setOutcome(result: HandResult) {
-    console.log('setting Outcome to, ', result)
     if (this.lastOutcome === result) {
       return
     }
@@ -121,7 +120,9 @@ export class Hand {
 
   beatsHand(other: Hand): HandResult {
     let result: HandResult
-    if (this.isBlackJack && !other.isBlackJack) {
+    if (this.isSurrendered) {
+      result = 'Surrendered'
+    } else if (this.isBlackJack && !other.isBlackJack) {
       result = 'BlackJack_Win'
     } else if (!this.isBlackJack && other.isBlackJack) {
       result = 'Lose'

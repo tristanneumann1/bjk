@@ -90,11 +90,7 @@ export const useChairsStore = defineStore('chairs', () => {
       return
     }
     const nextHands = extractChairHands(entry.chair)
-    // console.log('index', index)
-    // console.log('view', view)
-    console.log('entry.chair', entry.chair, entry.chair.hands[0]?.lastOutcome)
     const nextResults = extractChairHandResults(entry.chair)
-    console.log('nextResults', nextResults)
     view.modelHands = cloneHandCards(nextHands)
 
     const nextTotal = totalCards(nextHands)

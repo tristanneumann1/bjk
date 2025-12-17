@@ -1,1 +1,1 @@
-export type ResultVariant = 'win' | 'loss' | 'push'
+export type ResultVariant = 'win' | 'loss' | 'push' | 'surrender'

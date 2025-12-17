@@ -76,11 +76,10 @@ const tens = [
   new Card('Spades', 'K'),
   new Card('Diamonds', 'Q'),
   new Card( 'Clubs', 'J'),
-  new Card( 'Hearts', '10'),
-
+  new Card( 'Hearts', '10')
 ]
 
-dealer.shoe.unshift(...tens)
+// dealer.shoe.unshift(...t`ens)
 dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 
