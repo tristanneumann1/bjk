@@ -253,6 +253,7 @@ const entryResultClass = (entry: HandEntry | null | undefined) => {
     'hand__entry--push': isPush,
     'hand__entry--surrender': isSurrender,
     'hand__entry--bj-win': isBlackJackWin,
+    'hand__entry--bj-win-active': Boolean(isBlackJackWin && highlight),
     'hand__entry--win-active': Boolean(isWin && highlight),
     'hand__entry--loss-active': Boolean(isLoss && highlight),
     'hand__entry--push-active': Boolean(isPush && highlight),
@@ -635,15 +636,12 @@ const onBetChange = (value: number) => {
 @keyframes hand-bj-celebration {
   0% {
     opacity: 0;
-    transform: translate(-50%, -90%) scale(0.9);
   }
   25% {
     opacity: 1;
-    transform: translate(-50%, -100%) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -145%) scale(1.1);
   }
 }
 
