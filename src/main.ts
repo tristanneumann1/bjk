@@ -28,6 +28,25 @@ const playerSplitIntoBlackJack = [
   new Card( 'Hearts', 'A')
 ]
 
+const nonStopBlackJack = [
+  new Card('Spades', '2'),
+  new Card( 'Hearts', '3'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+  new Card('Spades', '6'),
+  new Card( 'Hearts', '5'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+  new Card('Spades', '2'),
+  new Card( 'Hearts', '3'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+  new Card('Spades', '6'),
+  new Card( 'Hearts', '5'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+]
+
 const doubleWith2Players = [
   new Card('Spades', '2'),
   new Card( 'Hearts', '3'),
@@ -79,7 +98,7 @@ const tens = [
   new Card( 'Hearts', '10')
 ]
 
-// dealer.shoe.unshift(...t`ens)
+dealer.shoe.unshift(...nonStopBlackJack)
 dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 

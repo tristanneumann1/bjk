@@ -51,6 +51,13 @@
             >
               <img src="/flag-wave.gif" alt="Surrender flag" />
             </div>
+            <div
+              v-if="entry.resultVariant === 'blackjack_win' && entry.showResultHighlight"
+              class="hand__bj-win"
+              aria-hidden="true"
+            >
+              <img src="/bjWin.gif" alt="Blackjack win animation" />
+            </div>
           </div>
         </button>
       </div>
@@ -90,6 +97,13 @@
             >
               <img src="/flag-wave.gif" alt="Surrender flag" />
             </div>
+            <div
+              v-if="entry.resultVariant === 'blackjack_win' && entry.showResultHighlight"
+              class="hand__bj-win"
+              aria-hidden="true"
+            >
+              <img src="/bjWin.gif" alt="Blackjack win animation" />
+            </div>
           </div>
         </button>
       </div>
@@ -120,6 +134,13 @@
               aria-hidden="true"
             >
               <img src="/flag-wave.gif" alt="Surrender flag" />
+            </div>
+            <div
+              v-if="activeEntry.resultVariant === 'blackjack_win' && activeEntry.showResultHighlight"
+              class="hand__bj-win"
+              aria-hidden="true"
+            >
+              <img src="/bjWin.gif" alt="Blackjack win animation" />
             </div>
           </div>
         </button>
@@ -165,8 +186,9 @@ const BASE_LARGE_CARD_HEIGHT = 64 * CARD_SCALE_LARGE
 const STACK_OVERLAP = BASE_SMALL_CARD_HEIGHT / 2
 const MAX_VISIBLE_STACK = 2
 
-const WIN_RESULTS = new Set<HandResult>(['Win', 'BlackJack_Win', 'Double_Win'])
+const WIN_RESULTS = new Set<HandResult>(['Win', 'Double_Win'])
 const SURRENDER_RESULTS = new Set<HandResult>(['Surrendered'])
+const BLACKJACK_WIN_RESULTS = new Set<HandResult>(['BlackJack_Win'])
 const LOSE_RESULTS = new Set<HandResult>(['Lose', 'Double_Lose'])
 const LOSS_MULTIPLIERS: Partial<Record<HandResult, number>> = {
   Lose: 1,
@@ -222,6 +244,7 @@ const entryResultClass = (entry: HandEntry | null | undefined) => {
   const isLoss = Boolean(entry?.resultVariant === 'loss' && hasCards)
   const isPush = Boolean(entry?.resultVariant === 'push' && hasCards)
   const isSurrender = Boolean(entry?.resultVariant === 'surrender' && hasCards)
+  const isBlackJackWin = Boolean(entry?.resultVariant === 'blackjack_win' && hasCards)
   const highlight = Boolean(entry?.showResultHighlight)
 
   return {
@@ -229,6 +252,7 @@ const entryResultClass = (entry: HandEntry | null | undefined) => {
     'hand__entry--lose': isLoss,
     'hand__entry--push': isPush,
     'hand__entry--surrender': isSurrender,
+    'hand__entry--bj-win': isBlackJackWin,
     'hand__entry--win-active': Boolean(isWin && highlight),
     'hand__entry--loss-active': Boolean(isLoss && highlight),
     'hand__entry--push-active': Boolean(isPush && highlight),
@@ -261,14 +285,14 @@ const resolveResultMeta = (
     return { variant: 'loss', amount: lossMultiplier * normalizedBet }
   }
   if (WIN_RESULTS.has(result)) {
-    if (result === 'BlackJack_Win') {
-      return { variant: 'win', amount: Math.floor(normalizedBet * BLACKJACK_WIN_MULTIPLIER) }
-    }
     const winMultiplier = WIN_MULTIPLIERS[result] ?? 2
     return { variant: 'win', amount: winMultiplier * normalizedBet }
   }
   if (PUSH_RESULTS.has(result)) {
     return { variant: 'push', amount: 0 }
+  }
+  if (result === 'BlackJack_Win') {
+    return { variant: 'blackjack_win', amount: Math.floor(normalizedBet * BLACKJACK_WIN_MULTIPLIER) }
   }
   return { variant: null, amount: 0 }
 }
@@ -472,11 +496,13 @@ const onBetChange = (value: number) => {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.hand__entry--bj-win .hand__entry-body,
 .hand__entry--win .hand__entry-body {
   border-color: rgba(74, 222, 128, 0.85);
   box-shadow: 0 0 0 13px rgba(74, 222, 128, 0.35);
 }
 
+.hand__entry--surrender .hand__entry-body,
 .hand__entry--lose .hand__entry-body {
   border-color: rgba(248, 113, 113, 0.95);
   box-shadow: 0 0 0 13px rgba(248, 113, 113, 0.4);
@@ -487,10 +513,12 @@ const onBetChange = (value: number) => {
   box-shadow: 0 0 0 13px rgba(96, 165, 250, 0.4);
 }
 
+.hand__entry--surrender-active .hand__entry-body,
 .hand__entry--loss-active .hand__entry-body {
   animation: hand-loss-outline 0.55s ease-in-out infinite;
 }
 
+.hand__entry--bj-win-active .hand__entry-body,
 .hand__entry--win-active .hand__entry-body {
   animation: hand-win-outline 0.55s ease-in-out infinite;
 }
@@ -515,6 +543,22 @@ const onBetChange = (value: number) => {
 }
 
 .hand__surrender-flag img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hand__bj-win {
+  z-index: 3;
+  position: absolute;
+  top: -14px;
+  right: 20px;
+  width: 82px;
+  pointer-events: none;
+  animation: hand-bj-celebration 1.15s ease forwards;
+}
+
+.hand__bj-win img {
   width: 100%;
   height: auto;
   display: block;
@@ -588,4 +632,20 @@ const onBetChange = (value: number) => {
   }
 }
 
+@keyframes hand-bj-celebration {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -90%) scale(0.9);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -145%) scale(1.1);
+  }
+}
+
 </style>
+`
