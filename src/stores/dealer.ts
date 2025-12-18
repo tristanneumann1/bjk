@@ -144,8 +144,7 @@ export const useDealerStore = defineStore('dealer', () => {
       if (shouldHide && !holeCardHidden.value) {
         holeCardHidden.value = true
         const newCard = e.value as Card | undefined
-        const delta = getCountDelta(newCard)
-        pendingHoleCardDelta.value = delta
+        pendingHoleCardDelta.value = getCountDelta(newCard)
       } else if (!shouldHide) {
         revealHoleCard()
       }

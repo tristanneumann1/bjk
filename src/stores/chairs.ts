@@ -163,8 +163,7 @@ export const useChairsStore = defineStore('chairs', () => {
       return
     }
 
-    const clampedActiveIndex = Math.min(Math.max(nextActiveIndex, 0), nextHands.length - 1)
-    view.displayActiveHandIndex = clampedActiveIndex
+    view.displayActiveHandIndex = Math.min(Math.max(nextActiveIndex, 0), nextHands.length - 1)
     view.hands = cloneHandCards(nextHands)
     view.handResults = [...nextResults]
   }
