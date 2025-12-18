@@ -121,7 +121,7 @@ const spritePosition = computed(() => {
   return { row, column }
 })
 
-const cardsTilemapUrl = new URL('../../kenney_playing-cards-pack/Tilesheet/cardsLarge_tilemap.png', import.meta.url).href
+const cardsTilemapUrl = new URL('../../public/kenney_playing-cards-pack/Tilesheet/cardsLarge_tilemap.png', import.meta.url).href
 
 const tileStyle = computed(() => {
   const { row, column } = spritePosition.value
