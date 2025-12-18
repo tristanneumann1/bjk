@@ -15,27 +15,44 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import type { ResultVariant } from '@/types/results'
+import type {HandResult} from "@/models/chair.ts";
 
-type Direction = 'up' | 'down'
+type Direction = 'up' | 'down' | 'push'
 
-const props = defineProps<{ amount: number; active: boolean; durationMs?: number; variant?: ResultVariant; direction?: Direction }>()
+const props = defineProps<{ amount: number; active: boolean; result: HandResult; durationMs?: number; direction?: Direction; }>()
 
 const displayValue = ref(0)
 const visible = ref(false)
 let rafId: number | null = null
 
-const resolvedVariant = computed<ResultVariant>(() => props.variant ?? 'loss')
-const resolvedDirection = computed<Direction>(() => props.direction ?? (resolvedVariant.value === 'win' ? 'up' : 'down'))
+const resolveDirection = (result: HandResult): Direction => {
+  switch (result) {
+    case 'Surrendered':
+    case 'Lose':
+    case 'Double_Lose':
+      return 'down'
+    case 'Win':
+    case 'BlackJack_Win':
+    case 'Double_Win':
+      return 'up'
+    case 'Push':
+    case 'Double_Push':
+      return 'push'
+    default:
+      return 'push'
+  }
+}
+
+const resolvedDirection = computed<Direction>(() => props.direction ?? (resolveDirection(props.result)))
 const duration = computed(() => props.durationMs ?? 900)
 
 const prefix = computed(() => {
-  if (resolvedVariant.value === 'win') return '+'
-  if (resolvedVariant.value === 'loss') return '-'
+  if (resolvedDirection.value === 'up') return '+'
+  if (resolvedDirection.value === 'down') return '-'
   return '±'
 })
 
-const variantClass = computed(() => `result-counter--${resolvedVariant.value}`)
+const variantClass = computed(() => `result-counter--${resolvedDirection.value}`)
 
 const cancelAnimation = () => {
   if (rafId !== null) {
@@ -140,13 +157,13 @@ const formattedValue = computed(() => displayValue.value.toLocaleString())
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
 }
 
-.result-counter--loss {
+.result-counter--down {
   background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(248, 113, 113, 0.7);
   color: #fef2f2;
 }
 
-.result-counter--win {
+.result-counter--up {
   background: rgba(22, 101, 52, 0.9);
   border: 1px solid rgba(187, 247, 208, 0.8);
   color: #ecfccb;

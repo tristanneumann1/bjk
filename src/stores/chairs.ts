@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, onScopeDispose, reactive, ref } from 'vue'
 import { Session } from '@/models/session.ts'
-import { type Chair, NEW_HAND_EVENT } from '@/models/chair.ts'
+import { type Chair, type HandResult, NEW_HAND_EVENT } from '@/models/chair.ts'
 import { getModelInstanceId } from '@/lib/modelEvents.ts'
 import {
   modelCustomEvent,
@@ -14,10 +14,15 @@ import {
 import { Hand, HAND_OUTCOME_EVENT, NEW_CARD_EVENT, SPLIT_CARDS_EVENT } from '@/models/hand.ts'
 import { CHAIR_EVENT } from '@/models/table.ts'
 
+type HandOutcomeView = {
+  result: Hand['lastOutcome']
+  amount: number
+}
+
 type ChairView = {
   hands: Hand['cards'][]
   modelHands: Hand['cards'][]
-  handResults: (Hand['lastOutcome'])[]
+  handResults: HandOutcomeView[]
   activeHandIndex: number
   bet: number
   displayActiveHandIndex: number | null
@@ -57,8 +62,57 @@ export const useChairsStore = defineStore('chairs', () => {
   const extractChairHands = (chair: Chair): Hand['cards'][] =>
     chair.hands.map(hand => [...hand.cards])
 
-  const extractChairHandResults = (chair: Chair): (Hand['lastOutcome'])[] =>
-    chair.hands.map(hand => hand.lastOutcome ?? null)
+  const WIN_RESULTS = new Set<HandResult>(['Win', 'Double_Win'])
+  const LOSE_RESULTS = new Set<HandResult>(['Lose', 'Double_Lose'])
+  const SURRENDER_RESULTS = new Set<HandResult>(['Surrendered'])
+  const PUSH_RESULTS = new Set<HandResult>(['Push', 'Double_Push'])
+  const LOSS_MULTIPLIERS: Partial<Record<HandResult, number>> = {
+    Lose: 1,
+    Double_Lose: 2,
+  }
+  const WIN_MULTIPLIERS: Partial<Record<HandResult, number>> = {
+    Win: 2,
+    Double_Win: 4,
+  }
+  const BLACKJACK_WIN_MULTIPLIER = 1 + Session.getInstance().rules.blackjackPayout
+
+  const resolveOutcomeAmount = (result: HandResult | null, bet: number): number => {
+    if (!result) {
+      return 0
+    }
+    const normalizedBet = bet / 100
+    if (normalizedBet <= 0) {
+      return 0
+    }
+
+    if (SURRENDER_RESULTS.has(result)) {
+      return normalizedBet / 2
+    }
+    if (LOSE_RESULTS.has(result)) {
+      const lossMultiplier = LOSS_MULTIPLIERS[result] ?? 1
+      return lossMultiplier * normalizedBet
+    }
+    if (WIN_RESULTS.has(result)) {
+      const winMultiplier = WIN_MULTIPLIERS[result] ?? 2
+      return winMultiplier * normalizedBet
+    }
+    if (PUSH_RESULTS.has(result)) {
+      return 0
+    }
+    if (result === 'BlackJack_Win') {
+      return Math.floor(normalizedBet * BLACKJACK_WIN_MULTIPLIER)
+    }
+    return 0
+  }
+
+  const extractChairHandResults = (chair: Chair): HandOutcomeView[] =>
+    chair.hands.map(hand => {
+      const result = hand.lastOutcome ?? null
+      return {
+        result,
+        amount: resolveOutcomeAmount(result, chair.bet ?? 0),
+      }
+    })
 
   const totalCards = (hands: Hand['cards'][]): number =>
     hands.reduce((sum, cards) => sum + cards.length, 0)

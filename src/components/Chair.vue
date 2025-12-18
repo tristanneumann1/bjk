@@ -39,20 +39,20 @@
               :maxWidth="cardHandMaxWidth"
             />
             <ResultCounter
-              v-if="entry.resultVariant && entry.resultAmount > 0"
+              v-if="entry.result && entry.resultAmount > 0"
               :amount="entry.resultAmount"
               :active="entry.showResultHighlight"
-              :variant="entry.resultVariant"
+              :result="entry.result"
             />
             <div
-              v-if="entry.resultVariant === 'surrender' && entry.showResultHighlight"
+              v-if="entry?.result && SURRENDER_RESULTS.has(entry.result) && entry.showResultHighlight"
               class="hand__surrender-flag"
               aria-hidden="true"
             >
               <img src="/flag-wave.gif" alt="Surrender flag" />
             </div>
             <div
-              v-if="entry.resultVariant === 'blackjack_win' && entry.showResultHighlight"
+              v-if="entry?.result && BLACKJACK_WIN_RESULTS.has(entry.result) && entry.showResultHighlight"
               class="hand__bj-win"
               aria-hidden="true"
             >
@@ -85,20 +85,20 @@
               :maxWidth="cardHandMaxWidth"
             />
             <ResultCounter
-              v-if="entry.resultVariant && entry.resultAmount > 0"
+              v-if="entry.result && entry.resultAmount > 0"
               :amount="entry.resultAmount"
               :active="entry.showResultHighlight"
-              :variant="entry.resultVariant"
+              :result="entry.result"
             />
             <div
-              v-if="entry.resultVariant === 'surrender' && entry.showResultHighlight"
+              v-if="entry?.result && SURRENDER_RESULTS.has(entry.result) && entry.showResultHighlight"
               class="hand__surrender-flag"
               aria-hidden="true"
             >
               <img src="/flag-wave.gif" alt="Surrender flag" />
             </div>
             <div
-              v-if="entry.resultVariant === 'blackjack_win' && entry.showResultHighlight"
+              v-if="entry?.result && BLACKJACK_WIN_RESULTS.has(entry.result) && entry.showResultHighlight"
               class="hand__bj-win"
               aria-hidden="true"
             >
@@ -123,20 +123,20 @@
               :maxWidth="cardHandMaxWidth"
             />
             <ResultCounter
-              v-if="activeEntry.resultVariant && activeEntry.resultAmount > 0"
+              v-if="activeEntry.result && activeEntry.resultAmount > 0"
               :amount="activeEntry.resultAmount"
               :active="activeEntry.showResultHighlight"
-              :variant="activeEntry.resultVariant"
+              :result="activeEntry.result"
             />
             <div
-              v-if="activeEntry.resultVariant === 'surrender' && activeEntry.showResultHighlight"
+              v-if="activeEntry?.result && SURRENDER_RESULTS.has(activeEntry.result) && activeEntry.showResultHighlight"
               class="hand__surrender-flag"
               aria-hidden="true"
             >
               <img src="/flag-wave.gif" alt="Surrender flag" />
             </div>
             <div
-              v-if="activeEntry.resultVariant === 'blackjack_win' && activeEntry.showResultHighlight"
+              v-if="activeEntry?.result && BLACKJACK_WIN_RESULTS.has(activeEntry.result) && activeEntry.showResultHighlight"
               class="hand__bj-win"
               aria-hidden="true"
             >
@@ -162,8 +162,6 @@ import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
 import type { HandResult } from '@/models/chair'
-import { Session } from '@/models/session.ts'
-import type { ResultVariant } from '@/types/results'
 
 type CardLike = {
   value?: string | number
@@ -175,7 +173,6 @@ type HandEntry = {
   hand: CardLike[]
   index: number
   result: HandResult | null | undefined
-  resultVariant: ResultVariant | null
   resultAmount: number
   showResultHighlight: boolean
 }
@@ -190,16 +187,7 @@ const WIN_RESULTS = new Set<HandResult>(['Win', 'Double_Win'])
 const SURRENDER_RESULTS = new Set<HandResult>(['Surrendered'])
 const BLACKJACK_WIN_RESULTS = new Set<HandResult>(['BlackJack_Win'])
 const LOSE_RESULTS = new Set<HandResult>(['Lose', 'Double_Lose'])
-const LOSS_MULTIPLIERS: Partial<Record<HandResult, number>> = {
-  Lose: 1,
-  Double_Lose: 2,
-}
-const WIN_MULTIPLIERS: Partial<Record<HandResult, number>> = {
-  Win: 2,
-  Double_Win: 4,
-}
 const PUSH_RESULTS = new Set<HandResult>(['Push', 'Double_Push'])
-const BLACKJACK_WIN_MULTIPLIER = 1 + Session.getInstance().rules.blackjackPayout
 
 const props = defineProps<{
   chairId: number
@@ -240,11 +228,11 @@ const currentBet = computed(() => chairView.value?.bet ?? 0)
 
 const entryResultClass = (entry: HandEntry | null | undefined) => {
   const hasCards = Boolean(entry?.hand.length)
-  const isWin = Boolean(entry?.resultVariant === 'win' && hasCards)
-  const isLoss = Boolean(entry?.resultVariant === 'loss' && hasCards)
-  const isPush = Boolean(entry?.resultVariant === 'push' && hasCards)
-  const isSurrender = Boolean(entry?.resultVariant === 'surrender' && hasCards)
-  const isBlackJackWin = Boolean(entry?.resultVariant === 'blackjack_win' && hasCards)
+  const isWin = Boolean(entry?.result && WIN_RESULTS.has(entry.result) && hasCards)
+  const isLoss = Boolean(entry?.result && LOSE_RESULTS.has(entry.result) && hasCards)
+  const isPush = Boolean(entry?.result && PUSH_RESULTS.has(entry.result) && hasCards)
+  const isSurrender = Boolean(entry?.result && SURRENDER_RESULTS.has(entry.result) && hasCards)
+  const isBlackJackWin = Boolean(entry?.result && BLACKJACK_WIN_RESULTS.has(entry.result) && hasCards)
   const highlight = Boolean(entry?.showResultHighlight)
 
   return {
@@ -261,60 +249,21 @@ const entryResultClass = (entry: HandEntry | null | undefined) => {
   }
 }
 
-const resolveResultMeta = (
-  result: HandResult | null | undefined,
-  betAmount: number,
-): {
-  variant: ResultVariant | null
-  amount: number
-} => {
-  const normalizedBet = betAmount / 100
-  if (normalizedBet <= 0) {
-    return { variant: null, amount: 0 }
-  }
-
-  if (!result) {
-    return { variant: null, amount: 0 }
-  }
-
-
-  if (SURRENDER_RESULTS.has(result)) {
-    return { variant: 'surrender', amount: normalizedBet / 2 }
-  }
-  if (LOSE_RESULTS.has(result)) {
-    const lossMultiplier = LOSS_MULTIPLIERS[result] ?? 1
-    return { variant: 'loss', amount: lossMultiplier * normalizedBet }
-  }
-  if (WIN_RESULTS.has(result)) {
-    const winMultiplier = WIN_MULTIPLIERS[result] ?? 2
-    return { variant: 'win', amount: winMultiplier * normalizedBet }
-  }
-  if (PUSH_RESULTS.has(result)) {
-    return { variant: 'push', amount: 0 }
-  }
-  if (result === 'BlackJack_Win') {
-    return { variant: 'blackjack_win', amount: Math.floor(normalizedBet * BLACKJACK_WIN_MULTIPLIER) }
-  }
-  return { variant: null, amount: 0 }
-}
-
-const handEntries = computed<HandEntry[]>(() => {
-  const betAmount = currentBet.value ?? 0
-
-  return displayHands.value.map((hand, index) => {
-    const result = trimmedResults.value[index] ?? null
-    const { variant, amount } = resolveResultMeta(result, betAmount)
+const handEntries = computed<HandEntry[]>(() =>
+  displayHands.value.map((hand, index) => {
+    const resultMeta = trimmedResults.value[index] ?? null
+    const result = resultMeta?.result ?? null
+    const amount = resultMeta?.amount ?? 0
     const hasCards = hand.length > 0
     return {
       hand,
       index,
       result,
-      resultVariant: variant,
       resultAmount: amount,
-      showResultHighlight: Boolean((variant) && hasCards),
+      showResultHighlight: Boolean((result) && hasCards),
     }
-  })
-})
+  }),
+)
 
 const lastResolvedActiveIndex = ref<number | null>(null)
 
