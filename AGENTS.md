@@ -18,6 +18,7 @@
 - Use TypeScript + `<script setup>` in Vue SFCs; favor explicit typing and descriptive computed names (`resolvedHandValue`).
 - Follow Prettier defaults (2-space indent, single quotes in TS, semicolons off) and ESLint rules defined in `eslint.config.ts`.
 - Components: `PascalCase.vue`; composables/utilities: `camelCase.ts`; constants uppercase snake (`CARD_SCALE_LARGE`).
+- String use single quotes (`'example'`); template HTML uses double quotes (`<div class="example">`).
 
 ## Testing Guidelines`
 - Write Vitest specs near the code, e.g., `src/__tests__/hand.spec.ts`. Name files `*.spec.ts`.

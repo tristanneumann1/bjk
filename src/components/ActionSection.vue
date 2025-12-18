@@ -78,6 +78,10 @@ function setCurrentActions() {
   if (viableActions) playerActions.setMany(viableActions)
 }
 
+/*
+  Event Listeners
+  TODO: simplify
+ */
 modelEvents.on(modelPropertyEvent('chair', 'activeHandIndex'), (_event: ModelPropertyChangeEvent) => {
   setCurrentActions()
 });
@@ -101,6 +105,10 @@ modelEvents.on(modelCustomEvent('table', CHAIR_EVENT), (_event: ModelPropertyCha
 modelEvents.on(modelPropertyEvent('dealer', 'dealIndex'), (_event: ModelPropertyChangeEvent) => {
   setCurrentActions()
 })
+
+/*
+  End Event Listeners
+ */
 </script>
 
 <style scoped>

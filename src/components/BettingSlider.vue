@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-const MIN_BET = 0
+const MIN_BET = 500
 const MAX_BET = 30000
 const STEP = 500
 
@@ -66,28 +66,14 @@ const clampToStep = (value: number) => {
 const currentValue = ref(clampToStep(props.initialValue ?? MIN_BET))
 const isDisabled = computed(() => props.disabled ?? false)
 
+const isAtMinimum = computed(() => currentValue.value <= MIN_BET)
+const isAtMaximum = computed(() => currentValue.value >= MAX_BET)
+
 const emitValueChange = () => {
   const value = currentValue.value
   emit('update:value', value)
   emit('change', value)
 }
-
-watch(
-  () => props.initialValue,
-  value => {
-    if (value !== undefined && !Number.isNaN(value)) {
-      const sanitized = clampToStep(value)
-      if (sanitized !== currentValue.value) {
-        currentValue.value = sanitized
-      }
-    }
-  },
-)
-
-watch(currentValue, emitValueChange)
-
-const isAtMinimum = computed(() => currentValue.value <= MIN_BET)
-const isAtMaximum = computed(() => currentValue.value >= MAX_BET)
 
 const formattedValue = computed(() => `$${(currentValue.value / 100).toLocaleString('en-US')}`)
 
@@ -115,6 +101,21 @@ const onSliderInput = (event: Event) => {
   if (Number.isNaN(parsed)) return
   setValue(parsed)
 }
+
+watch(
+  () => props.initialValue,
+  value => {
+    if (value !== undefined && !Number.isNaN(value)) {
+      const sanitized = clampToStep(value)
+      if (sanitized !== currentValue.value) {
+        currentValue.value = sanitized
+      }
+    }
+  },
+)
+
+watch(currentValue, emitValueChange)
+
 </script>
 
 <style scoped>
