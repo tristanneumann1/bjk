@@ -1,4 +1,5 @@
 export const PLAY = 'play';
+export const RESHUFFLE = 'reshuffle';
 
 export const PLAYER_ACTION = 'playerAction';
 

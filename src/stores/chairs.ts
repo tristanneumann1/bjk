@@ -9,10 +9,11 @@ import {
   modelInstanceCustomEvent,
   modelInstancePropertyEvent,
   modelPropertyEvent,
-  type ModelPropertyChangeEvent,
+  type ModelPropertyChangeEvent, userEvent,
 } from '@/lib/mitt.ts'
 import { Hand, HAND_OUTCOME_EVENT, NEW_CARD_EVENT, SPLIT_CARDS_EVENT } from '@/models/hand.ts'
 import { CHAIR_EVENT } from '@/models/table.ts'
+import {RESHUFFLE} from "@/lib/userEvents.ts";
 
 type HandOutcomeView = {
   result: Hand['lastOutcome']
@@ -137,7 +138,7 @@ export const useChairsStore = defineStore('chairs', () => {
     return null
   }
 
-  const updateChairHands = (index: number) => {
+  const updateChairHands = (index: number, reset: Boolean = false) => {
     const view = chairs[index]
     const entry = chairRegistry.get(index)
     if (!view || !entry) {
@@ -151,7 +152,7 @@ export const useChairsStore = defineStore('chairs', () => {
     const currentTotal = totalCards(view.hands)
     const nextActiveIndex = entry.chair.activeHandIndex
 
-    if (nextTotal === 0 && currentTotal > 0) {
+    if (nextTotal === 0 && currentTotal > 0 && !reset) {
       return
     }
 
@@ -167,6 +168,15 @@ export const useChairsStore = defineStore('chairs', () => {
     view.hands = cloneHandCards(nextHands)
     view.handResults = [...nextResults]
   }
+
+  const updateAllChairHands = () => {
+    for (const index of Object.keys(chairs).map(Number)) {
+      updateChairHands(index, true)
+    }
+  }
+   modelEvents.on(userEvent(RESHUFFLE), () => {
+    updateAllChairHands()
+  })
 
   const detachHandListener = (entry: ChairRegistryEntry, handId: string) => {
     const cleanup = entry.handListeners.get(handId)

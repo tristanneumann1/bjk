@@ -4,7 +4,7 @@
       v-if="!activeRound"
       class="action-section__play"
       type="button"
-      :disabled="!active && !needsReshuffle"
+      :disabled="!roundCanStart && !needsReshuffle"
       @click="onPlayClick()"
     >
       {{ needsReshuffle ? 'Reshuffle' : 'Play' }}
@@ -39,7 +39,7 @@ import {CHAIR_EVENT} from "@/models/table.ts";
 import {useDealerStore} from '@/stores/dealer'
 
 const activeRound = ref<boolean>(false)
-const active = ref<boolean>(false)
+const roundCanStart = ref<boolean>(false)
 const needsReshuffle = ref<boolean>(false)
 
 const playerActions = usePlayerActionsStore()
@@ -53,7 +53,8 @@ const onActionClick = (action: PlayerAction) => {
 const onPlayClick = () => {
   // If shoe is nearly over, reshuffle before starting the round
   if (needsReshuffle.value) {
-    dealerStore.resetShoe()
+    playerActions.reshuffle()
+    return
   }
   playerActions.play()
 }
@@ -61,7 +62,7 @@ const onPlayClick = () => {
 function setCurrentActions() {
   const table = Session.getInstance().table
   needsReshuffle.value = dealerStore.pastPenetration
-  active.value = !table.validateRoundCanStart()
+  roundCanStart.value = !table.validateRoundCanStart()
   if (!table.aPlayerHasCards) {
     activeRound.value = false
     return;

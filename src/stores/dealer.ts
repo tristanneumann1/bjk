@@ -6,7 +6,7 @@ import {
   modelInstanceCustomEvent,
   modelInstancePropertyEvent,
   modelPropertyEvent,
-  type ModelPropertyChangeEvent,
+  type ModelPropertyChangeEvent, userEvent,
 } from '@/lib/mitt'
 import { Dealer } from '@/models/dealer'
 import { getModelInstanceId } from '@/lib/modelEvents'
@@ -14,6 +14,7 @@ import type { Chair } from '@/models/chair'
 import { Hand, NEW_CARD_EVENT } from '@/models/hand'
 import type { Card } from '@/models/card'
 import type { Table } from '@/models/table'
+import {RESHUFFLE} from "@/lib/userEvents.ts";
 
 export type DealerCard = {
   value?: string | number
@@ -59,9 +60,9 @@ export const useDealerStore = defineStore('dealer', () => {
   const resetShoe = () => {
     totalShoeSize.value = Session.getInstance().rules.deckCount * 52
     remainingShoeSize.value = Session.getInstance().rules.deckCount * 52
+    pastPenetration.value = false
     Session.getInstance().table.dealer.reset()
     Session.getInstance().table.dealer.resetDealIndex()
-    pastPenetration.value = false
     runningCount.value = 0
   }
 
@@ -77,6 +78,10 @@ export const useDealerStore = defineStore('dealer', () => {
     resetCards()
     resetShoe()
   }
+
+  modelEvents.on(userEvent(RESHUFFLE), () => {
+    reset()
+  })
 
   const cleanupFns: Array<() => void> = []
 

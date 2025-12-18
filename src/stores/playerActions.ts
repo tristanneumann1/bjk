@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import {modelEvents, userEvent, userEventAction, type UserEventMap} from "@/lib/mitt.ts";
-import {PLAY, PLAYER_ACTION} from "@/lib/userEvents.ts";
+import {PLAY, PLAYER_ACTION, RESHUFFLE} from "@/lib/userEvents.ts";
 
 type PLAYER_ACTION_TYPE = 'Hit' | 'Stand' | 'Split' | 'Double' | 'Surrender' | 'Insurance'
 export const PLAYER_ACTIONS: PLAYER_ACTION_TYPE[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance'] as const
@@ -49,6 +49,10 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
     modelEvents.emit(userEvent(PLAY), { event: PLAY } as UserEventMap)
   }
 
+  const reshuffle = () => {
+    modelEvents.emit(userEvent(RESHUFFLE), { event: RESHUFFLE } as UserEventMap)
+  }
+
   return {
     enabledMap,
     isEnabled,
@@ -56,6 +60,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
     setMany,
     reset,
     triggerAction,
-    play
+    play,
+    reshuffle
   }
 })
