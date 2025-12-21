@@ -2,7 +2,7 @@
   <section class="action-section" aria-label="Player actions">
     <button
       v-if="!activeRound"
-      class="action-section__play"
+      class="action-section__play action-section__content"
       type="button"
       :disabled="!roundCanStart && !needsReshuffle"
       @click="onPlayClick()"
@@ -10,6 +10,7 @@
       {{ needsReshuffle ? 'Reshuffle' : 'Play' }}
     </button>
     <template v-else>
+      <div class="action-section__content action-section__actions">
       <button
         v-for="action in actions"
         :key="action"
@@ -20,6 +21,7 @@
       >
         {{ action }}
       </button>
+      </div>
     </template>
   </section>
 </template>
@@ -113,16 +115,23 @@ modelEvents.on(modelPropertyEvent('dealer', 'dealIndex'), (_event: ModelProperty
 
 <style scoped>
 .action-section {
-  padding: 0.5rem;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
   width: 100%;
   max-width: 30rem;
 }
 
+.action-section__content {
+  padding: 0.5rem;
+}
+
+.action-section__actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
 .action-section__button {
-  padding: 0.75rem 0.75rem;
+  padding: 0.75rem 0;
   border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.1);

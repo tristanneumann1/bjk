@@ -64,10 +64,10 @@ const formattedRunningCount = computed(() => {
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  padding: 1.5rem;
 }
 
 .dealer-section__count {
+  padding: 0.75rem;
   font-size: 0.95rem;
   font-weight: 500;
   opacity: 0.8;
@@ -78,6 +78,7 @@ const formattedRunningCount = computed(() => {
 }
 
 .dealer-section__content {
+  padding: 0.75rem;
   display: flex;
   align-items: center;
   gap: 1.25rem;

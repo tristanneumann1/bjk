@@ -30,10 +30,11 @@ const chairSlots = [0, 1, 2]
 
 <style scoped>
 .table-upper {
-    width: 100%;
-    display: flex;
-    gap: 2rem;
-    justify-content: space-between;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
 }
 .table-lower {
   width: 100%;
@@ -41,5 +42,21 @@ const chairSlots = [0, 1, 2]
     gap: 2rem;
     align-items: flex-end;
     justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .table-upper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-upper > :deep(*) {
+    width: 100%;
+  }
+
+  .table-lower {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 </style>

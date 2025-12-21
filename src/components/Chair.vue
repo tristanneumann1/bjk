@@ -382,6 +382,7 @@ watch(
 }
 
 .hand__top {
+  position: absolute;
   display: flex;
   justify-content: space-between;
   width: 100%;

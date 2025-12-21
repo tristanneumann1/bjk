@@ -20,6 +20,7 @@ const formattedBalance = computed(() =>
 
 <style scoped>
 .player-balance {
+  pointer-events: none;
   position: fixed;
   right: 0.5rem;
   bottom: 0.5rem;

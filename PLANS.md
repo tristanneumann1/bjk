@@ -1,7 +1,5 @@
 # Upcoming Tasks
 
-- [ ] Changing bet retriggers animation
-- [ ] The bankroll is hiding bet
 - [ ] Vertical display option
 - [ ] Menu with customizeable game
 - [ ] Account and track stats
