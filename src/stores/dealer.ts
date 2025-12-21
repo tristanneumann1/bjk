@@ -13,16 +13,12 @@ import { getModelInstanceId } from '@/lib/modelEvents'
 import type { Chair } from '@/models/chair'
 import { Hand, NEW_CARD_EVENT } from '@/models/hand'
 import type { Card } from '@/models/card'
+import type { Card as CardType } from '@/types/card'
 import type { Table } from '@/models/table'
 import {RESHUFFLE} from "@/lib/userEvents.ts";
 
-export type DealerCard = {
-  value?: string | number
-  suit?: string
-}
-
 export const useDealerStore = defineStore('dealer', () => {
-  const cards = ref<DealerCard[]>([])
+  const cards = ref<CardType[]>([])
   const totalShoeSize = ref(Session.getInstance().rules.deckCount * 52)
   const remainingShoeSize = ref(Session.getInstance().rules.deckCount * 52)
   const runningCount = ref(0)
@@ -30,14 +26,14 @@ export const useDealerStore = defineStore('dealer', () => {
   const holeCardHidden = ref(false)
   const pastPenetration = ref(false)
 
-  const setCards = (nextCards: DealerCard[]) => {
+  const setCards = (nextCards: CardType[]) => {
     cards.value = [...nextCards]
     if (nextCards.length === 0) {
       revealHoleCard()
     }
   }
 
-  const addCard = (card: DealerCard) => {
+  const addCard = (card: CardType) => {
     cards.value = [...cards.value, card]
   }
 
@@ -87,7 +83,7 @@ export const useDealerStore = defineStore('dealer', () => {
 
   const dealerDealIndexEvent = modelPropertyEvent('dealer', 'dealIndex')
 
-  const getCountDelta = (card: Card | DealerCard | undefined): number => {
+  const getCountDelta = (card: Card | CardType | undefined): number => {
     if (!card || card.value === undefined || card.value === null) {
       return 0
     }

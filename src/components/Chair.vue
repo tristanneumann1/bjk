@@ -4,7 +4,6 @@
     :class="{ 'chair--active': isActiveChair }"
     aria-label="Player Spot"
     :aria-current="isActiveChair ? 'true' : undefined"
-    :style="{ width: '272px' }"
   >
     <button
       v-if="!chairsStore.roundInProgress"
@@ -15,6 +14,7 @@
     >
       ×
     </button>
+<!--    Break apart Hand.vue including left and right hands -->
     <div class="hand__top" aria-label="Inactive hands">
       <div class="hand__top-stack hand__top-stack--left" aria-label="Hands before active">
         <span
@@ -24,7 +24,7 @@
         >
           {{ '.'.repeat(leftHiddenCount) }}
         </span>
-        <button
+        <div
           v-for="entry in leftStack"
           :key="entry.index"
           :class="['hand__entry', 'hand__entry--stack', entryResultClass(entry)]"
@@ -59,7 +59,7 @@
               <img src="/bjWin.gif" alt="Blackjack win animation" />
             </div>
           </div>
-        </button>
+        </div>
       </div>
 
       <div class="hand__top-stack hand__top-stack--right" aria-label="Hands after active">
@@ -70,7 +70,7 @@
         >
           {{ '.'.repeat(rightHiddenCount) }}
         </span>
-        <button
+        <div
           v-for="entry in rightStack"
           :key="entry.index"
           :class="['hand__entry', 'hand__entry--stack', entryResultClass(entry)]"
@@ -105,7 +105,7 @@
               <img src="/bjWin.gif" alt="Blackjack win animation" />
             </div>
           </div>
-        </button>
+        </div>
       </div>
     </div>
     <div class="hand" role="group" aria-label="Card hands">
@@ -162,15 +162,10 @@ import BettingSlider from "@/components/BettingSlider.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
 import type { HandResult } from '@/models/chair'
-
-type CardLike = {
-  value?: string | number
-  rank?: string | number
-  suit?: string
-}
+import type { Card } from '@/types/card.ts'
 
 type HandEntry = {
-  hand: CardLike[]
+  hand: Card[]
   index: number
   result: HandResult | null | undefined
   resultAmount: number
@@ -195,36 +190,109 @@ const props = defineProps<{
   initialActiveHand?: number
 }>()
 
+const lastResolvedActiveHandIndex = ref<number | null>(null)
+
 const chairsStore = useChairsStore()
 
 const isActiveChair = computed(() => chairsStore.activeChairId === props.chairId)
 
 const chairView = computed(() => chairsStore.getChairView(props.chairId))
-if (!chairView.value) throw new Error('Chair not found')
 
 const canAdjustBet = computed(() => !chairsStore.roundInProgress)
 
 const trimmedHands = computed(() => chairView.value?.hands.slice(0, MAX_HAND_SETS) ?? [])
 const trimmedResults = computed(() => chairView.value?.handResults.slice(0, MAX_HAND_SETS) ?? [])
 
-const normalizeHand = (hand: unknown): CardLike[] => {
-  if (Array.isArray(hand)) {
-    return hand as CardLike[]
-  }
-  if (hand && typeof hand === 'object' && 'cards' in (hand as Record<string, unknown>)) {
-    const cards = (hand as { cards?: CardLike[] }).cards
-    return Array.isArray(cards) ? cards : []
-  }
-  return []
-}
-
-const displayHands = computed(() =>
-  trimmedHands.value.map(hand => normalizeHand(hand)),
-)
-
 const cardHandMaxWidth = computed(() => props.maxWidth)
 
 const currentBet = computed(() => chairView.value?.bet ?? 0)
+
+const handEntries = computed<HandEntry[]>(() =>
+  trimmedHands.value.map((hand, index) => {
+    const resultMeta = trimmedResults.value[index] ?? null
+    const result = resultMeta?.result ?? null
+    const amount = resultMeta?.amount ?? 0
+    const hasCards = hand.length > 0
+    return {
+      hand,
+      index,
+      result,
+      resultAmount: amount,
+      showResultHighlight: Boolean((result) && hasCards),
+    }
+  }),
+)
+
+const resolvedActiveHandIndex = computed(() => {
+  const view = chairView.value
+  if (!view) {
+    lastResolvedActiveHandIndex.value = null
+    return 0
+  }
+
+  const { hands, activeHandIndex, clampedActiveHandIndex } = view
+  const handCount = hands.length
+  const inHandCountRange = clampedActiveHandIndex !== null
+    ? clampedActiveHandIndex >= 0 && clampedActiveHandIndex < handCount
+    : activeHandIndex >= 0 && activeHandIndex < handCount
+
+  if (inHandCountRange) {
+    const resolved = clampedActiveHandIndex !== null
+      ? clampedActiveHandIndex
+      : activeHandIndex
+    lastResolvedActiveHandIndex.value = resolved
+    return resolved
+  }
+
+  if (handCount === 0) {
+    lastResolvedActiveHandIndex.value = null
+    return 0
+  }
+
+  const fallback = lastResolvedActiveHandIndex.value !== null && lastResolvedActiveHandIndex.value < handCount
+    ? lastResolvedActiveHandIndex.value
+    : handCount - 1
+
+  lastResolvedActiveHandIndex.value = fallback
+  return fallback
+})
+
+const activeEntry = computed(() =>
+  handEntries.value.find(entry => entry.index === resolvedActiveHandIndex.value) ?? null,
+)
+const activeHandIndex = resolvedActiveHandIndex
+
+const leftEntries = computed(() =>
+  handEntries.value.filter(entry => entry.index < resolvedActiveHandIndex.value),
+)
+
+const rightEntries = computed(() =>
+  handEntries.value.filter(entry => entry.index > resolvedActiveHandIndex.value),
+)
+
+const leftDisplayEntries = computed(() => leftEntries.value.slice(Math.max(leftEntries.value.length - MAX_VISIBLE_STACK, 0), leftEntries.value.length))
+const rightDisplayEntries = computed(() => rightEntries.value.slice(0, Math.min(MAX_VISIBLE_STACK, rightEntries.value.length)).reverse())
+
+
+const leftHiddenCount = computed(() => Math.max(leftEntries.value.length - leftDisplayEntries.value.length, 0))
+const rightHiddenCount = computed(() => Math.max(rightEntries.value.length - rightDisplayEntries.value.length, 0))
+
+const buildStack = (entries: HandEntry[]) =>
+  entries.map((entry, stackIndex, source) => ({
+    ...entry,
+    style: {
+      marginTop: stackIndex === 0 ? '0' : `-${STACK_OVERLAP}px`,
+      zIndex: source.length - stackIndex,
+    } as Record<string, string | number>,
+  }))
+
+const leftStack = computed(() => buildStack(leftDisplayEntries.value))
+
+const rightStack = computed(() => buildStack(rightDisplayEntries.value))
+
+const onBetChange = (value: number) => {
+  chairsStore.adjustBet(props.chairId, value)
+}
 
 const entryResultClass = (entry: HandEntry | null | undefined) => {
   const hasCards = Boolean(entry?.hand.length)
@@ -249,104 +317,14 @@ const entryResultClass = (entry: HandEntry | null | undefined) => {
   }
 }
 
-const handEntries = computed<HandEntry[]>(() =>
-  displayHands.value.map((hand, index) => {
-    const resultMeta = trimmedResults.value[index] ?? null
-    const result = resultMeta?.result ?? null
-    const amount = resultMeta?.amount ?? 0
-    const hasCards = hand.length > 0
-    return {
-      hand,
-      index,
-      result,
-      resultAmount: amount,
-      showResultHighlight: Boolean((result) && hasCards),
-    }
-  }),
-)
-
-const lastResolvedActiveIndex = ref<number | null>(null)
-
-const resolvedActiveHandIndex = computed(() => {
-  const view = chairView.value
-  if (!view) {
-    lastResolvedActiveIndex.value = null
-    return 0
-  }
-
-  const { hands, activeHandIndex, displayActiveHandIndex } = view
-  const handCount = hands.length
-  const inRange = displayActiveHandIndex !== null
-    ? displayActiveHandIndex >= 0 && displayActiveHandIndex < handCount
-    : activeHandIndex >= 0 && activeHandIndex < handCount
-
-  if (inRange) {
-    const resolved = displayActiveHandIndex !== null
-      ? displayActiveHandIndex
-      : activeHandIndex
-    lastResolvedActiveIndex.value = resolved
-    return resolved
-  }
-
-  if (handCount === 0) {
-    lastResolvedActiveIndex.value = null
-    return 0
-  }
-
-  const fallback = lastResolvedActiveIndex.value !== null && lastResolvedActiveIndex.value < handCount
-    ? lastResolvedActiveIndex.value
-    : handCount - 1
-
-  lastResolvedActiveIndex.value = fallback
-  return fallback
-})
-
 watch(
-  () => displayHands.value.length,
+  () => trimmedHands.value.length,
   length => {
     if (length === 0) {
-      lastResolvedActiveIndex.value = null
+      lastResolvedActiveHandIndex.value = null
     }
   },
 )
-
-const activeEntry = computed(() =>
-  handEntries.value.find(entry => entry.index === resolvedActiveHandIndex.value) ?? null,
-)
-
-const activeHandIndex = resolvedActiveHandIndex
-
-const buildStack = (entries: HandEntry[]) =>
-  entries.map((entry, stackIndex, source) => ({
-    ...entry,
-    style: {
-      marginTop: stackIndex === 0 ? '0' : `-${STACK_OVERLAP}px`,
-      zIndex: source.length - stackIndex,
-    } as Record<string, string | number>,
-  }))
-
-const leftEntries = computed(() =>
-  handEntries.value.filter(entry => entry.index < resolvedActiveHandIndex.value),
-)
-
-const rightEntries = computed(() =>
-  handEntries.value.filter(entry => entry.index > resolvedActiveHandIndex.value),
-)
-
-const leftDisplayEntries = computed(() => leftEntries.value.slice(Math.max(leftEntries.value.length - MAX_VISIBLE_STACK, 0), leftEntries.value.length))
-const rightDisplayEntries = computed(() => rightEntries.value.slice(0, Math.min(MAX_VISIBLE_STACK, rightEntries.value.length)).reverse())
-
-
-const leftHiddenCount = computed(() => Math.max(leftEntries.value.length - leftDisplayEntries.value.length, 0))
-const rightHiddenCount = computed(() => Math.max(rightEntries.value.length - rightDisplayEntries.value.length, 0))
-
-const leftStack = computed(() => buildStack(leftDisplayEntries.value))
-
-const rightStack = computed(() => buildStack(rightDisplayEntries.value))
-
-const onBetChange = (value: number) => {
-  chairsStore.adjustBet(props.chairId, value)
-}
 </script>
 
 <style scoped>
@@ -358,6 +336,7 @@ const onBetChange = (value: number) => {
   padding: 0.5rem 0.25rem;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
   position: relative; /* allow floating controls without affecting layout */
+  width: 272px;
 }
 
 .chair--active {
@@ -435,7 +414,6 @@ const onBetChange = (value: number) => {
 
 .hand__entry--stack {
   position: relative;
-  pointer-events: auto;
 }
 
 .hand__entry-body {

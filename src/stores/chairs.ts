@@ -26,7 +26,7 @@ type ChairView = {
   handResults: HandOutcomeView[]
   activeHandIndex: number
   bet: number
-  displayActiveHandIndex: number | null
+  clampedActiveHandIndex: number | null
 }
 
 type ChairRegistryEntry = {
@@ -157,13 +157,13 @@ export const useChairsStore = defineStore('chairs', () => {
     }
 
     if (nextHands.length === 0) {
-      view.displayActiveHandIndex = null
+      view.clampedActiveHandIndex = null
       view.hands = []
       view.handResults = []
       return
     }
 
-    view.displayActiveHandIndex = Math.min(Math.max(nextActiveIndex, 0), nextHands.length - 1)
+    view.clampedActiveHandIndex = Math.min(Math.max(nextActiveIndex, 0), nextHands.length - 1)
     view.hands = cloneHandCards(nextHands)
     view.handResults = [...nextResults]
   }
@@ -289,7 +289,7 @@ export const useChairsStore = defineStore('chairs', () => {
       handResults: [...initialResults],
       activeHandIndex: chair.activeHandIndex,
       bet: chair.bet ?? 0,
-      displayActiveHandIndex: initialHands.length > 0
+      clampedActiveHandIndex: initialHands.length > 0
         ? Math.min(Math.max(chair.activeHandIndex, 0), initialHands.length - 1)
         : null,
     }

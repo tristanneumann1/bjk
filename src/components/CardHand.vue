@@ -17,11 +17,11 @@
 import { computed, onScopeDispose, ref, watch } from 'vue'
 import PlayingCard from '@/components/PlayingCard.vue'
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
+import type {Card} from "@/types/card.ts";
 
-type CardLike = {
-  value?: string | number
-  rank?: string | number
-  suit?: string
+type DisplayCard = Card & {
+  id: number
+  isEntering: boolean
 }
 
 const BASE_CARD_WIDTH = 46
@@ -31,7 +31,7 @@ const REVEAL_STAGGER_MS = 220
 const ENTER_ANIMATION_MS = 320
 
 const props = defineProps<{
-  cards: CardLike[]
+  cards: Card[]
   maxWidth?: number
   large?: boolean
 }>()
@@ -47,23 +47,8 @@ const maxWidth = computed(() => props.maxWidth ?? defaultMaxWidth.value)
 
 const isLarge = computed(() => props.large ?? false)
 
-type NormalizedCard = {
-  value?: string | number
-  suit?: string
-}
-
-type DisplayCard = NormalizedCard & {
-  id: number
-  isEntering: boolean
-}
-
-const normalizeCard = (card: CardLike): NormalizedCard => ({
-  value: card.rank ?? card.value ?? undefined,
-  suit: card.suit,
-})
-
-const targetCards = computed<NormalizedCard[]>(() =>
-  props.cards.slice(0, MAX_CARDS).map(normalizeCard),
+const targetCards = computed<Card[]>(() =>
+  props.cards.slice(0, MAX_CARDS),
 )
 
 const renderedCards = ref<DisplayCard[]>([])
@@ -105,12 +90,12 @@ const cardPositions = computed(() =>
   })),
 )
 
-const revealQueue: NormalizedCard[] = []
+const revealQueue: Card[] = []
 const activeTimeouts: Array<ReturnType<typeof setTimeout>> = []
 let cardIdCounter = 0
 let processingReveal = false
 
-const createDisplayCard = (card: NormalizedCard, isEntering: boolean): DisplayCard => ({
+const createDisplayCard = (card: Card, isEntering: boolean): DisplayCard => ({
   id: ++cardIdCounter,
   value: card.value,
   suit: card.suit,
@@ -167,7 +152,7 @@ const processRevealQueue = () => {
   step()
 }
 
-const enqueueReveals = (cards: NormalizedCard[]) => {
+const enqueueReveals = (cards: Card[]) => {
   if (cards.length === 0) {
     return
   }
@@ -176,13 +161,14 @@ const enqueueReveals = (cards: NormalizedCard[]) => {
   processRevealQueue()
 }
 
-const resetRenderedCards = (nextCards: NormalizedCard[]) => {
+const resetRenderedCards = (nextCards: Card[]) => {
   clearActiveTimeouts()
   revealQueue.length = 0
   processingReveal = false
   renderedCards.value = nextCards.map(card => createDisplayCard(card, false))
 }
 
+// TODO Clean up this watch by breaking down the steps; Maybe move logic
 watch(
   targetCards,
   nextCards => {

@@ -98,7 +98,7 @@ const tens = [
   new Card( 'Hearts', '10')
 ]
 
-// dealer.shoe.unshift(...nonStopBlackJack)
+// dealer.shoe.unshift(...tens)
 dealer.resetDealIndex()
 const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 

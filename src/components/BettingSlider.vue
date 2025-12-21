@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-const MIN_BET = 500
+const MIN_BET = 0
 const MAX_BET = 30000
 const STEP = 500
 
