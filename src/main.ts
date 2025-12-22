@@ -121,7 +121,7 @@ const table = new Table(dealer, dealerChair, [], { logAfterAction: false })
 
 initializeHandlers(table)
 Session.initialize({
-  player: new Player(10_000),
+  player: new Player(100_000),
   rules,
   table
 })
