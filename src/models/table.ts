@@ -9,6 +9,7 @@ import {
   modelEvents,
   type ModelPropertyChangeEvent
 } from "@/lib/mitt";
+import {Card} from "@/models/card";
 
 interface PlayerChair {
   [chairId: number]: Chair | null;
@@ -26,12 +27,17 @@ export const CHAIR_EVENT = 'chair'
 
 export class Table {
   chairIndex = 0;
+  public runningCount = 0;
   public chairTurnIndex = 0;
   constructor(public dealer: Dealer, public dealerChair: Chair, public playerChairs: PlayerChair = {}, public configuration: TableConfiguration = DEFAULT_TABLE_CONFIGURATION) {}
 
   get dealerPeekedBlackjack(): boolean {
     return Session.getInstance().rules.dealerPeekA10 &&
       this.dealerChair.hands[0]?.isBlackJack
+  }
+
+  get upCard(): Card {
+    return this.dealerChair.hands[0].cards[0]
   }
 
   get roundInitialCost(): number {
@@ -137,8 +143,22 @@ export class Table {
     if (this.configuration.logAfterAction) {
       this.view()
     }
+
+    this.dealer.holeCardHidden = !this.playerRoundsComplete
+    this.updateRunningCount()
+
     if (!this.activeChair) {
       this.payout()
+    }
+  }
+
+  updateRunningCount() {
+    if (this.dealer.holeCardHidden) {
+      const holeCard = Session.getInstance().table.dealerChair.hands[0]?.cards[1]
+      const diff = holeCard ? Dealer.getCountDelta(holeCard) : 0
+      this.runningCount = this.dealer.trueRunningCount - diff
+    } else {
+      this.runningCount = this.dealer.trueRunningCount
     }
   }
 
@@ -158,7 +178,7 @@ export class Table {
     if (this.playerRoundsComplete) {
       this.dealer.completeDealerHand(this.dealerChair.activeHand)
     }
-
+    this.updateRunningCount()
     if (this.configuration.logAfterAction) {
       this.view()
     }
@@ -227,7 +247,7 @@ export class Table {
 
 attachModelEventEmitter(Table, {
   model: 'table',
-  props: ['chairTurnIndex'],
+  props: ['chairTurnIndex', 'runningCount'],
   trackInstance: false,
 })
 

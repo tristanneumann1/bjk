@@ -2,12 +2,11 @@ import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import {modelEvents, userEvent, userEventAction, type UserEventMap} from "@/lib/mitt.ts";
 import {PLAY, PLAYER_ACTION, RESHUFFLE} from "@/lib/userEvents.ts";
+import type { PlayerAction } from '@/types/actions.ts'
 
-type PLAYER_ACTION_TYPE = 'Hit' | 'Stand' | 'Split' | 'Double' | 'Surrender' | 'Insurance'
-export const PLAYER_ACTIONS: PLAYER_ACTION_TYPE[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance'] as const
-export type PlayerAction = (typeof PLAYER_ACTIONS)[number]
+export const PLAYER_ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance'] as const
 
-const createDefaultState = (): {[action in PLAYER_ACTION_TYPE]: boolean} => ({
+const createDefaultState = (): {[action in PlayerAction]: boolean} => ({
   Hit: true,
   Stand: true,
   Split: false,
@@ -17,7 +16,7 @@ const createDefaultState = (): {[action in PLAYER_ACTION_TYPE]: boolean} => ({
 } satisfies Record<PlayerAction, boolean>)
 
 export const usePlayerActionsStore = defineStore('playerActions', () => {
-  const enabledMap: {[action in PLAYER_ACTION_TYPE]: boolean} = reactive(createDefaultState())
+  const enabledMap: {[action in PlayerAction]: boolean} = reactive(createDefaultState())
 
   const isEnabled = (action: PlayerAction) => enabledMap[action]
 

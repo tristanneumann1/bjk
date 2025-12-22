@@ -28,7 +28,8 @@
 
 <script setup lang="ts">
 import {ref} from 'vue'
-import { PLAYER_ACTIONS, type PlayerAction, usePlayerActionsStore } from '@/stores/playerActions'
+import { PLAYER_ACTIONS, usePlayerActionsStore } from '@/stores/playerActions'
+import { type PlayerAction } from '@/types/actions.ts'
 import {
   modelCustomEvent,
   modelEvents,

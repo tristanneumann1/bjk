@@ -5,7 +5,32 @@ import {attachModelEventEmitter} from "@/lib/modelEvents";
 
 export class Dealer {
   public dealIndex: number = 0;
+  public trueRunningCount: number = 0;
+  public holeCardHidden = true;
+
+  public static getCountDelta(card: Card): number {
+    const value = card.value
+    switch (value) {
+      case 1:
+      case 10:
+        return -1
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        return 1
+      default:
+        return 0
+    }
+  }
+
   constructor(public shoe: Card[] = []) {
+  }
+
+  get remainingDecks(): number {
+    const remainingCards = this.shoe.length - this.dealIndex - 1
+    return remainingCards / 52
   }
 
   pastPenetration(): boolean {
@@ -25,6 +50,8 @@ export class Dealer {
     }
     const card = this.shoe[this.dealIndex];
     this.dealIndex++;
+    // NEED to account for hidden Hole Card
+    this.applyRunningCountDelta(card)
     return card;
   }
 
@@ -34,6 +61,8 @@ export class Dealer {
       [this.shoe[i], this.shoe[j]] = [this.shoe[j], this.shoe[i]];
     }
     this.dealIndex = 0
+    this.trueRunningCount = 0
+    this.holeCardHidden = true
   }
 
   completeDealerHand(dealerHand: Hand): void {
@@ -43,11 +72,25 @@ export class Dealer {
     if (dealerHand.bestValue === 17 && dealerHand.isSoft && Session.getInstance().rules.dealerHitsSoft17) {
       dealerHand.addCard(this.dealCard())
     }
+    if (this.holeCardHidden) {
+      this.holeCardHidden = false
+    }
+  }
+
+  private applyRunningCountDelta(card: Card | undefined) {
+    if (!card) {
+      return
+    }
+    const delta = Dealer.getCountDelta(card)
+    if (delta === 0) {
+      return
+    }
+    this.trueRunningCount = this.trueRunningCount + delta
   }
 }
 
 attachModelEventEmitter(Dealer, {
   model: 'dealer',
-  props: ['dealIndex'],
+  props: ['dealIndex', 'holeCardHidden'],
   trackInstance: false,
 })

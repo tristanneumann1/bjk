@@ -47,6 +47,23 @@ const nonStopBlackJack = [
   new Card( 'Hearts', 'A'),
 ]
 
+const dealerBlackJack = [
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+  new Card('Spades', '6'),
+  new Card( 'Hearts', '5'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+  new Card('Spades', '2'),
+  new Card( 'Hearts', '3'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+  new Card('Spades', '6'),
+  new Card( 'Hearts', '5'),
+  new Card('Spades', 'K'),
+  new Card( 'Hearts', 'A'),
+]
+
 const doubleWith2Players = [
   new Card('Spades', '2'),
   new Card( 'Hearts', '3'),

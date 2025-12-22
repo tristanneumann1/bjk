@@ -78,19 +78,19 @@ const suitAliases: Record<string, CardSuit> = {
 }
 
 const props = defineProps<{
-  value?: string | number
   suit?: string
+  rank?: string
   large?: boolean
 }>()
 
 const scale = computed(() => (props.large ? CARD_SCALE_LARGE : CARD_SCALE_SMALL))
 
-const normalizedValue = computed<CardValue | null>(() => {
-  if (props.value === undefined || props.value === null) {
+const normalizedRank = computed<CardValue | null>(() => {
+  if (props.rank === undefined || props.rank === null) {
     return null
   }
 
-  const lookupKey = `${props.value}`.trim().toUpperCase()
+  const lookupKey = `${props.rank}`.trim().toUpperCase()
   return valueAliases[lookupKey] ?? null
 })
 
@@ -104,14 +104,14 @@ const normalizedSuit = computed<CardSuit | null>(() => {
 })
 
 const spritePosition = computed(() => {
-  const value = normalizedValue.value
+  const rank = normalizedRank.value
   const suit = normalizedSuit.value
 
-  if (!value || !suit) {
+  if (!rank || !suit) {
     return CARD_BACK_TILE
   }
 
-  const column = valueOrder.indexOf(value)
+  const column = valueOrder.indexOf(rank)
   const row = suitOrder.indexOf(suit)
 
   if (column === -1 || row === -1) {
@@ -140,14 +140,14 @@ const tileStyle = computed(() => {
 })
 
 const accessibleLabel = computed(() => {
-  const value = normalizedValue.value
+  const rank = normalizedRank.value
   const suit = normalizedSuit.value
 
-  if (!value || !suit) {
+  if (!rank || !suit) {
     return 'Card back'
   }
 
-  return `${value} of ${suit}`
+  return `${rank} of ${suit}`
 })
 </script>
 

@@ -18,18 +18,13 @@
 import { computed } from 'vue'
 import CardHand from '@/components/CardHand.vue'
 import { useDealerStore } from '@/stores/dealer'
-import { Session } from '@/models/session'
 
 const dealer = useDealerStore()
 
 const handMaxWidth = computed(() => 360)
 
 const shouldHideHoleCard = computed(() => {
-  if (!dealer.holeCardHidden) {
-    return false
-  }
-  const table = Session.getInstance().table
-  return !table.playerRoundsComplete
+  return dealer.holeCardHidden
 })
 
 const displayCards = computed(() => {

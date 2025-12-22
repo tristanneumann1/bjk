@@ -6,7 +6,7 @@
       class="card-hand__card"
       :class="{ 'card-hand__card--entering': card.isEntering }"
       :style="cardPositions[index]"
-      :value="card.value"
+      :rank="card.rank"
       :suit="card.suit"
       :large="isLarge"
     />
@@ -99,6 +99,7 @@ const createDisplayCard = (card: Card, isEntering: boolean): DisplayCard => ({
   id: ++cardIdCounter,
   value: card.value,
   suit: card.suit,
+  rank: card.rank,
   isEntering,
 })
 
