@@ -118,7 +118,7 @@ modelEvents.on(modelPropertyEvent('dealer', 'dealIndex'), (_event: ModelProperty
 .action-section {
   display: grid;
   width: 100%;
-  max-width: 30rem;
+  height: 9rem;
 }
 
 .action-section__content {

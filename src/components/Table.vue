@@ -31,23 +31,22 @@ const chairSlots = [0, 1, 2]
 <style scoped>
 .table-upper {
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
+  margin-bottom: 1rem;
 }
 .table-lower {
   width: 100%;
-    display: flex;
-    gap: 2rem;
-    align-items: flex-end;
-    justify-content: center;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
   .table-upper {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
   }
 
   .table-upper > :deep(*) {
