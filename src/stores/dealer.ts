@@ -19,7 +19,7 @@ export const useDealerStore = defineStore('dealer', () => {
   const totalShoeSize = ref(Session.getInstance().rules.deckCount * 52)
   const remainingShoeSize = ref(Session.getInstance().rules.deckCount * 52)
   const dealerModel = Session.getInstance().table.dealer
-  const runningCount = ref(Math.trunc(dealerModel.trueRunningCount))
+  const runningCount = ref(0)
   const holeCardHidden = ref(Boolean(dealerModel.holeCardHidden))
   const pastPenetration = ref(false)
   const dealerHandId: Ref<string | null> = ref(null)
@@ -48,7 +48,7 @@ export const useDealerStore = defineStore('dealer', () => {
     remainingShoeSize.value = Math.min(totalShoeSize.value, Math.max(0, Math.floor(nextRemaining)))
   }
 
-  const setRunningCount = () => runningCount.value = Math.trunc(Session.getInstance().table.dealer.trueRunningCount)
+  const setRunningCount = () => runningCount.value = Math.trunc(Session.getInstance().table.runningCount)
   const setHoleCardHidden = () => holeCardHidden.value = Session.getInstance().table.dealer.holeCardHidden
 
   const resetShoe = () => {
@@ -149,9 +149,6 @@ export const useDealerStore = defineStore('dealer', () => {
     detachActiveHandListener()
   })
 
-  const perceivedRunningCount = computed(() => {
-    return Math.trunc(runningCount.value)
-  })
 
   onScopeDispose(() => {
     cleanupFns.forEach((cleanup) => {
@@ -172,7 +169,6 @@ export const useDealerStore = defineStore('dealer', () => {
     remainingShoeSize,
     runningCount,
     pastPenetration,
-    perceivedRunningCount,
     holeCardHidden,
     setCards,
     addCard,

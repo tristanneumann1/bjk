@@ -6,3 +6,4 @@
 - [ ] Measure player overall EV
 - [ ] Insurance rule
 - [ ] Change betting slider for better functionality
+- [ ] Rule to prevent hit after split aces

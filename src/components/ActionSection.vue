@@ -40,6 +40,8 @@ import {NEW_CARD_EVENT} from "@/models/hand.ts";
 import {Session} from "@/models/session.ts";
 import {CHAIR_EVENT} from "@/models/table.ts";
 import {useDealerStore} from '@/stores/dealer'
+import {determineCorrectAction} from "@/models/strategy/determineCorrectAction.ts";
+import {basicStrategyH17} from "@/models/strategy/basicStrategyH17.ts";
 
 const activeRound = ref<boolean>(false)
 const roundCanStart = ref<boolean>(false)
@@ -50,6 +52,14 @@ const dealerStore = useDealerStore()
 const actions = PLAYER_ACTIONS
 
 const onActionClick = (action: PlayerAction) => {
+    try {
+      const correctActions = determineCorrectAction(Session.getInstance(), basicStrategyH17)
+      if (!correctActions.includes(action)) {
+        console.log(`Incorrect action chosen: ${action}. Recommended actions: ${Array.from(new Set(correctActions)).join(', ')}`)
+      }
+    } catch (e) {
+      console.error('Error determining correct action:', e)
+    }
   playerActions.triggerAction(action)
 }
 
@@ -78,7 +88,9 @@ function setCurrentActions() {
   activeRound.value = true
 
   const viableActions = activeChair.listViableActions()
-  if (viableActions) playerActions.setMany(viableActions)
+  if (viableActions) {
+    playerActions.setMany(viableActions)
+  }
 }
 
 /*
@@ -98,6 +110,10 @@ modelEvents.on(modelPropertyEvent('chair', 'bet'), (_event: ModelPropertyChangeE
 })
 
 modelEvents.on(modelPropertyEvent('table', 'chairTurnIndex'), (_event: ModelPropertyChangeEvent) => {
+  setCurrentActions()
+})
+
+modelEvents.on(modelPropertyEvent('table', 'runningCount'), (_event: ModelPropertyChangeEvent) => {
   setCurrentActions()
 })
 

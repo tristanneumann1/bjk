@@ -47,7 +47,7 @@ const shoeFillPercent = computed(() => {
 })
 
 const formattedRunningCount = computed(() => {
-  const count = dealer.perceivedRunningCount
+  const count = dealer.runningCount
   const sign = count > 0 ? '+' : ''
   return `${sign}${count}`
 })
