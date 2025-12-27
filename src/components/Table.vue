@@ -32,7 +32,7 @@ const chairSlots = [0, 1, 2]
 .table-upper {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: minmax(260px, 1fr) minmax(320px, 2fr);
   align-items: start;
   margin-bottom: 1rem;
 }

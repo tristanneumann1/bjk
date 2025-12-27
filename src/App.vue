@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Table from "@/components/Table.vue";
+import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <Table />
+  <RouterView />
 </template>
 
 <style>
