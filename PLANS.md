@@ -9,3 +9,5 @@
 - [ ] Rule to prevent hit after split aces
 - [ ] Offline Access
 - [ ] Felt, custom art
+- [ ] Chair Bet change and sit / leave should be sent to session through event handlers
+- [ ] Inform if bets are correct value

@@ -1,3 +1,5 @@
+// This doc is a model agnostic client for firestore db, model specific logic exists in the docs/ directory
+
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
 

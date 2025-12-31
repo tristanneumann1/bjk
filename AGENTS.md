@@ -1,9 +1,13 @@
 # Repository Guidelines
+- This Project is a blackjack simulator used to train card counting.
+- It is designed to work offline and online with a web interface.
+- It has optional sign in where users can track their stats, and monitor bankroll over a long period of time.
 
 ## Project Structure & Module Organization
 - `src/` holds the Vue 3 Blackjack project (components, stores, models, lib utilities).
 - There are 2 project interfaces, A CLI game that is run from the `src/index.ts`, and a web interface starting with `src/main.ts`.
 - The core game logic lives under `src/models/`, and UI elements are split between UI elements in `src/components/` and state management in Pinia stores under `src/stores/`.
+- `src/docs` contains the schema of the firestore database documents.
 - Tests sit beside the code in `src/__tests__/` using Vitest + Vue Test Utils. Static assets are in `public/` (served as-is) and `kenney_playing-cards-pack/` for art references.
 - Build outputs land in `dist/`; avoid editing generated files. Shared configs (Vite, TS, eslint) stay at repo root.
 
