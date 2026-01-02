@@ -10,9 +10,12 @@ import { ref, onMounted } from 'vue'
 import { getAuth, isSignInWithEmailLink, signInWithEmailLink, getAdditionalUserInfo, type UserCredential } from 'firebase/auth'
 import '@/lib/firebase.ts'
 import { LOCAL_KEY_EMAIL } from '@/constants.ts'
+import {useRouter} from "vue-router";
 
 const statusMessage = ref('Checking link…')
 const pendingLink = ref('')
+
+const router = useRouter()
 
 const completeSignIn = async () => {
   const auth = getAuth()
@@ -34,6 +37,7 @@ const completeSignIn = async () => {
       profile: info?.profile,
     })
     statusMessage.value = `Welcome back${info?.profile ? ', profile info logged in console.' : '!'} Signed in as ${result.user.email ?? email}.`
+    await router.push('/')
   } catch (error) {
     console.error('Failed to finish email link sign-in', error)
     statusMessage.value = 'Failed to finish signing in. Please request a new link and try again.'
