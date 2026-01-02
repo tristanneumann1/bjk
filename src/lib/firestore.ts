@@ -2,6 +2,7 @@
 
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
+import {PLAYER_COLLECTION, playerDocId} from "@/docs/player.ts";
 
 export const firestore = getFirestore(fbApp)
 
@@ -10,6 +11,11 @@ export const getFbDoc = async <T>(collectionId: string, address: string[]): Prom
   const snap = await getDoc(fbDoc)
   return snap.exists() ? (snap.data() as T) : null
 }
+
+export const getPlayerDoc = async <T>(playerUid: string, address: string[]): Promise<T | null> => {
+  return getFbDoc(PLAYER_COLLECTION, [playerDocId(playerUid), ...address])
+}
+
 
 export const upsertFbDoc = async <T>(collectionId: string, address: string[], data: Partial<T>) => {
   const fbDoc = doc(firestore, collectionId, ...address)
@@ -24,4 +30,9 @@ export const upsertFbDoc = async <T>(collectionId: string, address: string[], da
   }
 
   return setDoc(fbDoc, payload, { merge: true })
+}
+
+// TODO, refactor to use this
+export const upsertPlayerDoc = async <T>(playerUid: string, address: string[], data: Partial<T>) => {
+  return upsertFbDoc(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], data)
 }

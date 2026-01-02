@@ -36,10 +36,6 @@ interface RulesMeta {
   DAS: boolean
 }
 
-function roundTowards0(num: number): number {
-  return num < 0 ? Math.ceil(num) : Math.floor(num)
-}
-
 export function determineCorrectAction(
   session: Session,
   strategyGrid: StrategyGrid,
@@ -49,10 +45,8 @@ export function determineCorrectAction(
   const activeChair  = table.activeChair
   const playerHand = activeChair?.activeHand
   const dealerUpCard = table.upCard
-  const remainingDecksUpper = Math.ceil(2 * table.dealer.remainingDecks) / 2
-  const remainingDecksLower = Math.floor(2 * table.dealer.remainingDecks) / 2
-  const trueCountUpper = roundTowards0(table.runningCount / remainingDecksUpper)
-  const trueCountLower = roundTowards0(table.runningCount / remainingDecksLower)
+  const trueCountUpper = table.trueCountUpper
+  const trueCountLower = table.trueCountLower
 
   if (!activeChair || !playerHand || !dealerUpCard) {
     return []

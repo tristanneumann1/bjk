@@ -1,52 +1,59 @@
 import { defineStore } from 'pinia'
 import { onScopeDispose, ref } from 'vue'
-import { nanoid } from 'nanoid'
 import {modelEvents, userEvent, type UserEventMap} from '@/lib/mitt'
 import * as userEvents from '@/lib/userEvents'
 import {getAuth} from "firebase/auth";
 import {Session} from "@/models/session.ts";
+import {buildGameDocId, type GameDoc, GAMES_SUBCOLLECTION, serializeRulesDoc} from "@/docs/game.ts";
+import {upsertPlayerDoc} from "@/lib/firestore.ts";
+import {buildRoundDocId, type RoundDoc, ROUNDS_SUBCOLLECTION} from "@/docs/round.ts";
 
 export const useGameStore = defineStore('game', () => {
   const currentGameId = ref<string | null>(null)
+  const roundId = ref<number>(0)
 
-  const table = Session.getInstance().table
-  const newGameId = () => nanoid()
+  const session = Session.getInstance()
 
-  const ensureActiveGame = () => {
-    if (!currentGameId.value) {
-      currentGameId.value = newGameId()
-    }
-    return currentGameId.value
-  }
-
-  async function persistGame() {}
-
-  const onPlay = () => {
-    ensureActiveGame()
+  async function persistGame() {
     const auth = getAuth()
     const userId = auth.currentUser?.uid
     if (!userId) return
 
+    const rules = session.rules
+    const rulesDoc = serializeRulesDoc(rules)
 
-    /*
-    persistGame()
-      required data:
-        user id
-        Table Rules
-        Player seats and bets
-        startingTrueCount
+    const startingTrueCountLower = session.table.trueCountLower
+    const startingTrueCountUpper = session.table.trueCountUpper
 
-      In a transaction:
-      get or create the remote game document
-        /Player/plyr<id>/Games/game<id>
-        GameDoc
-      create the remote round document
-        /Player/plyr<id>/Games/gm<id>/Rounds/rnd<id>
-        RoundDoc
-     */
+    const betAmounts = session.table.playerChairArray.map((chair) => {
+      return chair.bet
+    })
+
+    if(!currentGameId.value) {
+      const gameId = buildGameDocId()
+      await upsertPlayerDoc<GameDoc>(userId, [GAMES_SUBCOLLECTION, gameId], rulesDoc)
+      currentGameId.value = gameId
+    }
+
+    await upsertPlayerDoc<RoundDoc>(userId, [GAMES_SUBCOLLECTION, currentGameId.value, ROUNDS_SUBCOLLECTION, buildRoundDocId('' + roundId.value)], {
+      startingTrueCountLower,
+      startingTrueCountUpper,
+      betAmounts
+    })
+  }
+
+  const onPlay = async () => {
+    console.log('onplay handler')
+    roundId.value++
+    try {
+      await persistGame()
+    } catch (error) {
+      console.error('Failed to persist game', error)
+    }
   }
 
   const onReshuffle = () => {
+    roundId.value = 0
     currentGameId.value = null
   }
 

@@ -16,7 +16,7 @@ export type RulesDoc = Pick<Rules,
 
 export type GameDoc = BaseDoc & RulesDoc
 
-export const GAMES_SUBCOLLECTION = 'games'
+export const GAMES_SUBCOLLECTION = 'Games'
 
 export const buildGameDocId = (id?: string) => `gm_${id ?? nanoid()}`
 
