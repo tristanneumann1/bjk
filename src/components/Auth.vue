@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { sendSignInLinkToEmail, getAuth, onAuthStateChanged, signOut } from 'firebase/auth'
 import { actionCodeSettings } from '@/lib/firebase.ts'
 import { LOCAL_KEY_EMAIL } from '@/constants.ts'

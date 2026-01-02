@@ -11,3 +11,4 @@
 - [ ] Felt, custom art
 - [ ] Chair Bet change and sit / leave should be sent to session through event handlers
 - [ ] Inform if bets are correct value
+- [ ] On player bust / blackjack don't complete dealer hand

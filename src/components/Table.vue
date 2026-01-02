@@ -5,8 +5,10 @@ import PlayerBalanceDisplay from "@/components/PlayerBalanceDisplay.vue";
 import ActionSection from "@/components/ActionSection.vue";
 import DealerSection from "@/components/DealerSection.vue";
 import { useChairsStore } from '@/stores/chairs'
+import { useGameStore } from '@/stores/game'
 
 const chairStore = useChairsStore()
+useGameStore()
 const chairSlots = [0, 1, 2]
 </script>
 

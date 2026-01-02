@@ -23,22 +23,3 @@ function playerPlayHandler(table: Table) {
     table.startRound();
   })
 }
-
-function persistGameRound(table: Table) {
-  modelEvents.on(userEvent(userEvents.PLAY), (_event: UserEventMap) => {
-    /*
-      required data:
-        Table Rules
-        Player seats and bets
-        startingTrueCount
-
-      In a transaction:
-      get or create the remote game document
-        /Player/plyr<id>/Games/game<id>
-        GameDoc
-      create the remote round document
-        /Player/plyr<id>/Games/gm<id>/Rounds/rnd<id>
-        RoundDoc
-     */
-  })
-}

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import {computed, onScopeDispose, type Ref, ref} from 'vue'
+import { onScopeDispose, type Ref, ref} from 'vue'
 import { Session } from '@/models/session'
 import {
   modelEvents,

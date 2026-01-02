@@ -14,6 +14,7 @@ import {
 import { Hand, HAND_OUTCOME_EVENT, NEW_CARD_EVENT, SPLIT_CARDS_EVENT } from '@/models/hand.ts'
 import { CHAIR_EVENT } from '@/models/table.ts'
 import {RESHUFFLE} from "@/lib/userEvents.ts";
+import {isNumber} from "@/lib/utils.ts";
 
 type HandOutcomeView = {
   result: Hand['lastOutcome']
@@ -42,7 +43,7 @@ export const useChairsStore = defineStore('chairs', () => {
   const chairs = reactive<Record<number, ChairView>>({})
   const activeChair = computed(() => {
     const chairId = activeChairId.value
-    if (typeof chairId !== 'number') {
+    if (!isNumber(chairId)) {
       return null
     }
     return chairs[chairId]
