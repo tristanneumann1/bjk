@@ -43,10 +43,11 @@ export const useGameStore = defineStore('game', () => {
   }
 
   const onPlay = async () => {
-    console.log('onplay handler')
     roundId.value++
+    const persistGamePromise = persistGame()
+    session.table.startRound();
     try {
-      await persistGame()
+      await persistGamePromise
     } catch (error) {
       console.error('Failed to persist game', error)
     }
@@ -67,5 +68,6 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     currentGameId,
+    roundId
   }
 })

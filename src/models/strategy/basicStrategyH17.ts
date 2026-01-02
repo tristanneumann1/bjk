@@ -1,6 +1,7 @@
 import type {StrategyGrid} from "@/models/strategy/determineCorrectAction.ts";
 
 export const basicStrategyH17: StrategyGrid = {
+      id: 'basicStrategyH17',
      '2_2': [{canSplit: true, action: 'Split'}, {action: 'Hit'}],
      '2_3': [{canSplit: true, action: 'Split'}, {action: 'Hit'}],
      '2_4': [{canSplit: true, action: 'Split'}, {action: 'Hit'}],

@@ -1,9 +1,5 @@
 import { Card } from '@/models/card';
 import { type HandResult } from '@/models/chair';
-export type Action = 'Hit' | 'Stand' | 'Double' | 'Split' | 'Surrender';
-export function isAction(value: string): value is Action {
-  return ['Hit', 'Stand', 'Double', 'Split', 'Surrender'].includes(value);
-}
 import {
   modelChangeEvent,
   modelCustomEvent,
@@ -12,6 +8,11 @@ import {
   type ModelPropertyChangeEvent
 } from "@/lib/mitt";
 import {ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
+import {type PlayerAction} from "@/types/actions";
+
+export function isAction(value: string): value is PlayerAction {
+  return ['Hit', 'Stand', 'Double', 'Split', 'Surrender'].includes(value);
+}
 
 export const NEW_CARD_EVENT = 'new_card'
 export const SPLIT_CARDS_EVENT = 'split_cards'

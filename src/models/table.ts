@@ -1,6 +1,6 @@
 import { Chair } from '@/models/chair';
 import { Dealer } from '@/models/dealer';
-import {type Action} from '@/models/hand';
+import {type PlayerAction} from '@/types/actions';
 import {Session} from "@/models/session";
 import {attachModelEventEmitter} from "@/lib/modelEvents";
 import {
@@ -171,7 +171,7 @@ export class Table {
     }
   }
 
-  act(action: Action) {
+  act(action: PlayerAction) {
     if (!this.dealerChair.activeHand) {
       throw new Error('Round not started');
     }

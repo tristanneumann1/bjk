@@ -3,7 +3,6 @@ import {buildNDeckShoe, Card} from "@/models/card.ts";
 import {Chair} from "@/models/chair.ts";
 import {Dealer} from "@/models/dealer.ts";
 import {Table} from "@/models/table.ts";
-import {initializeHandlers} from "@/lib/handlers.ts";
 import {Session} from "@/models/session.ts";
 import {Player} from "@/models/player.ts";
 
@@ -164,7 +163,6 @@ export default function initializeSession() {
   dealer.resetDealIndex()
   const table = new Table(dealer, dealerChair, [], {logAfterAction: false})
 
-  initializeHandlers(table)
   Session.initialize({
     player: new Player(100_000),
     rules,

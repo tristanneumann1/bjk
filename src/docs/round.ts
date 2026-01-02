@@ -9,4 +9,4 @@ export type RoundDoc = BaseDoc & {
 
 export const ROUNDS_SUBCOLLECTION = 'Rounds'
 
-export const buildRoundDocId = (id?: string) => `rnd_${id ?? nanoid()}`
+export const buildRoundDocId = (id?: string | number) => `rnd_${id ?? nanoid()}`

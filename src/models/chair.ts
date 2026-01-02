@@ -1,5 +1,5 @@
 import { Card } from '@/models/card';
-import {type Action, Hand} from '@/models/hand';
+import {Hand} from '@/models/hand';
 import { Dealer } from '@/models/dealer';
 import chalk, { type ColorName, type ModifierName } from 'chalk';
 import {Session} from "@/models/session";
@@ -10,6 +10,7 @@ import {
   modelEvents, modelInstanceCustomEvent,
   type ModelPropertyChangeEvent
 } from "@/lib/mitt";
+import {type PlayerAction} from "@/types/actions";
 
 export type HandResult = 'Win' | 'Lose' | 'Double_Lose' | 'Push' | 'BlackJack_Win' | 'Double_Win' | 'Double_Push' | 'Surrendered';
 const HAND_VIEW_COLORS: { [result in HandResult]: ColorName | ModifierName} = {
@@ -95,16 +96,16 @@ export class Chair {
       this.moveToNextHand(dealer);
     }
   }
-  private static readonly ACTIONS: Action[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender']
+  private static readonly ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender']
 
-  listViableActions(): Record<Action, boolean> {
+  listViableActions(): Record<PlayerAction, boolean> {
     return Chair.ACTIONS.reduce((result, action) => {
       result[action] = !this.validateAction(action)
       return result
-    }, {} as Record<Action, boolean>)
+    }, {} as Record<PlayerAction, boolean>)
   }
 
-  validateAction(action: Action): string | null {
+  validateAction(action: PlayerAction): string | null {
     const activeHand = this.activeHand
     if (!activeHand) {
       return 'No active hand'
@@ -155,10 +156,12 @@ export class Chair {
           return 'Surrender not allowed'
         }
         return null
+      case 'Insurance':
+        return 'Insurance not supported'
     }
   }
 
-  act (action: Action, dealer: Dealer) {
+  act (action: PlayerAction, dealer: Dealer) {
     if (!this.activeHand) {
       throw new Error('No active hand');
     }

@@ -6,7 +6,7 @@ import {Session} from "@/models/session.ts";
 import {Table} from "@/models/table.ts";
 import {Dealer} from "@/models/dealer.ts";
 import {Chair} from "@/models/chair.ts";
-import type {Action} from '@/models/hand'
+import type {PlayerAction} from '@/types/actions.ts'
 
 describe('Hand Model', () => {
   Session.initialize({
@@ -29,7 +29,7 @@ describe('Hand Model', () => {
   const handSplit13 = new Hand([new Card('Hearts', '4'), new Card('Diamonds', '7'), new Card('Diamonds', '2')]);
   handSplit13.split();
 
-  const validateAction = (hand: Hand, action: Action, bet: number = 10) => {
+  const validateAction = (hand: Hand, action: PlayerAction, bet: number = 10) => {
     const chair = new Chair([hand])
     chair.bet = bet
     return chair.validateAction(action)

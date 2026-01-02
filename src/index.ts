@@ -1,5 +1,5 @@
 import prompt from 'prompt';
-import { type Action } from '@/models/hand';
+import { type PlayerAction } from '@/types/actions';
 import { Game3Chair } from '@/models/games/game3Chair';
 
 async function run () {
@@ -8,7 +8,7 @@ async function run () {
   // game.start([new Card('Hearts', 'K'), new Card('Clubs', 'A'), new Card('Hearts', '5'), new Card('Clubs', 'K')])
   let stop = false
   while(!stop) {
-    let action: Action | null = null
+    let action: PlayerAction | null = null
     const { act } = await prompt.get(['act'])
     switch (act) {
       case 'h':

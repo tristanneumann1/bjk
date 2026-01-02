@@ -22,11 +22,12 @@ type ComparisonRule = {
 
 type ScenarioKey = `${number}_${number}`
 
-export type StrategyGrid = {
+export type StrategyGrid = { id: string } & {
   [K in ScenarioKey]: ComparisonRule[]
 }
 
 interface RulesMeta {
+  // strategyId: string
   dealerUpCard: number
   softValue: number
   canSplit: boolean
