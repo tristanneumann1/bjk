@@ -1,6 +1,6 @@
 // This doc is a model agnostic client for firestore db, model specific logic exists in the docs/ directory
 
-import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore'
+import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
 import {PLAYER_COLLECTION, playerDocId} from "@/docs/player.ts";
 
@@ -16,6 +16,17 @@ export const getPlayerDoc = async <T>(playerUid: string, address: string[]): Pro
   return getFbDoc(PLAYER_COLLECTION, [playerDocId(playerUid), ...address])
 }
 
+export const getFbDocs = async <T>(collectionId: string, address: string[]): Promise<(T | null)[]> => {
+  const querySnapshot = await getDocs(collection(firestore, collectionId, ...address));
+
+  return querySnapshot.docs.map(doc => {
+    return doc.exists() ? (doc.data() as T) : null
+  })
+}
+
+export const getPlayerDocs = async<T>(playerUid: string, address: string[]): Promise<(T | null)[]> => {
+    return getFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address])
+}
 
 export const upsertFbDoc = async <T>(collectionId: string, address: string[], data: Partial<T>) => {
   const fbDoc = doc(firestore, collectionId, ...address)

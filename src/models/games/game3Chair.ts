@@ -8,7 +8,7 @@ export class Game3Chair extends Game1 {
   }
 
   start() {
-    for (let chair of this.table.playerChairArray) {
+    for (const chair of this.table.playerChairArray) {
       chair.bet = 1000
     }
     this.table.startRound()

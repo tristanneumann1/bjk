@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import Chair from "@/components/Chair.vue";
-import InactiveChair from "@/components/InactiveChair.vue";
-import PlayerBalanceDisplay from "@/components/PlayerBalanceDisplay.vue";
-import ActionSection from "@/components/ActionSection.vue";
-import DealerSection from "@/components/DealerSection.vue";
+import { computed } from 'vue'
+import Chair from '@/components/Chair.vue'
+import InactiveChair from '@/components/InactiveChair.vue'
+import PlayerBalanceDisplay from '@/components/PlayerBalanceDisplay.vue'
+import ActionSection from '@/components/ActionSection.vue'
+import DealerSection from '@/components/DealerSection.vue'
+import RoundSummary from '@/components/RoundSummary.vue'
 import { useChairsStore } from '@/stores/chairs'
 import { useGameStore } from '@/stores/game'
+import {useDealerStore} from "@/stores/dealer.ts";
 
-const chairStore = useChairsStore()
 useGameStore()
+const chairStore = useChairsStore()
+const dealerStore = useDealerStore()
+
 const chairSlots = [0, 1, 2]
+const showSummary = computed(() => !chairStore.roundInProgress && dealerStore.pastPenetration)
 </script>
 
 <template>
@@ -19,7 +25,8 @@ const chairSlots = [0, 1, 2]
   </div>
 
   <div class="table-lower">
-    <template v-for="chairId in chairSlots" :key="chairId">
+    <RoundSummary v-if="showSummary" />
+    <template v-else v-for="chairId in chairSlots" :key="chairId">
       <Chair
         v-if="chairStore.getChairView(chairId)"
         :chair-id="chairId"
