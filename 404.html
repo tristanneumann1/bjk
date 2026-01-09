@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Redirecting...</title>
+    <script>
+      const base = '/bjk'
+      const rawPath = location.pathname
+      const normalizedPath = rawPath.startsWith(base)
+        ? rawPath.slice(base.length) || '/'
+        : rawPath
+      const redirectTarget = normalizedPath + location.search + location.hash
+      sessionStorage.setItem('bjk:redirect', redirectTarget)
+      location.replace(base + '/')
+    </script>
   </head>
   <body>
-    <p>Redirecting to <a href="/bjk/">home</a>...</p>
+    <p>Redirecting...</p>
   </body>
 </html>
