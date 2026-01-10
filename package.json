@@ -9,13 +9,13 @@
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
-    "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "deploy": "gh-pages -d dist --nojekyll"
+    "preview": "firebase hosting:channel:deploy ${BRANCH:sandbox}",
+    "deploy": "firebase hosting:clone blackjack-19729:${BRANCH:sandbox} blackjack-19729:live"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
