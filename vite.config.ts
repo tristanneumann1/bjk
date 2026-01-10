@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     port: 8080,
   },
-  base: '/bjk/',
+  base: '/',
   plugins: [vue(), vueDevTools()],
   test: {
     globals: true,

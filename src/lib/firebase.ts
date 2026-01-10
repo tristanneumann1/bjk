@@ -7,7 +7,7 @@ const fbApp = initializeApp(FIREBASE_CONFIG)
 const analytics = getAnalytics(fbApp)
 
 const fallbackDomain = (import.meta.env.VITE_APP_DOMAIN as string | undefined)?.replace(/\/$/, '')
-const finishSignUpPath = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/finishSignUp`
+const finishSignUpPath = `/finishSignUp`
 
 const resolveOrigin = () => {
   if (typeof window !== 'undefined') {
