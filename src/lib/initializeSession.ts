@@ -154,6 +154,7 @@ const OPTIONAL_STARTING_CARDS = {
 
 export default function initializeSession() {
   const rules = new Rules()
+  rules.penetration = 300
   const shoe: Card[] = buildNDeckShoe(rules.deckCount)
   const dealerChair = new Chair()
   const dealer = new Dealer(shoe)

@@ -41,7 +41,7 @@ export class Chair {
     return !this.activeHand || this.allHandsOff
   }
   get allHandsOff(): boolean {
-    for (let hand of this.hands) {
+    for (const hand of this.hands) {
       if (!hand.isBusted && !hand.isSurrendered && !hand.isBlackJack) {
         return false;
       }
@@ -63,7 +63,7 @@ export class Chair {
 
   payout (other: Hand): number {
     let payout = 0
-    for(let hand of this.hands) {
+    for(const hand of this.hands) {
       payout += this.handPayout(hand, other)
     }
     return payout;

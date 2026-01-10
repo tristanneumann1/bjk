@@ -75,7 +75,7 @@ export class Table {
       throw new Error('could not find active hands')
     }
 
-    for (let chair of this.playerChairArray) {
+    for (const chair of this.playerChairArray) {
       chair.view(chair === this.activeChair, this.playerRoundsComplete ? this.dealerChair.hands[0] : null)
     }
     if (this.playerRoundsComplete) {
@@ -136,7 +136,7 @@ export class Table {
     Session.getInstance().player.removeMoney(this.roundInitialCost);
     this.dealerChair.start()
     this.deal(this.dealerChair, 2);
-    for (let chair of this.playerChairArray) {
+    for (const chair of this.playerChairArray) {
       chair.start()
       this.deal(chair, 2);
     }
@@ -208,7 +208,7 @@ export class Table {
     if(this.chairTurnIndex < this.playerChairArray.length) {
       throw new Error('Round still in progress');
     }
-    for (let chair of this.playerChairArray) {
+    for (const chair of this.playerChairArray) {
       const payout = chair.payout(this.dealerChair.hands[0])
       if (payout > 0) {
         Session.getInstance().player.addMoney(payout)
@@ -219,7 +219,7 @@ export class Table {
   }
   resetAllChairs() {
     this.dealerChair.start()
-    for (let chair of this.playerChairArray) {
+    for (const chair of this.playerChairArray) {
       chair.start()
     }
   }

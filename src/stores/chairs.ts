@@ -139,7 +139,7 @@ export const useChairsStore = defineStore('chairs', () => {
     return null
   }
 
-  const updateChairHands = (index: number, reset: Boolean = false) => {
+  const updateChairHands = (index: number, reset: boolean = false) => {
     const view = chairs[index]
     const entry = chairRegistry.get(index)
     if (!view || !entry) {
