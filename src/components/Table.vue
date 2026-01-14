@@ -25,7 +25,7 @@ const showSummary = computed(() => !chairStore.roundInProgress && dealerStore.pa
   </div>
 
   <div class="table-lower">
-    <div v-if="!showSummary" class="summary-container">
+    <div v-if="showSummary" class="summary-container">
       <RoundSummary />
     </div>
     <template v-else v-for="chairId in chairSlots" :key="chairId">
