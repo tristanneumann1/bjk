@@ -1,8 +1,15 @@
 // This doc is a model agnostic client for firestore db, model specific logic exists in the docs/ directory
 
-import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection } from 'firebase/firestore'
+import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, where, type QueryFieldFilterConstraint } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
 import {PLAYER_COLLECTION, playerDocId} from "@/docs/player.ts";
+
+export interface QueryOptions {
+  limit?: number,
+  wheres?: Array<QueryFieldFilterConstraint>,
+}
+
+const DEFAULT_LIMIT = 100
 
 export const firestore = getFirestore(fbApp)
 
@@ -16,16 +23,18 @@ export const getPlayerDoc = async <T>(playerUid: string, address: string[]): Pro
   return getFbDoc(PLAYER_COLLECTION, [playerDocId(playerUid), ...address])
 }
 
-export const getFbDocs = async <T>(collectionId: string, address: string[]): Promise<(T | null)[]> => {
-  const querySnapshot = await getDocs(collection(firestore, collectionId, ...address));
+export const getFbDocs = async <T>(collectionId: string, address: string[], options: QueryOptions): Promise<(T | null)[]> => {
+  const col = collection(firestore, collectionId, ...address)
+  const q = query(col, limit(options.limit ?? DEFAULT_LIMIT), ...(options.wheres ?? []))
+  const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map(doc => {
     return doc.exists() ? (doc.data() as T) : null
   })
 }
 
-export const getPlayerDocs = async<T>(playerUid: string, address: string[]): Promise<(T | null)[]> => {
-    return getFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address])
+export const getPlayerDocs = async<T>(playerUid: string, address: string[], options: QueryOptions): Promise<(T | null)[]> => {
+    return getFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
 }
 
 export const upsertFbDoc = async <T>(collectionId: string, address: string[], data: Partial<T>) => {
@@ -43,7 +52,6 @@ export const upsertFbDoc = async <T>(collectionId: string, address: string[], da
   return setDoc(fbDoc, payload, { merge: true })
 }
 
-// TODO, refactor to use this
 export const upsertPlayerDoc = async <T>(playerUid: string, address: string[], data: Partial<T>) => {
   return upsertFbDoc(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], data)
 }

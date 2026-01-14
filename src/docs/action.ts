@@ -4,11 +4,13 @@ import type {Card} from "@/types/card.ts";
 import type {PlayerAction} from "@/types/actions.ts";
 
 export type ActionDoc = BaseDoc & {
+  roundId: string,
   cards: Card[],
   upCard: Card,
   startingTrueCountUpper: number,
   startingTrueCountLower: number,
   chosenAction: PlayerAction,
+  actionIsCorrect: boolean,
   strategyId: string,
   expectedAction: PlayerAction[]
 }

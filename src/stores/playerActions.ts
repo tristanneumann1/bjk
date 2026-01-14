@@ -96,10 +96,12 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
       startingTrueCountUpper,
       chosenAction: action,
       strategyId: basicStrategyH17.id,
-      expectedAction: correctActions
+      expectedAction: correctActions,
+      actionIsCorrect: correctActions.includes(action),
+      roundId: buildRoundDocId(roundId)
     }
 
-    return upsertPlayerDoc<ActionDoc>(userId, [ GAMES_SUBCOLLECTION, gameId, ROUNDS_SUBCOLLECTION, buildRoundDocId(roundId), ACTIONS_SUBCOLLECTION, buildActionDocId()], actionDoc)
+    return upsertPlayerDoc<ActionDoc>(userId, [ GAMES_SUBCOLLECTION, gameId, ACTIONS_SUBCOLLECTION, buildActionDocId()], actionDoc)
   }
 
   const onAct = async (event: UserEventMap) => {
