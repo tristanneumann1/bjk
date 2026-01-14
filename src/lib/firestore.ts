@@ -1,6 +1,6 @@
 // This doc is a model agnostic client for firestore db, model specific logic exists in the docs/ directory
 
-import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, type QueryFieldFilterConstraint } from 'firebase/firestore'
+import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, getCountFromServer, type QueryFieldFilterConstraint } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
 import {PLAYER_COLLECTION, playerDocId} from "@/docs/player.ts";
 
@@ -35,6 +35,20 @@ export const getFbDocs = async <T>(collectionId: string, address: string[], opti
 
 export const getPlayerDocs = async<T>(playerUid: string, address: string[], options: QueryOptions): Promise<(T | null)[]> => {
     return getFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
+}
+
+export const countFbDocs = async (collectionId: string, address: string[], options: QueryOptions): Promise<number> => {
+  const col = collection(firestore, collectionId, ...address)
+  const q = query(col, limit(options.limit ?? DEFAULT_LIMIT), ...(options.wheres ?? []))
+
+  const snapshot = await getCountFromServer(q)
+  console.log('snapshot', snapshot)
+  console.log('snapshot.data()', snapshot.data())
+  return snapshot.data().count
+}
+
+export const countPlayerDocs = async(playerUid: string, address: string[], options: QueryOptions): Promise<(number)> => {
+    return countFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
 }
 
 export const upsertFbDoc = async <T>(collectionId: string, address: string[], data: Partial<T>) => {

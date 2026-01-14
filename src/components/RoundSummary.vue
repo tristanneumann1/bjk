@@ -17,7 +17,7 @@
       </nav>
     </header>
 
-    <div class="round-summary__content" v-if="isAuthenticated">
+    <div class="round-summary__content" v-if="userId">
       <div v-if="activeTab === 'stats'" class="round-summary__panel">
         <ul class="round-summary__stats">
           <li v-for="stat in stats" :key="stat.label">
@@ -37,41 +37,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import {useGameStore} from "@/stores/game.ts";
-import {getPlayerDoc, getPlayerDocs} from "@/lib/firestore.ts";
-import {GAMES_SUBCOLLECTION} from "@/docs/game.ts";
-import {ROUNDS_SUBCOLLECTION} from "@/docs/round.ts";
-
-const gameStore = useGameStore()
+import { where } from 'firebase/firestore'
+import { useGameStore } from '@/stores/game.ts'
+import { countPlayerDocs } from '@/lib/firestore.ts'
+import { GAMES_SUBCOLLECTION } from '@/docs/game.ts'
+import { ACTIONS_SUBCOLLECTION } from '@/docs/action.ts'
 
 const tabs = [
   { id: 'stats', label: 'Stats' },
   { id: 'graph', label: 'Graph' },
 ]
 
+const gameStore = useGameStore()
 const activeTab = ref('stats')
 const userId = ref<string | null>(getAuth().currentUser?.uid ?? null)
+const totalActions = ref(0)
+const incorrectActions = ref(0)
 
-const stats = [
-  { label: 'Actions Taken', value: 0 },
-  { label: 'Mistakes Made', value: 0 },
-]
+const stats = computed(() => [
+  { label: 'Actions Taken', value: totalActions.value },
+  { label: 'Mistakes Made', value: incorrectActions.value },
+])
 
 onAuthStateChanged(getAuth(), user => {
   userId.value = user?.uid ?? null
 })
 
-const fetchUserActions = async () => {
-  if (!userId.value) return
-  if (!gameStore.currentGameId) return
+const updateActionStats = async () => {
+  if (!userId.value || !gameStore.currentGameId) return
 
-  getPlayerDocs(userId.value, [GAMES_SUBCOLLECTION, gameStore.currentGameId, ROUNDS_SUBCOLLECTION])
-  // Placeholder for fetching user game data
-  // const games = await getUserGames(userId.value)
-  // Process games to compute stats
+  const actionsPath = [GAMES_SUBCOLLECTION, gameStore.currentGameId, ACTIONS_SUBCOLLECTION]
+
+  try {
+    const [wrongActionsCount, totalActionsCount] = await Promise.all([
+      countPlayerDocs(userId.value, actionsPath, {
+        wheres: [where('actionIsCorrect', '==', false)],
+      }),
+      countPlayerDocs(userId.value, actionsPath, {}),
+    ])
+
+    incorrectActions.value = wrongActionsCount
+    totalActions.value = totalActionsCount
+  } catch (error) {
+    console.error('Failed to fetch action stats', error)
+  }
 }
+
+watch(
+  [userId, () => gameStore.currentGameId],
+  ([uid, currentGameId]) => {
+    if (uid && currentGameId) {
+      updateActionStats()
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
