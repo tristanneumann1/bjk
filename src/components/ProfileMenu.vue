@@ -1,15 +1,16 @@
 <template>
-  <div class="profile-menu" @mouseenter="toggleHover(true)" @mouseleave="toggleHover(false)">
+  <div class="profile-menu">
     <button
       class="profile-menu__button"
       type="button"
       aria-haspopup="true"
       :aria-expanded="isOpen ? 'true' : 'false'"
+      @click="toggleMenu"
     >
       <ProfileIcon class="profile-menu__icon" aria-label="Profile" role="img" />
     </button>
 
-    <div v-if="isOpen" class="profile-menu__panel" role="dialog" aria-label="Player menu">
+    <div v-if="isOpen" class="profile-menu__panel" role="dialog" aria-label="Player menu" ref="menuRef">
       <header class="profile-menu__header">
         <p class="profile-menu__eyebrow">Player Hub</p>
       </header>
@@ -47,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, type Component } from 'vue'
+import { computed, onMounted, onUnmounted, ref, type Component } from 'vue'
 import Auth from "@/components/Auth.vue";
 import ProfileIcon from '@/assets/icons/profile.svg?component'
 import GameIcon from '@/assets/icons/game.svg?component'
@@ -57,6 +58,7 @@ import StyleIcon from '@/assets/icons/style.svg?component'
 
 const isOpen = ref(false)
 const activeSection = ref<MenuSectionId>('profile')
+const menuRef = ref<HTMLElement | null>(null)
 
 type MenuSectionId = 'profile' | 'game' | 'strategy' | 'stats' | 'style'
 
@@ -83,9 +85,25 @@ const activeSectionCopy = computed(() => {
   return section?.description ?? ''
 })
 
-const toggleHover = (value: boolean) => {
-  isOpen.value = value
+const toggleMenu = () => {
+  isOpen.value = !isOpen.value
 }
+
+const closeOnOutsideClick = (event: MouseEvent) => {
+  const target = event.target as Node | null
+  if (!menuRef.value || !target) return
+  if (!menuRef.value.contains(target)) {
+    isOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', closeOnOutsideClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('pointerdown', closeOnOutsideClick)
+})
 </script>
 
 <style scoped>
@@ -94,6 +112,8 @@ const toggleHover = (value: boolean) => {
   top: 1rem;
   left: 1rem;
   z-index: 20;
+  display: flex;
+  gap: 1rem;
 }
 
 .profile-menu__button {
@@ -134,8 +154,10 @@ const toggleHover = (value: boolean) => {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
   color: #fff;
-  min-width: 320px;
   max-width: 380px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 

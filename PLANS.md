@@ -2,7 +2,6 @@
 
 
 - [ ] Menu with customizeable game
-  - "Icon new file" "Remove hover for open close" "Scrollable if the window too small" 
 - [ ] Customizeable action spread with deviations
 - [ ] Insurance rule
 - [ ] On player bust / blackjack don't complete dealer hand
@@ -12,4 +11,5 @@
 - [ ] Measure player overall EV
 - [ ] Change betting slider for better functionality
 - [ ] Felt, custom art
-- [ ] Round summary still too wide
+- [s] Round summary still too wide
+- [s] Can't get menu to be right width

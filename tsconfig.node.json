@@ -7,7 +7,9 @@
     "nightwatch.conf.*",
     "playwright.config.*",
     "eslint.config.*",
-    "./src/index.ts"
+    "./src/index.ts",
+    "./env.d.ts",
+    "./vite-env.d.ts"
   ],
   "compilerOptions": {
     "noEmit": true,
