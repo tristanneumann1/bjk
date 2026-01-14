@@ -10,7 +10,7 @@
       <ProfileIcon class="profile-menu__icon" aria-label="Profile" role="img" />
     </button>
 
-    <div v-if="isOpen" class="profile-menu__panel" role="dialog" aria-label="Player menu" ref="menuRef">
+    <div v-if="isOpen" class="profile-menu__panel" role="dialog" aria-label="Player menu" ref="menuContainerRef">
       <header class="profile-menu__header">
         <p class="profile-menu__eyebrow">Player Hub</p>
       </header>
@@ -37,6 +37,20 @@
         <template v-if="activeSection === 'profile'">
           <p>Log in or view your player details.</p>
           <Auth />
+          <v-divider class="profile-menu__divider" />
+          <div class="profile-menu__settings">
+            <h3>Preferences</h3>
+            <v-switch
+              class="profile-menu__switch"
+              color="primary"
+              hide-details
+              inset
+              density="compact"
+              label="Show running counter"
+              :model-value="settingsStore.showCounter"
+              @update:model-value="settingsStore.setShowCounter"
+            />
+          </div>
         </template>
         <template v-else>
           <p>{{ activeSectionCopy }}</p>
@@ -50,6 +64,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, type Component } from 'vue'
 import Auth from "@/components/Auth.vue";
+import { useSettingsStore } from '@/stores/settings'
 import ProfileIcon from '@/assets/icons/profile.svg?component'
 import GameIcon from '@/assets/icons/game.svg?component'
 import StrategyIcon from '@/assets/icons/strategy.svg?component'
@@ -58,7 +73,8 @@ import StyleIcon from '@/assets/icons/style.svg?component'
 
 const isOpen = ref(false)
 const activeSection = ref<MenuSectionId>('profile')
-const menuRef = ref<HTMLElement | null>(null)
+const menuContainerRef = ref<HTMLElement | null>(null)
+const settingsStore = useSettingsStore()
 
 type MenuSectionId = 'profile' | 'game' | 'strategy' | 'stats' | 'style'
 
@@ -91,8 +107,8 @@ const toggleMenu = () => {
 
 const closeOnOutsideClick = (event: MouseEvent) => {
   const target = event.target as Node | null
-  if (!menuRef.value || !target) return
-  if (!menuRef.value.contains(target)) {
+  if (!menuContainerRef.value || !target) return
+  if (!menuContainerRef.value.contains(target)) {
     isOpen.value = false
   }
 }
@@ -239,5 +255,23 @@ onUnmounted(() => {
   margin: 0;
   font-size: 0.8rem;
   opacity: 0.7;
+}
+
+.profile-menu__divider {
+  margin: 0.75rem 0;
+  opacity: 0.5;
+}
+
+.profile-menu__settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-menu__settings h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 </style>

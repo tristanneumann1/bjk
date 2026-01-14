@@ -4,6 +4,20 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import svgLoader from 'vite-svg-loader'
+import ViteFonts from 'unplugin-fonts/vite'
+import {Options} from "unplugin-fonts/types";
+
+const viteFontsConfig: Options = {
+  fontsource: {
+    families: [
+      {
+        name: 'Roboto',
+        weights: [100, 300, 400, 500, 700, 900],
+        styles: ['normal', 'italic'],
+      },
+    ],
+  },
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,7 +25,7 @@ export default defineConfig({
     port: 8080,
   },
   base: '/',
-  plugins: [vue(), vueDevTools(), svgLoader()],
+  plugins: [vue(), vueDevTools(), svgLoader(), ViteFonts(viteFontsConfig)],
   test: {
     globals: true,
     root: 'src'

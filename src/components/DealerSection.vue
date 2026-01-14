@@ -1,6 +1,6 @@
 <template>
   <section class="dealer-section" aria-label="Dealer hand">
-    <div class="dealer-section__count" aria-live="polite">
+    <div v-if="showResultCounters" class="dealer-section__count" aria-live="polite">
       Running Count: <span class="dealer-section__count-value">{{ formattedRunningCount }}</span>
     </div>
     <div class="dealer-section__content">
@@ -18,8 +18,10 @@
 import { computed } from 'vue'
 import CardHand from '@/components/CardHand.vue'
 import { useDealerStore } from '@/stores/dealer'
+import {useSettingsStore} from "@/stores/settings.ts";
 
 const dealer = useDealerStore()
+const settingsStore = useSettingsStore()
 
 const handMaxWidth = computed(() => 360)
 
@@ -51,6 +53,9 @@ const formattedRunningCount = computed(() => {
   const sign = count > 0 ? '+' : ''
   return `${sign}${count}`
 })
+
+const showResultCounters = computed(() => settingsStore.showCounter)
+
 </script>
 
 <style scoped>
