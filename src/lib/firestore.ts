@@ -42,8 +42,6 @@ export const countFbDocs = async (collectionId: string, address: string[], optio
   const q = query(col, limit(options.limit ?? DEFAULT_LIMIT), ...(options.wheres ?? []))
 
   const snapshot = await getCountFromServer(q)
-  console.log('snapshot', snapshot)
-  console.log('snapshot.data()', snapshot.data())
   return snapshot.data().count
 }
 

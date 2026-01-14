@@ -78,11 +78,12 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
     if (!roundId) throw 'no round found when user acted, gameID' + gameId
 
     const cards: Card[] | undefined = table.activeChair?.activeHand?.cards.map(card => {
-      return { value: card.value }
+      return { rank: card.rank, suit: card.suit }
     })
     if (!cards) throw 'no cards found'
-    const upCardValue = table.upCard.value
-    if (!upCardValue) throw 'no upCard found'
+    const upCardSuit = table.upCard.suit
+    const upCardRank = table.upCard.rank
+    if (!upCardSuit || !upCardRank) throw 'no upCard found'
 
     const startingTrueCountLower = table.trueCountLower
     const startingTrueCountUpper = table.trueCountUpper
@@ -91,7 +92,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
 
     const actionDoc: ActionDoc = {
       cards,
-      upCard: { value: upCardValue },
+      upCard: { rank: upCardRank, suit: upCardSuit },
       startingTrueCountLower,
       startingTrueCountUpper,
       chosenAction: action,
