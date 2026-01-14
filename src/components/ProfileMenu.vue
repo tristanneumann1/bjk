@@ -1,42 +1,87 @@
 <template>
-  <div
-    class="profile-menu"
-    @mouseenter="toggleHover(true)"
-    @mouseleave="toggleHover(false)"
-  >
+  <div class="profile-menu" @mouseenter="toggleHover(true)" @mouseleave="toggleHover(false)">
     <button
       class="profile-menu__button"
       type="button"
       aria-haspopup="true"
       :aria-expanded="isOpen ? 'true' : 'false'"
     >
-      <svg
-        class="profile-menu__icon"
-        viewBox="0 0 24 24"
-        role="img"
-        aria-label="Profile"
-      >
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 20c0-3.3137 3.134-6 8-6s8 2.6863 8 6" />
-      </svg>
+      <ProfileIcon class="profile-menu__icon" aria-label="Profile" role="img" />
     </button>
 
-    <div
-      v-if="isOpen"
-      class="profile-menu__panel"
-      role="dialog"
-      aria-label="Profile menu"
-    >
-      <Auth />
+    <div v-if="isOpen" class="profile-menu__panel" role="dialog" aria-label="Player menu">
+      <header class="profile-menu__header">
+        <p class="profile-menu__eyebrow">Player Hub</p>
+      </header>
+
+      <nav class="profile-menu__tabs" role="tablist">
+        <button
+          v-for="section in menuSections"
+          :key="section.id"
+          class="profile-menu__tab"
+          role="tab"
+          type="button"
+          :aria-selected="section.id === activeSection ? 'true' : 'false'"
+          @click="activeSection = section.id"
+        >
+          <component :is="getIcon(section.id)" class="profile-menu__tab-icon" aria-hidden="true" />
+          <div>
+            <p class="profile-menu__tab-label">{{ section.label }}</p>
+<!--            <p class="profile-menu__tab-description">{{ section.description }}</p>-->
+          </div>
+        </button>
+      </nav>
+
+      <section class="profile-menu__content" role="tabpanel">
+        <template v-if="activeSection === 'profile'">
+          <p>Log in or view your player details.</p>
+          <Auth />
+        </template>
+        <template v-else>
+          <p>{{ activeSectionCopy }}</p>
+          <p class="profile-menu__coming-soon">Content coming soon.</p>
+        </template>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, type Component } from 'vue'
 import Auth from "@/components/Auth.vue";
+import ProfileIcon from '@/assets/icons/profile.svg?component'
+import GameIcon from '@/assets/icons/game.svg?component'
+import StrategyIcon from '@/assets/icons/strategy.svg?component'
+import StatsIcon from '@/assets/icons/stats.svg?component'
+import StyleIcon from '@/assets/icons/style.svg?component'
 
 const isOpen = ref(false)
+const activeSection = ref<MenuSectionId>('profile')
+
+type MenuSectionId = 'profile' | 'game' | 'strategy' | 'stats' | 'style'
+
+const menuSections: Array<{ id: MenuSectionId; label: string; description: string }> = [
+  { id: 'profile', label: 'Profile', description: 'Log in and view profile information.' },
+  { id: 'game', label: 'Game', description: 'Customize table rules and preferences.' },
+  { id: 'strategy', label: 'Strategy', description: 'Adjust and review your strategy charts.' },
+  { id: 'stats', label: 'Stats', description: 'Review historical performance and bankroll.' },
+  { id: 'style', label: 'Style', description: 'Personalize the look and feel of the game.' },
+]
+
+const iconMap: Record<MenuSectionId, Component> = {
+  profile: ProfileIcon,
+  game: GameIcon,
+  strategy: StrategyIcon,
+  stats: StatsIcon,
+  style: StyleIcon,
+}
+
+const getIcon = (id: MenuSectionId) => iconMap[id]
+
+const activeSectionCopy = computed(() => {
+  const section = menuSections.find(entry => entry.id === activeSection.value)
+  return section?.description ?? ''
+})
 
 const toggleHover = (value: boolean) => {
   isOpen.value = value
@@ -84,18 +129,93 @@ const toggleHover = (value: boolean) => {
 
 .profile-menu__panel {
   margin-top: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.25rem;
   background: rgba(0, 0, 0, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
   color: #fff;
-  min-width: 220px;
+  min-width: 320px;
+  max-width: 380px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-.profile-menu__placeholder {
+.profile-menu__header {
+  margin-bottom: 0.75rem;
+}
+
+.profile-menu__header h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+}
+
+.profile-menu__eyebrow {
   margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.profile-menu__tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0 0 0.75rem;
+}
+
+.profile-menu__tab {
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  text-align: left;
+  padding: 0.5rem;
+  border-radius: 0.6rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.profile-menu__tab[aria-selected='true'] {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.profile-menu__tab:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.profile-menu__tab-icon {
+  width: 32px;
+  height: 32px;
+  stroke: currentColor;
+}
+
+.profile-menu__tab-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.profile-menu__tab-description {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.profile-menu__content {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   font-size: 0.9rem;
-  opacity: 0.85;
+}
+
+.profile-menu__coming-soon {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 </style>

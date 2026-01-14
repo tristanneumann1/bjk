@@ -1,8 +1,9 @@
 # Upcoming Tasks
 
+
 - [ ] Menu with customizeable game
-- [ ] Track stats
-- [ ] Inform user if moves are correct, customizeable action spread with deviations
+  - "Icon new file" "Remove hover for open close" "Scrollable if the window too small" 
+- [ ] Customizeable action spread with deviations
 - [ ] Insurance rule
 - [ ] On player bust / blackjack don't complete dealer hand
 - [ ] Rule to prevent hit after split aces
@@ -11,3 +12,4 @@
 - [ ] Measure player overall EV
 - [ ] Change betting slider for better functionality
 - [ ] Felt, custom art
+- [ ] Round summary still too wide
