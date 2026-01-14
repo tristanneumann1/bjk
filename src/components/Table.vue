@@ -25,7 +25,9 @@ const showSummary = computed(() => !chairStore.roundInProgress && dealerStore.pa
   </div>
 
   <div class="table-lower">
-    <RoundSummary v-if="showSummary" />
+    <div v-if="!showSummary" class="summary-container">
+      <RoundSummary />
+    </div>
     <template v-else v-for="chairId in chairSlots" :key="chairId">
       <Chair
         v-if="chairStore.getChairView(chairId)"
@@ -51,6 +53,11 @@ const showSummary = computed(() => !chairStore.roundInProgress && dealerStore.pa
   gap: 1rem;
   align-items: flex-end;
   justify-content: center;
+}
+
+.summary-container {
+  width: 100%;
+  display: block;
 }
 
 @media (max-width: 768px) {
