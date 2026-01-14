@@ -1,6 +1,6 @@
 // This doc is a model agnostic client for firestore db, model specific logic exists in the docs/ directory
 
-import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, where, type QueryFieldFilterConstraint } from 'firebase/firestore'
+import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, type QueryFieldFilterConstraint } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
 import {PLAYER_COLLECTION, playerDocId} from "@/docs/player.ts";
 

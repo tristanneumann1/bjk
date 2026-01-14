@@ -13,7 +13,7 @@ import {getAuth} from "firebase/auth";
 import {useGameStore} from "@/stores/game.ts";
 import {upsertPlayerDoc} from "@/lib/firestore.ts";
 import {GAMES_SUBCOLLECTION} from "@/docs/game.ts";
-import {buildRoundDocId, ROUNDS_SUBCOLLECTION} from "@/docs/round.ts";
+import {buildRoundDocId} from "@/docs/round.ts";
 import {type ActionDoc, ACTIONS_SUBCOLLECTION, buildActionDocId} from "@/docs/action.ts";
 
 export const PLAYER_ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance'] as const
