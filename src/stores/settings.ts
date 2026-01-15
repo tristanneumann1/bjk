@@ -49,7 +49,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   hydrate()
 
-  watch(showCounter, persist)
+  watch(showCounter, persist, { deep: false })
 
   return {
     showCounter,

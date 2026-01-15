@@ -13,5 +13,17 @@ import Table from '@/components/Table.vue'
 <style scoped>
 .home-shell {
   position: relative;
+  min-height: 100vh;
+  padding: 1rem 1rem calc(env(safe-area-inset-bottom, 0px) + 120px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .home-shell {
+    padding: 2rem 2rem calc(env(safe-area-inset-bottom, 0px) + 160px);
+  }
 }
 </style>

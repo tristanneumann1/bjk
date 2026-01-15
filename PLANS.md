@@ -2,9 +2,9 @@
 
 
 - [ ] Menu with customizeable game
-- [ ] need to guess last count to see summary
+- [ ] need to guess last count to see summary (and see last card)
 - [ ] Customizeable action spread with deviations
-- [ ] Insurance rmule
+- [ ] Insurance rule
 - [ ] On player bust / blackjack don't complete dealer hand
 - [ ] Rule to prevent hit after split aces
 - [ ] Inform if bets are correct value
