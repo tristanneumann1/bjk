@@ -28,30 +28,12 @@
           <component :is="getIcon(section.id)" class="profile-menu__tab-icon" aria-hidden="true" />
           <div>
             <p class="profile-menu__tab-label">{{ section.label }}</p>
-<!--            <p class="profile-menu__tab-description">{{ section.description }}</p>-->
           </div>
         </button>
       </nav>
 
       <section class="profile-menu__content" role="tabpanel">
-        <template v-if="activeSection === 'profile'">
-          <p>Log in or view your player details.</p>
-          <Auth />
-          <v-divider class="profile-menu__divider" />
-          <div class="profile-menu__settings">
-            <h3>Preferences</h3>
-            <v-switch
-              class="profile-menu__switch"
-              color="primary"
-              hide-details
-              inset
-              density="compact"
-              label="Show running counter"
-              :model-value="settingsStore.showCounter"
-              @update:model-value="settingsStore.setShowCounter"
-            />
-          </div>
-        </template>
+        <component v-if="activeSectionComponent" :is="activeSectionComponent" />
         <template v-else>
           <p>{{ activeSectionCopy }}</p>
           <p class="profile-menu__coming-soon">Content coming soon.</p>
@@ -63,8 +45,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, type Component } from 'vue'
-import Auth from "@/components/Auth.vue";
-import { useSettingsStore } from '@/stores/settings'
+import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
+import GameTab from '@/components/menuTabs/GameTab.vue'
 import ProfileIcon from '@/assets/icons/profile.svg?component'
 import GameIcon from '@/assets/icons/game.svg?component'
 import StrategyIcon from '@/assets/icons/strategy.svg?component'
@@ -74,7 +56,6 @@ import StyleIcon from '@/assets/icons/style.svg?component'
 const isOpen = ref(false)
 const activeSection = ref<MenuSectionId>('profile')
 const menuContainerRef = ref<HTMLElement | null>(null)
-const settingsStore = useSettingsStore()
 
 type MenuSectionId = 'profile' | 'game' | 'strategy' | 'stats' | 'style'
 
@@ -94,12 +75,19 @@ const iconMap: Record<MenuSectionId, Component> = {
   style: StyleIcon,
 }
 
+const tabComponents: Partial<Record<MenuSectionId, Component>> = {
+  profile: ProfileTab,
+  game: GameTab,
+}
+
 const getIcon = (id: MenuSectionId) => iconMap[id]
 
 const activeSectionCopy = computed(() => {
   const section = menuSections.find(entry => entry.id === activeSection.value)
   return section?.description ?? ''
 })
+
+const activeSectionComponent = computed(() => tabComponents[activeSection.value])
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
@@ -255,23 +243,5 @@ onUnmounted(() => {
   margin: 0;
   font-size: 0.8rem;
   opacity: 0.7;
-}
-
-.profile-menu__divider {
-  margin: 0.75rem 0;
-  opacity: 0.5;
-}
-
-.profile-menu__settings {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.profile-menu__settings h3 {
-  margin: 0;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 </style>

@@ -1,10 +1,6 @@
 import {Rules} from "@/models/rules.ts";
-import {buildNDeckShoe, Card} from "@/models/card.ts";
-import {Chair} from "@/models/chair.ts";
-import {Dealer} from "@/models/dealer.ts";
-import {Table} from "@/models/table.ts";
+import {Card} from "@/models/card.ts";
 import {Session} from "@/models/session.ts";
-import {Player} from "@/models/player.ts";
 
 const OPTIONAL_STARTING_CARDS = {
   playerSplitIntoBlackJack: [
@@ -154,19 +150,8 @@ const OPTIONAL_STARTING_CARDS = {
 
 export default function initializeSession() {
   const rules = new Rules()
-  const shoe: Card[] = buildNDeckShoe(rules.deckCount)
-  const dealerChair = new Chair()
-  const dealer = new Dealer(shoe)
-  dealer.shuffle()
 
-  // dealer.shoe.unshift(...OPTIONAL_STARTING_CARDS.tens)
-  dealer.resetDealIndex()
-  const table = new Table(dealer, dealerChair, [], {logAfterAction: false})
-
-  Session.initialize({
-    player: new Player(100_000),
-    rules,
-    table
-  })
-  return Session.getInstance()
+  const session = Session.initialize(rules)
+  // session.table.dealer.shoe.unshift(...OPTIONAL_STARTING_CARDS.tens)
+  return session
 }

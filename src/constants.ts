@@ -12,3 +12,4 @@ export const FIREBASE_CONFIG = {
 };
 
 export const LOCAL_KEY_EMAIL = 'User_Email';
+export const GAME_CONFIG_STORAGE_KEY = 'bjk_game_config'

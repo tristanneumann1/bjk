@@ -12,7 +12,7 @@ import router from '@/router'
 
 import './lib/mitt'
 
-import initializeSession from "@/lib/initializeSession.ts";
+import initializeSession from '@/lib/initializeSession.ts'
 
 import '@/lib/firebase.ts'
 
@@ -20,7 +20,7 @@ import '@/lib/firebase.ts'
 
 
 initializeSession()
-// document['_session'] = Session.getInstance()
+// document['_session'] = session
 // document['_events'] = modelEvents
 // const eventsToLog = [HAND_OUTCOME_EVENT]
 // modelEvents.on('*', (type, e) => {
@@ -33,10 +33,11 @@ const vuetify = createVuetify({
   directives,
 })
 
+const pinia = createPinia()
 const app = createApp(App)
 
 app.use(vuetify)
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 
 app.mount('#app')

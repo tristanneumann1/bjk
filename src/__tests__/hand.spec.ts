@@ -1,19 +1,12 @@
 import { Hand } from '@/models/hand';
 import { Card } from '@/models/card';
-import { Player } from '@/models/player';
 import { Rules } from '@/models/rules';
 import {Session} from "@/models/session.ts";
-import {Table} from "@/models/table.ts";
-import {Dealer} from "@/models/dealer.ts";
 import {Chair} from "@/models/chair.ts";
 import type {PlayerAction} from '@/types/actions.ts'
 
 describe('Hand Model', () => {
-  Session.initialize({
-    player: new Player(100),
-    rules: new Rules(),
-    table: new Table(new Dealer(), new Chair(), [], {})
-  })
+  Session.initialize(new Rules(), { playerBalance: 1_000 });
 
   const hand17 = new Hand([new Card('Hearts', '10'), new Card('Diamonds', '7')]);
   const handMismatch20 = new Hand([new Card('Hearts', '10'), new Card('Diamonds', 'J')]);
@@ -74,8 +67,8 @@ describe('Hand Model', () => {
     })
 
     it('blackjack beats all but other blackjacks', () => {
-      expect(handBlackjack.beatsHand(hand17)).toBe('BlackJackWin')
-      expect(handBlackjack.beatsHand(hand24)).toBe('BlackJackWin')
+      expect(handBlackjack.beatsHand(hand17)).toBe('BlackJack_Win')
+      expect(handBlackjack.beatsHand(hand24)).toBe('BlackJack_Win')
 
       expect(hand24.beatsHand(handBlackjack)).toBe('Lose')
       expect(handBlackjack.beatsHand(handBlackjack)).toBe('Push')
@@ -88,7 +81,7 @@ describe('Hand Model', () => {
     })
 
     it('handles doubled hands', () => {
-      expect(handDoubled18.beatsHand(hand17)).toBe('Double')
+      expect(handDoubled18.beatsHand(hand17)).toBe('Double_Win')
       expect(handDoubled18.beatsHand(hand8_18)).toBe('Double_Push')
       expect(handDoubled18.beatsHand(handBlackjack)).toBe('Lose')
     })
@@ -109,7 +102,7 @@ describe('Hand Model', () => {
 
     it('should validate Double action', () => {
       expect(validateAction(hand17, 'Double')).toBe(null)
-      expect(validateAction(hand17, 'Double', 10000)).toBe('Not enough balance to double')
+      expect(validateAction(hand17, 'Double', 10_000)).toBe('Not enough balance to double')
       expect(validateAction(handSplit13, 'Double')).toBe('Can only double on first two cards')
     })
 

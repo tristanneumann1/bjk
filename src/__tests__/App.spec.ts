@@ -1,25 +1,40 @@
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { createRouter, createMemoryHistory } from 'vue-router'
+import { createVuetify } from 'vuetify'
+
 import App from '@/App.vue'
 import { Session } from '@/models/session'
-import { Player } from '@/models/player'
 import { Rules } from '@/models/rules'
-import {Table} from "@/models/table.ts";
-import {Chair} from "@/models/chair.ts";
-import {Dealer} from "@/models/dealer.ts";
 
 describe('App', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    Session.initialize(new Session({
-      player: new Player(100_000),
-      rules: new Rules(),
-      table: new Table(new Dealer(), new Chair(), [], {})
-    }))
+    Session.initialize(new Rules())
   })
 
-  it('mounts renders properly', () => {
-    const wrapper = mount(App)
+  it('mounts renders properly', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: '/',
+          alias: [''],
+          name: 'home',
+          component: { template: '<div />' },
+        },
+      ],
+    })
+
+    const vuetify = createVuetify()
+
+    const wrapper = mount(App, {
+      global: {
+        plugins: [router, vuetify],
+      },
+    })
+
+    await router.isReady()
     expect(wrapper.exists()).toBe(true)
   })
 })
