@@ -4,8 +4,6 @@ import { createPinia } from 'pinia'
 import 'vuetify/styles'
 import 'unfonts.css'
 import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
 
 import App from '@/App.vue'
 import router from '@/router'
@@ -28,10 +26,7 @@ initializeSession()
   // console.log('[Event]',type, e.value)
 
 // })
-const vuetify = createVuetify({
-  components,
-  directives,
-})
+const vuetify = createVuetify()
 
 const pinia = createPinia()
 const app = createApp(App)

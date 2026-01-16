@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import svgLoader from 'vite-svg-loader'
 import ViteFonts from 'unplugin-fonts/vite'
@@ -25,7 +26,13 @@ export default defineConfig({
     port: 8080,
   },
   base: '/',
-  plugins: [vue(), vueDevTools(), svgLoader(), ViteFonts(viteFontsConfig)],
+  plugins: [
+    vue({ template: { transformAssetUrls } }),
+    vuetify({ autoImport: true }),
+    vueDevTools(),
+    svgLoader(),
+    ViteFonts(viteFontsConfig),
+  ],
   test: {
     globals: true,
     root: 'src'
