@@ -1,8 +1,16 @@
 import {GAME_CONFIG_STORAGE_KEY} from "@/constants.ts";
 
-export type StoredGameConfig = {
+export type StoredGameConfig = Partial<{
   penetration: number
-}
+  deckCount: number
+  dealerHitsSoft17: boolean
+  doubleAllowedAfterSplit: boolean
+  resplitAcesAllowed: boolean
+  surrenderAllowed: boolean
+  maxSplits: number
+  blackjackPayout: number
+  dealerPeekA10: boolean
+}>
 
 export const readGameConfig = (): StoredGameConfig | null => {
   if (typeof window === 'undefined') return null

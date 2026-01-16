@@ -1,50 +1,59 @@
 <template>
   <div class="profile-menu">
-    <button
-      class="profile-menu__button"
-      type="button"
-      aria-haspopup="true"
-      :aria-expanded="isOpen ? 'true' : 'false'"
-      @click="toggleMenu"
+    <v-menu
+      v-model="isOpen"
+      :close-on-content-click="false"
+      location="bottom start"
+      offset="8"
     >
-      <ProfileIcon class="profile-menu__icon" aria-label="Profile" role="img" />
-    </button>
-
-    <div v-if="isOpen" class="profile-menu__panel" role="dialog" aria-label="Player menu" ref="menuContainerRef">
-      <header class="profile-menu__header">
-        <p class="profile-menu__eyebrow">Player Hub</p>
-      </header>
-
-      <nav class="profile-menu__tabs" role="tablist">
+      <template #activator="{ props }">
         <button
-          v-for="section in menuSections"
-          :key="section.id"
-          class="profile-menu__tab"
-          role="tab"
+          class="profile-menu__button"
           type="button"
-          :aria-selected="section.id === activeSection ? 'true' : 'false'"
-          @click="activeSection = section.id"
+          aria-haspopup="true"
+          :aria-expanded="isOpen ? 'true' : 'false'"
+          v-bind="props"
         >
-          <component :is="getIcon(section.id)" class="profile-menu__tab-icon" aria-hidden="true" />
-          <div>
-            <p class="profile-menu__tab-label">{{ section.label }}</p>
-          </div>
+          <ProfileIcon class="profile-menu__icon" aria-label="Profile" role="img" />
         </button>
-      </nav>
+      </template>
 
-      <section class="profile-menu__content" role="tabpanel">
-        <component v-if="activeSectionComponent" :is="activeSectionComponent" />
-        <template v-else>
-          <p>{{ activeSectionCopy }}</p>
-          <p class="profile-menu__coming-soon">Content coming soon.</p>
-        </template>
-      </section>
-    </div>
+      <div class="profile-menu__panel" role="dialog" aria-label="Player menu">
+        <header class="profile-menu__header">
+          <p class="profile-menu__eyebrow">Player Hub</p>
+        </header>
+
+        <nav class="profile-menu__tabs" role="tablist">
+          <button
+            v-for="section in menuSections"
+            :key="section.id"
+            class="profile-menu__tab"
+            role="tab"
+            type="button"
+            :aria-selected="section.id === activeSection ? 'true' : 'false'"
+            @click="activeSection = section.id"
+          >
+            <component :is="getIcon(section.id)" class="profile-menu__tab-icon" aria-hidden="true" />
+            <div>
+              <p class="profile-menu__tab-label">{{ section.label }}</p>
+            </div>
+          </button>
+        </nav>
+
+        <section class="profile-menu__content" role="tabpanel">
+          <component v-if="activeSectionComponent" :is="activeSectionComponent" />
+          <template v-else>
+            <p>{{ activeSectionCopy }}</p>
+            <p class="profile-menu__coming-soon">Content coming soon.</p>
+          </template>
+        </section>
+      </div>
+    </v-menu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, type Component } from 'vue'
+import { computed, ref, type Component } from 'vue'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import ProfileIcon from '@/assets/icons/profile.svg?component'
@@ -55,7 +64,6 @@ import StyleIcon from '@/assets/icons/style.svg?component'
 
 const isOpen = ref(false)
 const activeSection = ref<MenuSectionId>('profile')
-const menuContainerRef = ref<HTMLElement | null>(null)
 
 type MenuSectionId = 'profile' | 'game' | 'strategy' | 'stats' | 'style'
 
@@ -88,26 +96,6 @@ const activeSectionCopy = computed(() => {
 })
 
 const activeSectionComponent = computed(() => tabComponents[activeSection.value])
-
-const toggleMenu = () => {
-  isOpen.value = !isOpen.value
-}
-
-const closeOnOutsideClick = (event: MouseEvent) => {
-  const target = event.target as Node | null
-  if (!menuContainerRef.value || !target) return
-  if (!menuContainerRef.value.contains(target)) {
-    isOpen.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('pointerdown', closeOnOutsideClick)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('pointerdown', closeOnOutsideClick)
-})
 </script>
 
 <style scoped>
