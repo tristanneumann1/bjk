@@ -1,4 +1,4 @@
-import {Player} from "@/models/player.ts";
+import {Player} from "@/models/player";
 import type {Rules} from "@/models/rules.ts";
 import {Table} from "@/models/table";
 import {buildNDeckShoe, Card} from "@/models/card";
