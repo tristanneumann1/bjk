@@ -11,11 +11,13 @@ import { useChairsStore } from '@/stores/chairs'
 import { useGameStore } from '@/stores/game'
 import {useDealerStore} from "@/stores/dealer.ts";
 import { useSettingsStore } from '@/stores/settings'
+import { useStatsStore } from '@/stores/stats'
 
 useGameStore()
 const chairStore = useChairsStore()
 const dealerStore = useDealerStore()
 const settingsStore = useSettingsStore()
+const statsStore = useStatsStore()
 
 const guessSubmitted = ref(false)
 const chairSlots = [0, 1, 2]
@@ -33,7 +35,8 @@ watch(
   },
 )
 
-const handleGuessSubmit = () => {
+const handleGuessSubmit = (guess: number | null) => {
+  statsStore.submitCountGuess(guess)
   guessSubmitted.value = true
 }
 </script>

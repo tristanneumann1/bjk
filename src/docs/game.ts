@@ -14,7 +14,10 @@ export type RulesDoc = Pick<Rules,
   | 'dealerPeekA10'
 >
 
-export type GameDoc = BaseDoc & RulesDoc
+export type GameDoc = BaseDoc & RulesDoc & {
+    finalRunningCount?: number | null,
+    countGuess?: number | null,
+}
 
 export const GAMES_SUBCOLLECTION = 'Games'
 

@@ -1,7 +1,5 @@
 # Upcoming Tasks
 
-- [ ] need to guess last count to see summary (and see last card)
-  - Upload the guess, and display
 - [ ] Customizeable action spread with deviations
 - [ ] Insurance rule
 - [ ] On player bust / blackjack don't complete dealer hand

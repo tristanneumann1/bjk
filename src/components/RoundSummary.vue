@@ -17,12 +17,21 @@
       </nav>
     </header>
 
-    <div class="round-summary__content" v-if="userId">
+    <div class="round-summary__content" v-if="hasUser">
       <div v-if="activeTab === 'stats'" class="round-summary__panel">
         <ul class="round-summary__stats">
           <li v-for="stat in stats" :key="stat.label">
             <span class="round-summary__stat-label">{{ stat.label }}</span>
             <span class="round-summary__stat-value">{{ stat.value }}</span>
+          </li>
+          <li v-if="showGuessComparison" class="round-summary__true-count-stat">
+            <span class="round-summary__stat-label">Final True Count</span>
+            <div class="round-summary__true-count-values">
+              <span class="round-summary__stat-value">{{ finalRunningCount }}</span>
+              <span class="round-summary__guess-chip" :class="guessChipClass">
+                Guess: {{ latestGuess }}
+              </span>
+            </div>
           </li>
         </ul>
 
@@ -59,83 +68,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { where } from 'firebase/firestore'
+import { computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import CardHand from '@/components/CardHand.vue'
 import PlayingCard from '@/components/PlayingCard.vue'
-import { useGameStore } from '@/stores/game.ts'
-import { countPlayerDocs, getPlayerDocs } from '@/lib/firestore.ts'
-import { GAMES_SUBCOLLECTION } from '@/docs/game.ts'
-import { ACTIONS_SUBCOLLECTION, type ActionDoc } from '@/docs/action.ts'
+import { useStatsStore } from '@/stores/stats'
 
 const tabs = [
   { id: 'stats', label: 'Stats' },
   { id: 'graph', label: 'Graph' },
 ]
 
-const gameStore = useGameStore()
 const activeTab = ref('stats')
-const userId = ref<string | null>(getAuth().currentUser?.uid ?? null)
-const totalActions = ref(0)
-const incorrectActions = ref(0)
-const mistakes = ref<ActionDoc[]>([])
-const isLoadingMistakes = ref(false)
+const statsStore = useStatsStore()
+const { stats, mistakes, isLoadingMistakes, hasUser, latestGuess, finalRunningCount } = storeToRefs(statsStore)
 
-const stats = computed(() => [
-  { label: 'Actions Taken', value: totalActions.value },
-  { label: 'Mistakes Made', value: incorrectActions.value },
-])
-
-onAuthStateChanged(getAuth(), user => {
-  userId.value = user?.uid ?? null
-})
-
-const resetStats = () => {
-  totalActions.value = 0
-  incorrectActions.value = 0
-  mistakes.value = []
-}
-
-const refreshRoundSummary = async () => {
-  if (!userId.value || !gameStore.currentGameId) {
-    resetStats()
-    return
-  }
-
-  const actionsPath = [GAMES_SUBCOLLECTION, gameStore.currentGameId, ACTIONS_SUBCOLLECTION]
-  isLoadingMistakes.value = true
-
-  try {
-    const [totalActionsCount, wrongActions] = await Promise.all([
-      countPlayerDocs(userId.value, actionsPath, {}),
-      getPlayerDocs<ActionDoc>(userId.value, actionsPath, {
-        wheres: [where('actionIsCorrect', '==', false)],
-      }),
-    ])
-
-    mistakes.value = wrongActions.filter((entry): entry is ActionDoc => Boolean(entry))
-    incorrectActions.value = mistakes.value.length
-    totalActions.value = totalActionsCount
-  } catch (error) {
-    console.error('Failed to fetch action stats', error)
-    resetStats()
-  } finally {
-    isLoadingMistakes.value = false
-  }
-}
-
-watch(
-  [userId, () => gameStore.currentGameId],
-  ([uid, currentGameId]) => {
-    if (uid && currentGameId) {
-      refreshRoundSummary()
-    } else {
-      resetStats()
-    }
-  },
-  { immediate: true }
-)
+const showGuessComparison = computed(() => latestGuess.value !== null && finalRunningCount.value !== null)
+const guessIsCorrect = computed(() => showGuessComparison.value && latestGuess.value === finalRunningCount.value)
+const guessChipClass = computed(() => (guessIsCorrect.value ? 'round-summary__guess-chip--correct' : 'round-summary__guess-chip--incorrect'))
 </script>
 
 <style scoped>
@@ -197,6 +147,33 @@ watch(
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.75rem;
+}
+
+.round-summary__true-count-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.round-summary__guess-chip {
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.round-summary__guess-chip--correct {
+  background: rgba(34, 197, 94, 0.85);
+  color: #fff;
+}
+
+.round-summary__guess-chip--incorrect {
+  background: rgba(239, 68, 68, 0.85);
+  color: #fff;
 }
 
 .round-summary__stat-label {

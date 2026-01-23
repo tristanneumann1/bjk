@@ -15,18 +15,18 @@ import initializeSession from '@/lib/initializeSession.ts'
 import '@/lib/firebase.ts'
 import {Session} from "@/models/session.ts";
 
-// import {modelEvents} from "@/lib/mitt.ts";
+import {modelEvents} from "@/lib/mitt.ts";
 
 
 initializeSession()
 // document['_session'] = Session
 // document['_events'] = modelEvents
 // const eventsToLog = [HAND_OUTCOME_EVENT]
-// modelEvents.on('*', (type, e) => {
-  // if(type)
-  // console.log('[Event]',type, e.value)
+modelEvents.on('*', (type, e) => {
+  if(type)
+  console.log('[Event]',type, e.value)
+})
 
-// })
 const vuetify = createVuetify()
 
 const pinia = createPinia()

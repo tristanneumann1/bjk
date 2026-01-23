@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, onScopeDispose, ref, watch } from 'vue'
-import { modelEvents, userEvent } from '@/lib/mitt'
+import { modelEvents, modelPropertyEvent, userEvent, type UserEventMap } from '@/lib/mitt'
 import * as userEvents from '@/lib/userEvents'
 import { getAuth } from 'firebase/auth'
 import { Session } from '@/models/session.ts'
@@ -121,7 +121,7 @@ export const useGameStore = defineStore('game', () => {
     Session.changeRules(newRules)
   }
 
-  async function persistGame() {
+  async function persistGameAndRound() {
     let isNewGame = false
     if (!currentGameId.value) {
       const gameId = buildGameDocId()
@@ -163,7 +163,7 @@ export const useGameStore = defineStore('game', () => {
       applyPendingConfig()
     }
 
-    const persistGamePromise = persistGame()
+    const persistGamePromise = persistGameAndRound()
     Session.getInstance().table.startRound()
     try {
       await persistGamePromise
@@ -178,12 +178,41 @@ export const useGameStore = defineStore('game', () => {
     currentGameId.value = null
   }
 
+  const persistFinalTrueCount = async (finalCount: number | null) => {
+    const auth = getAuth()
+    const userId = auth.currentUser?.uid
+    if (!userId || !currentGameId.value || !roundId.value) return
+
+    await upsertPlayerDoc<GameDoc>(
+      userId,
+      [GAMES_SUBCOLLECTION, currentGameId.value],
+      { finalRunningCount: finalCount },
+    )
+  }
+
+  const chairTurnEvent = modelPropertyEvent('table', 'chairTurnIndex')
+  const checkGameEndEvent = () => {
+    const table = Session.getInstance().table
+    if (!table.gameComplete) return
+    modelEvents.emit(userEvent(userEvents.GAME_END), { event: userEvents.GAME_END } as UserEventMap)
+  }
+
+  modelEvents.on(chairTurnEvent, checkGameEndEvent)
+
+  const onGameEnd = async () => {
+    const finalCount = Session.getInstance().table.trueCountLower
+    await persistFinalTrueCount(finalCount)
+  }
+
   modelEvents.on(userEvent(userEvents.PLAY), onPlay)
   modelEvents.on(userEvent(userEvents.RESHUFFLE), onReshuffle)
+  modelEvents.on(userEvent(userEvents.GAME_END), onGameEnd)
 
   onScopeDispose(() => {
+    modelEvents.off(chairTurnEvent, checkGameEndEvent)
     modelEvents.off(userEvent(userEvents.PLAY), onPlay)
     modelEvents.off(userEvent(userEvents.RESHUFFLE), onReshuffle)
+    modelEvents.off(userEvent(userEvents.GAME_END), onGameEnd)
   })
 
   watch(maxPenetration, nextMax => {
@@ -229,5 +258,6 @@ export const useGameStore = defineStore('game', () => {
     dealerPeekA10,
     setDealerPeekA10,
     applyPendingConfig,
+    persistFinalTrueCount,
   }
 })
