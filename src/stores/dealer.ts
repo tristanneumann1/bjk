@@ -96,7 +96,10 @@ export const useDealerStore = defineStore('dealer', () => {
   }
 
   function dealerNewCardHandler() {
-    const dealerHand = Session.getInstance().table.dealerChair.activeHand as Hand;
+    const dealerHand = Session.getInstance().table.dealerChair.activeHand;
+    if (!dealerHand) {
+      return
+    }
     setCards(dealerHand.cards)
     setHoleCardHidden()
   }

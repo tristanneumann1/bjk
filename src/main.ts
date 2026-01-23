@@ -13,12 +13,13 @@ import './lib/mitt'
 import initializeSession from '@/lib/initializeSession.ts'
 
 import '@/lib/firebase.ts'
+import {Session} from "@/models/session.ts";
 
 // import {modelEvents} from "@/lib/mitt.ts";
 
 
 initializeSession()
-// document['_session'] = session
+// document['_session'] = Session
 // document['_events'] = modelEvents
 // const eventsToLog = [HAND_OUTCOME_EVENT]
 // modelEvents.on('*', (type, e) => {

@@ -144,7 +144,6 @@ watch(
   max-width: 960px;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 1rem;
-  margin: 2rem;
   padding: 1.25rem;
   color: #fff;
   display: flex;

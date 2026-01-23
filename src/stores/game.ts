@@ -8,7 +8,6 @@ import { buildGameDocId, type GameDoc, GAMES_SUBCOLLECTION, serializeRulesDoc } 
 import { upsertPlayerDoc } from '@/lib/firestore.ts'
 import { buildRoundDocId, type RoundDoc, ROUNDS_SUBCOLLECTION } from '@/docs/round.ts'
 import { readGameConfig, writeGameConfig } from '@/lib/gameConfig.ts'
-import { buildNDeckShoe } from '@/models/card'
 import {Rules} from "@/models/rules.ts";
 
 const clampPenetration = (value: number, maxPenetration: number): number => {
@@ -35,24 +34,24 @@ export const useGameStore = defineStore('game', () => {
   const currentGameId = ref<string | null>(null)
   const roundId = ref<number>(0)
 
-  const session = Session.getInstance()
+  const sessionInitial = Session.getInstance()
 
   const storedConfig = readGameConfig()
 
-  const pendingDeckCount = ref(clampDeckCount(storedConfig?.deckCount ?? session.rules.deckCount))
+  const pendingDeckCount = ref(clampDeckCount(storedConfig?.deckCount ?? sessionInitial.rules.deckCount))
   const maxPenetration = computed(() => Math.max(52, pendingDeckCount.value * 52))
   const pendingPenetration = ref(
-    clampPenetration(storedConfig?.penetration ?? session.rules.penetration, maxPenetration.value),
+    clampPenetration(storedConfig?.penetration ?? sessionInitial.rules.penetration, maxPenetration.value),
   )
-  const dealerHitsSoft17 = ref(storedConfig?.dealerHitsSoft17 ?? session.rules.dealerHitsSoft17)
+  const dealerHitsSoft17 = ref(storedConfig?.dealerHitsSoft17 ?? sessionInitial.rules.dealerHitsSoft17)
   const doubleAllowedAfterSplit = ref(
-    storedConfig?.doubleAllowedAfterSplit ?? session.rules.doubleAllowedAfterSplit,
+    storedConfig?.doubleAllowedAfterSplit ?? sessionInitial.rules.doubleAllowedAfterSplit,
   )
-  const resplitAcesAllowed = ref(storedConfig?.resplitAcesAllowed ?? session.rules.resplitAcesAllowed)
-  const surrenderAllowed = ref(storedConfig?.surrenderAllowed ?? session.rules.surrenderAllowed)
-  const pendingMaxSplits = ref(clampMaxSplits(storedConfig?.maxSplits ?? session.rules.maxSplits))
-  const blackjackPayout = ref(normalizeBlackjackPayout(storedConfig?.blackjackPayout ?? session.rules.blackjackPayout))
-  const dealerPeekA10 = ref(storedConfig?.dealerPeekA10 ?? session.rules.dealerPeekA10)
+  const resplitAcesAllowed = ref(storedConfig?.resplitAcesAllowed ?? sessionInitial.rules.resplitAcesAllowed)
+  const surrenderAllowed = ref(storedConfig?.surrenderAllowed ?? sessionInitial.rules.surrenderAllowed)
+  const pendingMaxSplits = ref(clampMaxSplits(storedConfig?.maxSplits ?? sessionInitial.rules.maxSplits))
+  const blackjackPayout = ref(normalizeBlackjackPayout(storedConfig?.blackjackPayout ?? sessionInitial.rules.blackjackPayout))
+  const dealerPeekA10 = ref(storedConfig?.dealerPeekA10 ?? sessionInitial.rules.dealerPeekA10)
 
   const setPenetration = (value: number) => {
     pendingPenetration.value = clampPenetration(value, maxPenetration.value)
@@ -123,22 +122,27 @@ export const useGameStore = defineStore('game', () => {
   }
 
   async function persistGame() {
+    let isNewGame = false
+    if (!currentGameId.value) {
+      const gameId = buildGameDocId()
+      isNewGame = true
+      currentGameId.value = gameId
+    }
+
     const auth = getAuth()
     const userId = auth.currentUser?.uid
     if (!userId) return
 
-    const rules = session.rules
+    const rules = Session.getInstance().rules
     const rulesDoc = serializeRulesDoc(rules)
 
-    const startingTrueCountLower = session.table.trueCountLower
-    const startingTrueCountUpper = session.table.trueCountUpper
+    const startingTrueCountLower = Session.getInstance().table.trueCountLower
+    const startingTrueCountUpper = Session.getInstance().table.trueCountUpper
 
-    const betAmounts = session.table.playerChairArray.map(chair => chair.bet)
+    const betAmounts = Session.getInstance().table.playerChairArray.map(chair => chair.bet)
 
-    if (!currentGameId.value) {
-      const gameId = buildGameDocId()
-      await upsertPlayerDoc<GameDoc>(userId, [GAMES_SUBCOLLECTION, gameId], rulesDoc)
-      currentGameId.value = gameId
+    if (isNewGame) {
+      await upsertPlayerDoc<GameDoc>(userId, [GAMES_SUBCOLLECTION, currentGameId.value], rulesDoc)
     }
 
     await upsertPlayerDoc<RoundDoc>(
@@ -160,7 +164,7 @@ export const useGameStore = defineStore('game', () => {
     }
 
     const persistGamePromise = persistGame()
-    session.table.startRound()
+    Session.getInstance().table.startRound()
     try {
       await persistGamePromise
     } catch (error) {

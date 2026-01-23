@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { markRaw, onScopeDispose, ref } from 'vue'
+import { onScopeDispose, ref } from 'vue'
 import { Session } from '@/models/session'
 import {
   modelEvents,
@@ -15,7 +15,6 @@ const DEFAULT_REMOTE_BALANCE = 50_000_00
 const PLAYER_BALANCE_EVENT = modelPropertyEvent('player', 'balance')
 
 export const usePlayerStore = defineStore('player', () => {
-  const session = markRaw(Session.getInstance())
   const balance = ref(DEFAULT_BALANCE)
   const auth = getAuth()
   const currentUserId = ref<string | null>(auth.currentUser?.uid ?? null)
@@ -24,6 +23,7 @@ export const usePlayerStore = defineStore('player', () => {
   const normalise = (amount: number) => Math.max(0, Math.floor(amount))
 
   const setBalance = (amount: number) => {
+    const session = Session.getInstance()
     const target = normalise(amount)
     const current = session.player.balance
 
@@ -44,7 +44,7 @@ export const usePlayerStore = defineStore('player', () => {
       return
     }
 
-    setBalance(session.player.balance + delta)
+    setBalance(Session.getInstance().player.balance + delta)
   }
 
   const persistRemoteBalance = async (uid: string, value: number) => {
@@ -99,7 +99,7 @@ export const usePlayerStore = defineStore('player', () => {
       void hydrateBalanceFromRemote(currentUserId.value)
       return
     }
-    setBalance(session.player.balance)
+    setBalance(Session.getInstance().player.balance)
   })
 
   return {

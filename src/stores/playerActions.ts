@@ -31,7 +31,6 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
   const enabledMap: {[action in PlayerAction]: boolean} = reactive(createDefaultState())
 
   const gameStore = useGameStore()
-  const table = Session.getInstance().table
 
   const isEnabled = (action: PlayerAction) => enabledMap[action]
 
@@ -68,6 +67,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
   }
 
   const persistAction = (action: PlayerAction) => {
+    const table = Session.getInstance().table
     const auth = getAuth()
     const userId = auth.currentUser?.uid
     if (!userId) return
@@ -111,7 +111,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
       return
     }
     const persistActionPromise = persistAction(event.action)
-    table.act(event.action);
+    Session.getInstance().table.act(event.action);
     await persistActionPromise
   }
 

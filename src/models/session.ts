@@ -23,8 +23,8 @@ export class Session {
     dealer.shuffle()
 
     const table = new Table(dealer, dealerChair, [], {logAfterAction: false})
-    this.instance = new Session({ rules, player, table });
-    return this.instance
+    Session.instance = new Session({ rules, player, table });
+    return Session.instance
   }
 
   static getInstance(): Session {
@@ -35,11 +35,19 @@ export class Session {
   }
 
   static changeRules(newRules: Rules) {
-    if (this.instance.table.dealer.dealIndex !== 0) {
+    const currentSession = Session.getInstance();
+
+    if (currentSession.table.dealer.dealIndex !== 0 && !currentSession.table.gameComplete) {
       throw new Error('Cannot change rules during an active shoe');
     }
-    this.instance = Session.initialize(newRules);
-    return this.instance;
+    const shoe: Card[] = buildNDeckShoe(newRules.deckCount)
+    const dealer = new Dealer(shoe)
+    dealer.shuffle()
+    const table = currentSession.table
+    table.dealer = dealer
+
+    Session.instance = new Session({ player: currentSession.player, table, rules: newRules })
+    return Session.instance;
   }
 
   constructor({ player, rules, table }: { player: Player; rules: Rules, table: Table }) {

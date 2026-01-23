@@ -38,7 +38,8 @@ type ChairRegistryEntry = {
 }
 
 export const useChairsStore = defineStore('chairs', () => {
-  const activeChairId = ref<number | null>(null)
+  const tableInitial = Session.getInstance().table
+  const activeChairId = ref<number | null>(tableInitial.chairTurnIndex >= 0 ? tableInitial.chairTurnIndex : null)
 
   const chairs = reactive<Record<number, ChairView>>({})
   const activeChair = computed(() => {
@@ -51,8 +52,6 @@ export const useChairsStore = defineStore('chairs', () => {
 
   const chairRegistry = new Map<number, ChairRegistryEntry>()
   const cleanupFns: Array<() => void> = []
-
-  const table = Session.getInstance().table
 
   const roundInProgress = computed(() =>
     Object.values(chairs).some(view => view.modelHands.some(hand => hand.length > 0)),
@@ -130,7 +129,7 @@ export const useChairsStore = defineStore('chairs', () => {
       }
     }
 
-    for (const [key, value] of Object.entries(table.playerChairs)) {
+    for (const [key, value] of Object.entries(Session.getInstance().table.playerChairs)) {
       if (value === chair) {
         return Number(key)
       }
@@ -351,12 +350,33 @@ export const useChairsStore = defineStore('chairs', () => {
   }
 
   const initializeChairs = () => {
-    for (const [key, chair] of Object.entries(table.playerChairs)) {
+    for (const [key, chair] of Object.entries(Session.getInstance().table.playerChairs)) {
       if (!chair) {
         continue
       }
       registerChair(Number(key), chair)
     }
+  }
+
+  const getChairView = (index: number): ChairView | null => {
+    return chairs[index] ?? null
+  }
+
+  const sit = (index: number) => {
+    if (roundInProgress.value) return
+    Session.getInstance().table.addPlayerChair(index)
+  }
+
+  const adjustBet = (index: number, bet: number) => {
+    if (roundInProgress.value) return
+    const chair = chairRegistry.get(index)?.chair
+    if (!chair) return
+    chair.bet = Math.max(bet, 0)
+  }
+
+  const leave = (index: number) => {
+    if (roundInProgress.value) return
+    Session.getInstance().table.removePlayerChair(index)
   }
 
   const onTableChairChange = (event: ModelPropertyChangeEvent) => {
@@ -394,8 +414,6 @@ export const useChairsStore = defineStore('chairs', () => {
   modelEvents.on(chairTurnEvent, onChairTurnIndexChange)
   cleanupFns.push(() => modelEvents.off(chairTurnEvent, onChairTurnIndexChange))
 
-  activeChairId.value = table.chairTurnIndex >= 0 ? table.chairTurnIndex : null
-
   initializeChairs()
 
   onScopeDispose(() => {
@@ -412,27 +430,6 @@ export const useChairsStore = defineStore('chairs', () => {
       cleanupChair(index)
     }
   })
-
-  const getChairView = (index: number): ChairView | null => {
-    return chairs[index] ?? null
-  }
-
-  const sit = (index: number) => {
-    if (roundInProgress.value) return
-    Session.getInstance().table.addPlayerChair(index)
-  }
-
-  const adjustBet = (index: number, bet: number) => {
-    if (roundInProgress.value) return
-    const chair = chairRegistry.get(index)?.chair
-    if (!chair) return
-    chair.bet = Math.max(bet, 0)
-  }
-
-  const leave = (index: number) => {
-    if (roundInProgress.value) return
-    Session.getInstance().table.removePlayerChair(index)
-  }
 
   return {
     activeChairId,

@@ -69,6 +69,10 @@ export class Table {
     return roundTowards0(this.runningCount / remainingDecksUpper)
   }
 
+  get gameComplete(): boolean {
+    return this.dealer.pastPenetration() && !this.aPlayerHasCards
+  }
+
   view() {
     if (this.dealerChair.hands[0]?.cards.length < 1
     || this.playerChairArray[0]?.hands[0]?.cards.length < 1) {

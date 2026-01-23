@@ -34,9 +34,7 @@
             @click="activeSection = section.id"
           >
             <component :is="getIcon(section.id)" class="profile-menu__tab-icon" aria-hidden="true" />
-            <div>
-              <p class="profile-menu__tab-label">{{ section.label }}</p>
-            </div>
+            <p class="profile-menu__tab-label">{{ section.label }}</p>
           </button>
         </nav>
 
@@ -210,12 +208,6 @@ const activeSectionComponent = computed(() => tabComponents[activeSection.value]
 .profile-menu__tab-label {
   margin: 0;
   font-weight: 600;
-}
-
-.profile-menu__tab-description {
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.75;
 }
 
 .profile-menu__content {
