@@ -72,6 +72,10 @@ export class Dealer {
     if (dealerHand.bestValue === 17 && dealerHand.isSoft && Session.getInstance().rules.dealerHitsSoft17) {
       dealerHand.addCard(this.dealCard())
     }
+    this.revealHoleCard()
+  }
+
+  revealHoleCard(): void {
     if (this.holeCardHidden) {
       this.holeCardHidden = false
     }

@@ -60,6 +60,16 @@ export class Table {
   get playerRoundsComplete(): boolean {
     return this.dealerPeekedBlackjack || !this.playerChairArray.find(pc => !pc.chairDone)
   }
+  get allPlayerHandsBustedOrBlackjack(): boolean {
+    for (const chair of this.playerChairArray) {
+      for (const hand of chair.hands) {
+        if (!hand.isBusted && !hand.isBlackJack) {
+          return false
+        }
+      }
+    }
+    return this.playerChairArray.length > 0 && this.playerChairArray.some(chair => chair.hands.length > 0)
+  }
   get trueCountLower(): number {
     const remainingDecksLower = Math.floor(2 * this.dealer.remainingDecks) / 2
     return roundTowards0(this.runningCount / remainingDecksLower)
@@ -189,7 +199,11 @@ export class Table {
     }
 
     if (this.playerRoundsComplete) {
-      this.dealer.completeDealerHand(this.dealerChair.activeHand)
+      if (this.allPlayerHandsBustedOrBlackjack) {
+        this.dealer.revealHoleCard()
+      } else {
+        this.dealer.completeDealerHand(this.dealerChair.activeHand)
+      }
     }
     this.updateRunningCount()
     if (this.configuration.logAfterAction) {
