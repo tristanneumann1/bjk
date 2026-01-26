@@ -9,6 +9,7 @@ import {
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import {getFbDoc, upsertFbDoc} from "@/lib/firestore.ts";
 import {type PlayerDoc, PLAYER_COLLECTION, playerDocId} from "@/docs/player.ts";
+import { useGameStore } from '@/stores/game'
 
 const DEFAULT_BALANCE = 0 // Default to 0 if session still loading
 const DEFAULT_REMOTE_BALANCE = 50_000_00
@@ -19,6 +20,7 @@ export const usePlayerStore = defineStore('player', () => {
   const auth = getAuth()
   const currentUserId = ref<string | null>(auth.currentUser?.uid ?? null)
   const syncingRemoteBalance = ref(false)
+  const gameStore = useGameStore()
 
   const normalise = (amount: number) => Math.max(0, Math.floor(amount))
 
@@ -84,6 +86,7 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     void persistRemoteBalance(uid, nextBalance)
+    void gameStore.persistGameBalance(nextBalance)
   }
 
   modelEvents.on(PLAYER_BALANCE_EVENT, onBalanceChange)
