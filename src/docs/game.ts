@@ -16,6 +16,7 @@ export type RulesDoc = Pick<Rules,
 
 export type GameDoc = BaseDoc & RulesDoc & {
     finalRunningCount?: number | null,
+    finalBalance?: number | null,
     countGuess?: number | null,
 }
 

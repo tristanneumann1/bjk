@@ -178,15 +178,15 @@ export const useGameStore = defineStore('game', () => {
     currentGameId.value = null
   }
 
-  const persistFinalTrueCount = async (finalCount: number | null) => {
+  const persistGameEndState = async (finalRunningCount: number | null, finalBalance: number | null) => {
     const auth = getAuth()
     const userId = auth.currentUser?.uid
-    if (!userId || !currentGameId.value || !roundId.value) return
+    if (!userId || !currentGameId.value) return
 
     await upsertPlayerDoc<GameDoc>(
       userId,
       [GAMES_SUBCOLLECTION, currentGameId.value],
-      { finalRunningCount: finalCount },
+      { finalRunningCount, finalBalance },
     )
   }
 
@@ -200,8 +200,10 @@ export const useGameStore = defineStore('game', () => {
   modelEvents.on(chairTurnEvent, checkGameEndEvent)
 
   const onGameEnd = async () => {
-    const finalCount = Session.getInstance().table.trueCountLower
-    await persistFinalTrueCount(finalCount)
+    const table = Session.getInstance().table
+    const finalCount = table.trueCountLower
+    const finalBalance = Session.getInstance().player.balance
+    await persistGameEndState(finalCount, finalBalance)
   }
 
   modelEvents.on(userEvent(userEvents.PLAY), onPlay)
@@ -258,6 +260,5 @@ export const useGameStore = defineStore('game', () => {
     dealerPeekA10,
     setDealerPeekA10,
     applyPendingConfig,
-    persistFinalTrueCount,
   }
 })
