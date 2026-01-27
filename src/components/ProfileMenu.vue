@@ -54,6 +54,7 @@
 import { computed, ref, type Component } from 'vue'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
+import StrategyTab from '@/components/menuTabs/StrategyTab.vue'
 import ProfileIcon from '@/assets/icons/profile.svg?component'
 import GameIcon from '@/assets/icons/game.svg?component'
 import StrategyIcon from '@/assets/icons/strategy.svg?component'
@@ -84,6 +85,7 @@ const iconMap: Record<MenuSectionId, Component> = {
 const tabComponents: Partial<Record<MenuSectionId, Component>> = {
   profile: ProfileTab,
   game: GameTab,
+  strategy: StrategyTab,
 }
 
 const getIcon = (id: MenuSectionId) => iconMap[id]
