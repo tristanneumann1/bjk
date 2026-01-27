@@ -22,7 +22,7 @@ type ComparisonRule = {
 
 type ScenarioKey = `${number}_${number}`
 
-export type StrategyGrid = { id: string } & {
+export type StrategyGrid = { id: string, name: string } & {
   [K in ScenarioKey]: ComparisonRule[]
 }
 
