@@ -146,7 +146,6 @@ const activeSectionComponent = computed(() => tabComponents[activeSection.value]
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
   color: #fff;
-  max-width: 380px;
   max-height: calc(100vh - 4rem);
   overflow-y: auto;
   overscroll-behavior: contain;

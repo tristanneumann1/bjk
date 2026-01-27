@@ -2,22 +2,60 @@
   <section class="strategy-tab" aria-label="Strategy chart preview">
     <header class="strategy-tab__header">
       <h3>Strategy Preview</h3>
-      <p>Compact view of recent hard totals. Full chart coming soon.</p>
+      <p>Hard totals versus dealer upcards (dummy data).</p>
     </header>
-    <div class="strategy-tab__grid">
-      <StrategyActionButton
-        v-for="index in 9"
-        :key="index"
-        :actions="placeholderActions"
-      />
+    <div class="strategy-chart" role="table">
+      <div class="strategy-chart__cell strategy-chart__cell--corner">Hard</div>
+      <div
+        v-for="upcard in upcards"
+        :key="`header-${upcard}`"
+        class="strategy-chart__cell strategy-chart__cell--header"
+      >
+        {{ formatUpcard(upcard) }}
+      </div>
+      <template v-for="row in strategyGrid" :key="`row-${row.total}`">
+        <div class="strategy-chart__cell strategy-chart__cell--row-label">{{ row.total }}</div>
+        <StrategyActionButton
+          v-for="(actions, index) in row.actions"
+          :key="`cell-${row.total}-${index}`"
+          :actions="actions"
+        />
+      </template>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import StrategyActionButton, { type StrategyActionType } from '@/components/strategy/StrategyActionButton.vue'
 
-const placeholderActions: StrategyActionType[] = ['split', 'hit']
+const hardTotals = Array.from({ length: 19 }, (_, index) => 20 - index)
+const upcards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+const actionPatterns: StrategyActionType[][] = [
+  ['stand'],
+  ['hit'],
+  ['double', 'hit'],
+  ['split', 'hit'],
+  ['surrender', 'hit'],
+  ['double', 'stand'],
+  ['split', 'stand'],
+  ['hit', 'stand'],
+]
+
+const formatUpcard = (value: number) => (value === 1 ? 'A' : value)
+
+const getDummyActions = (total: number, upcard: number): StrategyActionType[] => {
+  const index = (total + upcard) % actionPatterns.length
+  return actionPatterns[index]
+}
+
+const strategyGrid = computed(() =>
+  hardTotals.map(total => ({
+    total,
+    actions: upcards.map(upcard => getDummyActions(total, upcard)),
+  })),
+)
 </script>
 
 <style scoped>
@@ -40,11 +78,40 @@ const placeholderActions: StrategyActionType[] = ['split', 'hit']
   }
 }
 
-.strategy-tab__grid {
+.strategy-chart {
   display: inline-grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 2.5rem repeat(10, 3rem);
   gap: 0;
   width: fit-content;
   max-width: 100%;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.strategy-chart__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.strategy-chart__cell--corner {
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.strategy-chart__cell--header,
+.strategy-chart__cell--row-label {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.strategy-chart__cell--row-label {
+  font-size: 0.85rem;
 }
 </style>
