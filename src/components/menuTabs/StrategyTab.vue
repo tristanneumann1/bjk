@@ -29,8 +29,8 @@
 import { computed } from 'vue'
 import StrategyActionButton, { type StrategyActionType } from '@/components/strategy/StrategyActionButton.vue'
 
-const hardTotals = Array.from({ length: 19 }, (_, index) => 20 - index)
-const upcards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+const hardTotals = Array.from({ length: 19 }, (_, index) => 2 + index)
+const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
 
 const actionPatterns: StrategyActionType[][] = [
   ['stand'],
