@@ -5,7 +5,7 @@
     :style="{ backgroundImage: gradientBackground }"
   >
     <span class="strategy-action-button__label">
-      {{ resolvedActions.map(action => actionMap[action].label).join(' ') }}
+      {{ labelText }}
     </span>
   </button>
 </template>
@@ -28,6 +28,12 @@ const actionMap: Record<StrategyActionType, { label: string; color: string }> = 
 }
 
 const resolvedActions = computed(() => props.actions.slice(0, 4))
+const hasOverflow = computed(() => props.actions.length > 4)
+
+const labelText = computed(() => {
+  const labels = resolvedActions.value.map(action => actionMap[action].label).join('.')
+  return hasOverflow.value ? `${labels}+` : labels
+})
 
 const gradientBackground = computed(() => {
   const actions = resolvedActions.value

@@ -1,4 +1,4 @@
-import type {StrategyGrid} from "@/models/strategy/determineCorrectAction.ts";
+import type {StrategyGrid} from "@/types/strategies.ts";
 
 export const basicStrategyH17: StrategyGrid = {
       id: 'basicStrategyH17',

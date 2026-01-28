@@ -22,10 +22,10 @@ initializeSession()
 // document['_session'] = Session
 // document['_events'] = modelEvents
 // const eventsToLog = [HAND_OUTCOME_EVENT]
-modelEvents.on('*', (type, e) => {
-  if(type)
-  console.log('[Event]',type, e.value)
-})
+// modelEvents.on('*', (type, e) => {
+//   if(type)
+//   console.log('[Event]',type, e.value)
+// })
 
 const vuetify = createVuetify()
 
