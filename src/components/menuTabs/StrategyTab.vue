@@ -4,6 +4,7 @@
       <div>
         <h3>Strategy Preview</h3>
         <p>Hard totals versus dealer upcards (based on selected strategy).</p>
+        <p class="strategy-tab__warning">Changing strategies mid-shoe can skew analytics.</p>
       </div>
       <label class="strategy-tab__selector">
         <span>Strategy</span>
@@ -112,6 +113,12 @@ const strategyGrid = computed(() =>
     font-size: 0.85rem;
     opacity: 0.85;
   }
+}
+
+.strategy-tab__warning {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #facc15;
 }
 
 .strategy-tab__selector {
