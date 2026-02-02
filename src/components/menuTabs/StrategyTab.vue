@@ -53,23 +53,24 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import StrategyActionButton, { type StrategyActionType } from '@/components/strategy/StrategyActionButton.vue'
+import StrategyActionButton from '@/components/strategy/StrategyActionButton.vue'
 import { STRATEGIES } from '@/models/strategy/strategies'
 import { useGameStore } from '@/stores/game'
 import StrategyTileDetail from '@/components/strategy/StrategyTileDetail.vue'
 import type {ScenarioKey, StrategyGrid} from "@/types/strategies.ts";
+import {type PlayerAction} from "@/types/actions.ts";
 
 const hardTotals = Array.from({ length: 19 }, (_, index) => 2 + index)
 const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
 
 const strategies = STRATEGIES
 
-const actionMap: Record<string, StrategyActionType> = {
-  hit: 'hit',
-  stand: 'stand',
-  double: 'double',
-  split: 'split',
-  surrender: 'surrender',
+const actionMap: Record<string, PlayerAction> = {
+  hit: 'Hit',
+  stand: 'Stand',
+  double: 'Double',
+  split: 'Split',
+  surrender: 'Surrender',
 }
 
 const gameStore = useGameStore()
@@ -103,14 +104,14 @@ const selectedStrategy = computed<StrategyGrid>(() =>
 
 const formatUpCard = (value: number) => (value === 1 ? 'A' : value)
 
-const resolveActions = (total: number, upCard: number): StrategyActionType[] => {
+const resolveActions = (total: number, upCard: number): PlayerAction[] => {
   const scenarioKey: ScenarioKey = `${total}_${upCard}`
   const rules = selectedStrategy.value?.[scenarioKey]
-  if (!rules?.length) return ['hit']
+  if (!rules?.length) return ['Hit']
   const mapped = rules
     .map(rule => actionMap[rule.action.toLowerCase()] ?? null)
-    .filter((value): value is StrategyActionType => Boolean(value))
-  return mapped.length ? mapped : ['hit']
+    .filter((value): value is PlayerAction => Boolean(value))
+  return mapped.length ? mapped : ['Hit']
 }
 
 const strategyGrid = computed(() =>

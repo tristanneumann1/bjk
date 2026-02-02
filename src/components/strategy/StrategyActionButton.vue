@@ -13,21 +13,21 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-
-export type StrategyActionType = 'hit' | 'stand' | 'double' | 'split' | 'surrender'
+import {type PlayerAction} from "@/types/actions.ts";
 
 const emit = defineEmits<{ select: [] }>()
 
-const props = withDefaults(defineProps<{ actions?: StrategyActionType[] }>(), {
-  actions: () => ['split', 'hit', 'stand'] as StrategyActionType[],
+const props = withDefaults(defineProps<{ actions?: PlayerAction[] }>(), {
+  actions: () => ['Split', 'Hit', 'Stand'] as PlayerAction[],
 })
 
-const actionMap: Record<StrategyActionType, { label: string; color: string }> = {
-  hit: { label: 'H', color: '#f5f5f5' },
-  stand: { label: 'S', color: '#fde047' },
-  double: { label: 'D', color: '#f472b6' },
-  split: { label: 'Y', color: '#38bdf8' },
-  surrender: { label: 'R', color: '#f97316' },
+const actionMap: Record<PlayerAction, { label: string; color: string }> = {
+  Hit: { label: 'H', color: '#f5f5f5' },
+  Stand: { label: 'S', color: '#fde047' },
+  Double: { label: 'D', color: '#f472b6' },
+  Split: { label: 'Y', color: '#38bdf8' },
+  Surrender: { label: 'R', color: '#f97316' },
+  Insurance: { label: 'I', color: '#000000' },
 }
 
 const resolvedActions = computed(() => props.actions.slice(0, 4))
