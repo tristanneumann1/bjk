@@ -7,6 +7,9 @@ import { RouterView } from 'vue-router'
 </template>
 
 <style>
+@custom-media --bp-landscape-max (max-width: 760px);
+@custom-media --bp-landscape-min (min-width: 761px);
+
 html,
 body,
 #app {

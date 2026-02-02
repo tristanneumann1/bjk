@@ -86,7 +86,7 @@ const handleGuessSubmit = (guess: number | null) => {
   display: block;
 }
 
-@media (max-width: 768px) {
+@media (--bp-landscape-max) {
   .table-upper {
     grid-template-columns: 1fr;
   }

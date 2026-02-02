@@ -9,7 +9,7 @@
           <div class="dealer-shoe__fill" :style="{ height: `${shoeFillPercent}%` }" />
         </div>
       </div>
-      <CardHand :cards="displayCards" :maxWidth="handMaxWidth" large />
+      <CardHand :cards="displayCards" large />
     </div>
   </section>
 </template>
@@ -22,8 +22,6 @@ import {useSettingsStore} from "@/stores/settings.ts";
 
 const dealer = useDealerStore()
 const settingsStore = useSettingsStore()
-
-const handMaxWidth = computed(() => 360)
 
 const shouldHideHoleCard = computed(() => {
   return dealer.holeCardHidden

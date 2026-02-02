@@ -21,7 +21,7 @@ import Table from '@/components/Table.vue'
   gap: 1rem;
 }
 
-@media (min-width: 768px) {
+@media (--bp-landscape-min) {
   .home-shell {
     padding: 2rem 2rem calc(env(safe-area-inset-bottom, 0px) + 160px);
   }
