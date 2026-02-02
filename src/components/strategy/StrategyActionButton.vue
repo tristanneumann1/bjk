@@ -3,6 +3,7 @@
     class="strategy-action-button"
     type="button"
     :style="{ backgroundImage: gradientBackground }"
+    @click="emit('select')"
   >
     <span class="strategy-action-button__label">
       {{ labelText }}
@@ -14,6 +15,8 @@
 import { computed } from 'vue'
 
 export type StrategyActionType = 'hit' | 'stand' | 'double' | 'split' | 'surrender'
+
+const emit = defineEmits<{ select: [] }>()
 
 const props = withDefaults(defineProps<{ actions?: StrategyActionType[] }>(), {
   actions: () => ['split', 'hit', 'stand'] as StrategyActionType[],

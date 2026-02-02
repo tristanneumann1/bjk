@@ -1,12 +1,12 @@
 # Upcoming Tasks
 
-- [ ] Customizeable action spread with deviations
+- [ ] Customizable action spread with deviations
 - [ ] Insurance rule
 - [ ] Rule to prevent hit after split aces
+- [ ] Change betting slider for better functionality
 - [ ] Inform if bets are correct value
 - [ ] Offline Access
 - [ ] Measure player overall EV
-- [ ] Change betting slider for better functionality
 - [ ] Felt, custom art
 - [s] minimize CSS by creating components
 - [s] Round summary still too wide

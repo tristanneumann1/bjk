@@ -15,33 +15,48 @@
         </select>
       </label>
     </header>
-    <div class="strategy-chart" role="table">
-      <div class="strategy-chart__cell strategy-chart__cell--corner">Hard</div>
-      <div
-        v-for="upcard in upcards"
-        :key="`header-${upcard}`"
-        class="strategy-chart__cell strategy-chart__cell--header"
-      >
-        {{ formatUpCard(upcard) }}
-      </div>
-      <template v-for="row in strategyGrid" :key="`row-${row.total}`">
-        <div class="strategy-chart__cell strategy-chart__cell--row-label">{{ row.total }}</div>
-        <StrategyActionButton
-          v-for="(actions, index) in row.actions"
-          :key="`cell-${row.total}-${index}`"
-          :actions="actions"
-        />
-      </template>
+    <div class="strategy-tab__panels">
+      <Transition :name="detailTransitionName" mode="out-in">
+        <div v-if="!selectedTile" key="chart" class="strategy-panel strategy-panel--chart">
+          <div class="strategy-chart" role="table">
+            <div class="strategy-chart__cell strategy-chart__cell--corner">Hard</div>
+            <div
+              v-for="upcard in upcards"
+              :key="`header-${upcard}`"
+              class="strategy-chart__cell strategy-chart__cell--header"
+            >
+              {{ formatUpCard(upcard) }}
+            </div>
+            <template v-for="row in strategyGrid" :key="`row-${row.total}`">
+              <div class="strategy-chart__cell strategy-chart__cell--row-label">{{ row.total }}</div>
+              <StrategyActionButton
+                v-for="(actions, index) in row.actions"
+                :key="`cell-${row.total}-${index}`"
+                :actions="actions"
+                @select="openDetail(row.total, upcards[index])"
+              />
+            </template>
+          </div>
+        </div>
+        <div v-else key="detail" class="strategy-panel strategy-panel--detail">
+          <StrategyTileDetail
+            :total="selectedTile.total"
+            :upcard="selectedTile.upcard"
+            @back="selectedTile = null"
+          />
+        </div>
+      </Transition>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import StrategyActionButton, { type StrategyActionType } from '@/components/strategy/StrategyActionButton.vue'
 import { STRATEGIES } from '@/models/strategy/strategies'
 import { useGameStore } from '@/stores/game'
+import StrategyTileDetail from '@/components/strategy/StrategyTileDetail.vue'
 import type {ScenarioKey, StrategyGrid} from "@/types/strategies.ts";
 
 const hardTotals = Array.from({ length: 19 }, (_, index) => 2 + index)
@@ -59,6 +74,23 @@ const actionMap: Record<string, StrategyActionType> = {
 
 const gameStore = useGameStore()
 const { selectedStrategyId } = storeToRefs(gameStore)
+const selectedTile = ref<{ total: number; upcard: number } | null>(null)
+const transitioningToDetail = ref(false)
+
+const openDetail = (total: number, upcard: number) => {
+  transitioningToDetail.value = true
+  selectedTile.value = { total, upcard }
+}
+
+const detailTransitionName = computed(() =>
+  transitioningToDetail.value ? 'strategy-panel-forward' : 'strategy-panel-backward'
+)
+
+watch(selectedTile, (next, prev) => {
+  if (!next && prev) {
+    transitioningToDetail.value = false
+  }
+})
 
 const selectedStrategyModel = computed({
   get: () => selectedStrategyId.value,
@@ -137,13 +169,52 @@ const strategyGrid = computed(() =>
   }
 }
 
+.strategy-tab__panels {
+  position: relative;
+  min-height: 320px;
+}
+
+.strategy-panel {
+  position: absolute;
+  inset: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 0.5rem 0.25rem 0.5rem 0;
+}
+
+.strategy-panel--detail {
+  padding: 0.5rem 0 0.5rem 0;
+}
+
+.strategy-panel-forward-enter-active,
+.strategy-panel-forward-leave-active,
+.strategy-panel-backward-enter-active,
+.strategy-panel-backward-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.strategy-panel-forward-enter-from,
+.strategy-panel-backward-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.strategy-panel-forward-leave-to,
+.strategy-panel-backward-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.strategy-panel-forward-leave-active,
+.strategy-panel-backward-leave-active {
+  position: absolute;
+}
+
 .strategy-chart {
   display: inline-grid;
   grid-template-columns: 2.5rem repeat(10, 3rem);
   gap: 0;
   width: fit-content;
-  max-width: 100%;
-  overflow: auto;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 

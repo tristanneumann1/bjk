@@ -2,6 +2,7 @@
 - This Project is a blackjack simulator used to train card counting.
 - It is designed to work offline and online with a web interface.
 - It has optional sign in where users can track their stats, and monitor bankroll over a long period of time.
+- Considerations should be made to see if new npm package dependencies qould be helpf to reduce complexity or code volume and if so, the agent should recommend them.
 
 ## Project Structure & Module Organization
 - `src/` holds the Vue 3 Blackjack project (components, stores, models, lib utilities).
