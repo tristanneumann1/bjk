@@ -15,8 +15,8 @@
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
     "serve": "firebase serve --only hosting",
-    "preview": "firebase hosting:channel:deploy ${BRANCH:sandbox}",
-    "deploy": "firebase hosting:clone blackjack-19729:${BRANCH:sandbox} blackjack-19729:live"
+    "preview": "node scripts/firebaseDeploy.mjs preview",
+    "deploy": "node scripts/firebaseDeploy.mjs deploy"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.9",
