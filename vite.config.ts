@@ -6,6 +6,8 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import svgLoader from 'vite-svg-loader'
 import ViteFonts from 'unplugin-fonts/vite'
+import postcssCustomMedia from 'postcss-custom-media'
+import postcssGlobalData from '@csstools/postcss-global-data'
 import {Options} from "unplugin-fonts/types";
 
 const viteFontsConfig: Options = {
@@ -52,4 +54,14 @@ export default defineConfig({
       },
     },
   },
+  css: {
+    postcss: {
+      plugins: [
+        postcssGlobalData({
+          files: ['./src/assets/media.css'],
+        }),
+        postcssCustomMedia(),
+      ],
+    }
+  }
 })

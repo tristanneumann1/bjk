@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 
 import 'vuetify/styles'
 import 'unfonts.css'
+import '@/assets/media.css'
 import { createVuetify } from 'vuetify'
 
 import App from '@/App.vue'
