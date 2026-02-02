@@ -5,6 +5,7 @@ export type RoundDoc = BaseDoc & {
   startingTrueCountLower: number,
   startingTrueCountUpper: number,
   betAmounts: number[]|null,
+  strategyId?: string,
 }
 
 export const ROUNDS_SUBCOLLECTION = 'Rounds'

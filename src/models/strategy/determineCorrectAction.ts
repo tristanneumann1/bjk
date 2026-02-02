@@ -3,39 +3,7 @@ import { Hand } from '@/models/hand'
 import { Rules } from '@/models/rules'
 import type { PlayerAction } from '@/types/actions'
 import type {Session} from "@/models/session.ts"
-
-
-type ComparisonRule = {
-  count_gt?: number
-  count_gte?: number
-  count_lt?: number
-  count_lte?: number
-
-  isSoft?: boolean
-  canSplit?: boolean
-  canDouble?: boolean
-  canSurrender?: boolean
-  DAS?: boolean
-
-  action: PlayerAction
-}
-
-type ScenarioKey = `${number}_${number}`
-
-export type StrategyGrid = { id: string } & {
-  [K in ScenarioKey]: ComparisonRule[]
-}
-
-interface RulesMeta {
-  // strategyId: string
-  dealerUpCard: number
-  softValue: number
-  canSplit: boolean
-  canDouble: boolean
-  canSurrender: boolean
-  isSoft: boolean
-  DAS: boolean
-}
+import type {ComparisonRule, RulesMeta, ScenarioKey, StrategyGrid} from "@/types/strategies.ts";
 
 export function determineCorrectAction(
   session: Session,

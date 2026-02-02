@@ -9,6 +9,7 @@ import { upsertPlayerDoc } from '@/lib/firestore.ts'
 import { buildRoundDocId, type RoundDoc, ROUNDS_SUBCOLLECTION } from '@/docs/round.ts'
 import { readGameConfig, writeGameConfig } from '@/lib/gameConfig.ts'
 import {Rules} from "@/models/rules.ts";
+import { STRATEGIES } from '@/models/strategy/strategies'
 
 const clampPenetration = (value: number, maxPenetration: number): number => {
   const rounded = Math.round(value)
@@ -33,6 +34,7 @@ const normalizeBlackjackPayout = (value: number): number => {
 export const useGameStore = defineStore('game', () => {
   const currentGameId = ref<string | null>(null)
   const roundId = ref<number>(0)
+  const selectedStrategyId = ref(STRATEGIES[0]?.id ?? '')
 
   const sessionInitial = Session.getInstance()
 
@@ -152,6 +154,7 @@ export const useGameStore = defineStore('game', () => {
         startingTrueCountLower,
         startingTrueCountUpper,
         betAmounts,
+        strategyId: selectedStrategyId.value,
       },
     )
   }
@@ -178,15 +181,33 @@ export const useGameStore = defineStore('game', () => {
     currentGameId.value = null
   }
 
-  const persistFinalTrueCount = async (finalCount: number | null) => {
+  const setSelectedStrategy = (strategyId: string) => {
+    if (STRATEGIES.some(strategy => strategy.id === strategyId)) {
+      selectedStrategyId.value = strategyId
+    }
+  }
+
+  const persistGameBalance = async (finalBalance: number | null) => {
     const auth = getAuth()
     const userId = auth.currentUser?.uid
-    if (!userId || !currentGameId.value || !roundId.value) return
+    if (!userId || !currentGameId.value) return
 
     await upsertPlayerDoc<GameDoc>(
       userId,
       [GAMES_SUBCOLLECTION, currentGameId.value],
-      { finalRunningCount: finalCount },
+      { finalBalance },
+    )
+  }
+
+  const persistGameEndState = async (finalRunningCount: number | null) => {
+    const auth = getAuth()
+    const userId = auth.currentUser?.uid
+    if (!userId || !currentGameId.value) return
+
+    await upsertPlayerDoc<GameDoc>(
+      userId,
+      [GAMES_SUBCOLLECTION, currentGameId.value],
+      { finalRunningCount },
     )
   }
 
@@ -200,8 +221,9 @@ export const useGameStore = defineStore('game', () => {
   modelEvents.on(chairTurnEvent, checkGameEndEvent)
 
   const onGameEnd = async () => {
-    const finalCount = Session.getInstance().table.trueCountLower
-    await persistFinalTrueCount(finalCount)
+    const table = Session.getInstance().table
+    const finalCount = table.trueCountLower
+    await persistGameEndState(finalCount)
   }
 
   modelEvents.on(userEvent(userEvents.PLAY), onPlay)
@@ -258,6 +280,8 @@ export const useGameStore = defineStore('game', () => {
     dealerPeekA10,
     setDealerPeekA10,
     applyPendingConfig,
-    persistFinalTrueCount,
+    persistGameBalance,
+    selectedStrategyId,
+    setSelectedStrategy,
   }
 })
