@@ -6,6 +6,8 @@
         <p>Hard totals versus dealer upcards (based on selected strategy).</p>
         <p class="strategy-tab__warning">Changing strategies mid-shoe can skew analytics.</p>
       </div>
+    </header>
+    <div class="strategy-tab__controls">
       <label class="strategy-tab__selector">
         <span>Strategy</span>
         <select v-model="selectedStrategyModel">
@@ -14,7 +16,14 @@
           </option>
         </select>
       </label>
-    </header>
+      <button
+        type="button"
+        class="strategy-tab__save"
+        :disabled="!hasUnsavedChanges"
+      >
+        Save Strategy
+      </button>
+    </div>
     <div class="strategy-tab__panels">
       <Transition :name="detailTransitionName" mode="out-in">
         <div v-if="!selectedTile" key="chart" class="strategy-panel strategy-panel--chart">
@@ -63,7 +72,7 @@ const hardTotals = Array.from({ length: 19 }, (_, index) => 2 + index)
 const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
 
 const strategyStore = useStrategyStore()
-const { selectedStrategyId } = storeToRefs(strategyStore)
+const { selectedStrategyId, hasUnsavedChanges } = storeToRefs(strategyStore)
 const strategies = strategyStore.strategies
 
 const actionMap: Record<string, PlayerAction> = {
@@ -149,6 +158,13 @@ const strategyGrid = computed(() =>
   color: #facc15;
 }
 
+.strategy-tab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
 .strategy-tab__selector {
   display: flex;
   flex-direction: column;
@@ -163,6 +179,21 @@ const strategyGrid = computed(() =>
     padding: 0.35rem 0.5rem;
     font-size: 0.9rem;
   }
+}
+
+.strategy-tab__save {
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.7);
+  color: #fff;
+  border-radius: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.strategy-tab__save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .strategy-tab__panels {

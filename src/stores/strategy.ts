@@ -17,6 +17,7 @@ const cloneStrategyGrid = (grid: StrategyGrid): Record<ScenarioKey, ComparisonRu
 export const useStrategyStore = defineStore('strategy', () => {
   const selectedStrategyId = ref(STRATEGIES[0]?.id ?? '')
   const strategyModel = ref<Record<ScenarioKey, ComparisonRule[]>>({})
+  const hasUnsavedChanges = ref(false)
 
   watch(
     selectedStrategyId,
@@ -24,6 +25,7 @@ export const useStrategyStore = defineStore('strategy', () => {
       const nextStrategy = STRATEGIES.find(strategy => strategy.id === id)
       if (nextStrategy) {
         strategyModel.value = cloneStrategyGrid(nextStrategy)
+        hasUnsavedChanges.value = false
       }
     },
     { immediate: true },
@@ -48,6 +50,11 @@ export const useStrategyStore = defineStore('strategy', () => {
       ...strategyModel.value,
       [key]: cloneRules(rules),
     }
+    hasUnsavedChanges.value = true
+  }
+
+  const markStrategySaved = () => {
+    hasUnsavedChanges.value = false
   }
 
   return {
@@ -58,5 +65,7 @@ export const useStrategyStore = defineStore('strategy', () => {
     strategyModel,
     getRulesForScenario,
     setRulesForScenario,
+    hasUnsavedChanges,
+    markStrategySaved,
   }
 })
