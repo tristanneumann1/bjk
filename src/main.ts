@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, reactive } from 'vue'
 import { createPinia } from 'pinia'
 
 import 'vuetify/styles'
@@ -14,9 +14,6 @@ import './lib/mitt'
 import initializeSession from '@/lib/initializeSession.ts'
 
 import '@/lib/firebase.ts'
-import {Session} from "@/models/session.ts";
-
-import {modelEvents} from "@/lib/mitt.ts";
 
 
 initializeSession()
@@ -32,6 +29,14 @@ const vuetify = createVuetify()
 
 const pinia = createPinia()
 const app = createApp(App)
+
+const viewport = reactive({ size: `${window.innerWidth}×${window.innerHeight}` })
+
+window.addEventListener('resize', () => {
+  viewport.size = `${window.innerWidth}×${window.innerHeight}`
+})
+
+app.provide('viewport', viewport)
 
 app.use(vuetify)
 app.use(pinia)

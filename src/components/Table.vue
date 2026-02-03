@@ -52,15 +52,17 @@ const handleGuessSubmit = (guess: number | null) => {
     <div v-else-if="showSummary" class="summary-container">
       <RoundSummary />
     </div>
-    <template v-if="shouldShowChairs">
-      <template v-for="chairId in chairSlots" :key="chairId">
-        <Chair
-          v-if="chairStore.getChairView(chairId)"
-          :chair-id="chairId"
-        />
-        <InactiveChair v-else :chair-id="chairId" />
+    <div class="chairs-container">
+      <template v-if="shouldShowChairs">
+        <template v-for="chairId in chairSlots" :key="chairId">
+          <Chair
+            v-if="chairStore.getChairView(chairId)"
+            :chair-id="chairId"
+          />
+          <InactiveChair v-else :chair-id="chairId" />
+        </template>
       </template>
-    </template>
+    </div>
   </div>
   <PlayerBalanceDisplay/>
 </template>
@@ -75,6 +77,14 @@ const handleGuessSubmit = (guess: number | null) => {
 }
 .table-lower {
   width: 100%;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chairs-container {
   display: flex;
   gap: 1rem;
   align-items: flex-end;
@@ -95,7 +105,7 @@ const handleGuessSubmit = (guess: number | null) => {
     width: 100%;
   }
 
-  .table-lower {
+  .chairs-container {
     flex-direction: column;
     align-items: center;
   }

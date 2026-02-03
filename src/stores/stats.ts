@@ -95,9 +95,11 @@ export const useStatsStore = defineStore('stats', () => {
   )
 
   modelEvents.on(userEvent(userEvents.GAME_END), updateFinalRunningCount)
+  modelEvents.on(userEvent(userEvents.GAME_END), refreshRoundSummary)
 
   onScopeDispose(() => {
     modelEvents.off(userEvent(userEvents.GAME_END), updateFinalRunningCount)
+    modelEvents.off(userEvent(userEvents.GAME_END), refreshRoundSummary)
   })
 
   return {
