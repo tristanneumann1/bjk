@@ -9,7 +9,7 @@ import { upsertPlayerDoc } from '@/lib/firestore.ts'
 import { buildRoundDocId, type RoundDoc, ROUNDS_SUBCOLLECTION } from '@/docs/round.ts'
 import { readGameConfig, writeGameConfig } from '@/lib/gameConfig.ts'
 import {Rules} from "@/models/rules.ts";
-import { STRATEGIES } from '@/models/strategy/strategies'
+import { useStrategyStore } from '@/stores/strategy'
 
 const clampPenetration = (value: number, maxPenetration: number): number => {
   const rounded = Math.round(value)
@@ -34,7 +34,7 @@ const normalizeBlackjackPayout = (value: number): number => {
 export const useGameStore = defineStore('game', () => {
   const currentGameId = ref<string | null>(null)
   const roundId = ref<number>(0)
-  const selectedStrategyId = ref(STRATEGIES[0]?.id ?? '')
+  const strategyStore = useStrategyStore()
 
   const sessionInitial = Session.getInstance()
 
@@ -154,7 +154,7 @@ export const useGameStore = defineStore('game', () => {
         startingTrueCountLower,
         startingTrueCountUpper,
         betAmounts,
-        strategyId: selectedStrategyId.value,
+        strategyId: strategyStore.selectedStrategyId.value,
       },
     )
   }
@@ -179,12 +179,6 @@ export const useGameStore = defineStore('game', () => {
     applyPendingConfig()
     roundId.value = 0
     currentGameId.value = null
-  }
-
-  const setSelectedStrategy = (strategyId: string) => {
-    if (STRATEGIES.some(strategy => strategy.id === strategyId)) {
-      selectedStrategyId.value = strategyId
-    }
   }
 
   const persistGameBalance = async (finalBalance: number | null) => {
@@ -281,7 +275,5 @@ export const useGameStore = defineStore('game', () => {
     setDealerPeekA10,
     applyPendingConfig,
     persistGameBalance,
-    selectedStrategyId,
-    setSelectedStrategy,
   }
 })

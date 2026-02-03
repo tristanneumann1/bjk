@@ -54,16 +54,17 @@
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import StrategyActionButton from '@/components/strategy/StrategyActionButton.vue'
-import { STRATEGIES } from '@/models/strategy/strategies'
-import { useGameStore } from '@/stores/game'
+import { useStrategyStore } from '@/stores/strategy'
 import StrategyTileDetail from '@/components/strategy/StrategyTileDetail.vue'
-import type {ScenarioKey, StrategyGrid} from "@/types/strategies.ts";
+import type {ScenarioKey} from "@/types/strategies.ts";
 import {type PlayerAction} from "@/types/actions.ts";
 
 const hardTotals = Array.from({ length: 19 }, (_, index) => 2 + index)
 const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
 
-const strategies = STRATEGIES
+const strategyStore = useStrategyStore()
+const { selectedStrategyId } = storeToRefs(strategyStore)
+const strategies = strategyStore.strategies
 
 const actionMap: Record<string, PlayerAction> = {
   hit: 'Hit',
@@ -71,10 +72,8 @@ const actionMap: Record<string, PlayerAction> = {
   double: 'Double',
   split: 'Split',
   surrender: 'Surrender',
+  insurance: 'Insurance',
 }
-
-const gameStore = useGameStore()
-const { selectedStrategyId } = storeToRefs(gameStore)
 const selectedTile = ref<{ total: number; upcard: number } | null>(null)
 const transitioningToDetail = ref(false)
 
@@ -95,18 +94,14 @@ watch(selectedTile, (next, prev) => {
 
 const selectedStrategyModel = computed({
   get: () => selectedStrategyId.value,
-  set: value => gameStore.setSelectedStrategy(value),
+  set: value => strategyStore.setSelectedStrategy(value),
 })
-
-const selectedStrategy = computed<StrategyGrid>(() =>
-  strategies.find(strategy => strategy.id === selectedStrategyId.value) ?? strategies[0],
-)
 
 const formatUpCard = (value: number) => (value === 1 ? 'A' : value)
 
 const resolveActions = (total: number, upCard: number): PlayerAction[] => {
   const scenarioKey: ScenarioKey = `${total}_${upCard}`
-  const rules = selectedStrategy.value?.[scenarioKey]
+  const rules = strategyStore.getRulesForScenario(scenarioKey)
   if (!rules?.length) return ['Hit']
   const mapped = rules
     .map(rule => actionMap[rule.action.toLowerCase()] ?? null)

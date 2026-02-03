@@ -17,7 +17,6 @@
         <header>
           <h4>Condition {{ index + 1 }}</h4>
           <button
-            v-if="editableRules.length > 1"
             type="button"
             class="strategy-tile-detail__remove"
             @click="removeRule(index)"
@@ -70,13 +69,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {type PlayerAction} from "@/types/actions.ts";
+import { useStrategyStore } from '@/stores/strategy'
+import type { ScenarioKey, ComparisonRule } from '@/types/strategies'
 
 const MAX_RULES_COUNT = 7
 
 const props = defineProps<{ total: number; upcard: number }>()
 const formattedUpcard = computed(() => (props.upcard === 1 ? 'A' : props.upcard))
+const scenarioKey = computed<ScenarioKey>(() => `${props.total}_${props.upcard}`)
+const strategyStore = useStrategyStore()
 
 const toggles = [
   { key: 'isSoft', label: 'Is soft' },
@@ -105,7 +108,7 @@ const createRule = (): EditableRule => ({
   canSurrender: false,
 })
 
-const editableRules = ref<EditableRule[]>([createRule()])
+const editableRules = ref<EditableRule[]>([])
 const finalAction = ref<PlayerAction>('Hit')
 
 const addRule = () => {
@@ -116,6 +119,56 @@ const addRule = () => {
 const removeRule = (index: number) => {
   editableRules.value.splice(index, 1)
 }
+
+const hydrateFromStore = () => {
+  const rules = strategyStore.getRulesForScenario(scenarioKey.value)
+  if (!rules.length) {
+    editableRules.value = []
+    finalAction.value = 'Hit'
+    return
+  }
+  const fallback = rules[rules.length - 1]
+  const conditionals = rules.slice(0, -1)
+  editableRules.value = conditionals.length
+    ? conditionals.map(rule => ({
+        id: crypto.randomUUID(),
+        action: (rule.action as PlayerAction) ?? 'Hit',
+        canSplit: Boolean(rule.canSplit),
+        isSoft: Boolean(rule.isSoft),
+        canDouble: Boolean(rule.canDouble),
+        DAS: Boolean(rule.DAS),
+        canSurrender: Boolean(rule.canSurrender),
+      }))
+    : []
+  finalAction.value = (fallback?.action as PlayerAction) ?? 'Hit'
+}
+
+const persistToStore = () => {
+  const serialized: ComparisonRule[] = [
+    ...editableRules.value.map(rule => ({
+      action: rule.action,
+      canSplit: rule.canSplit || undefined,
+      isSoft: rule.isSoft || undefined,
+      canDouble: rule.canDouble || undefined,
+      DAS: rule.DAS || undefined,
+      canSurrender: rule.canSurrender || undefined,
+    })),
+    { action: finalAction.value },
+  ]
+  strategyStore.setRulesForScenario(scenarioKey.value, serialized)
+}
+
+watch(
+  [() => scenarioKey.value, () => strategyStore.selectedStrategyId],
+  hydrateFromStore,
+  { immediate: true },
+)
+
+watch(
+  () => [editableRules.value, finalAction.value],
+  persistToStore,
+  { deep: true },
+)
 </script>
 
 <style scoped>
