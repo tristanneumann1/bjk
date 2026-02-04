@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { STRATEGIES } from '@/models/strategy/strategies'
 import type { ComparisonRule, ScenarioKey, StrategyGrid } from '@/types/strategies'
+import { getAuth } from 'firebase/auth'
+import { upsertPlayerDoc } from '@/lib/firestore'
+import {buildStrategyDocId, STRATEGY_COLLECTION, type StrategyDoc} from '@/docs/strategy'
 
 const isScenarioKey = (key: string): key is ScenarioKey => /\d+_\d+/.test(key)
 
@@ -18,6 +21,9 @@ export const useStrategyStore = defineStore('strategy', () => {
   const selectedStrategyId = ref(STRATEGIES[0]?.id ?? '')
   const strategyModel = ref<Record<ScenarioKey, ComparisonRule[]>>({})
   const hasUnsavedChanges = ref(false)
+
+  const auth = getAuth()
+  const currentUserUid = computed(() => auth.currentUser?.uid ?? null)
 
   watch(
     selectedStrategyId,
@@ -57,6 +63,31 @@ export const useStrategyStore = defineStore('strategy', () => {
     hasUnsavedChanges.value = false
   }
 
+  const saveStrategy = async (name: string, strategyId?: string) => {
+    const userUid = currentUserUid.value
+    if (!userUid || !name.trim()) return
+
+    const targetId = strategyId ?? buildStrategyDocId()
+
+    const a = {
+        id: targetId,
+        name,
+        rules: strategyModel.value,
+    }
+    console.log('a', a)
+
+    await upsertPlayerDoc<StrategyDoc>(
+      userUid,
+      [STRATEGY_COLLECTION, targetId],
+      {
+        id: targetId,
+        name,
+        rules: strategyModel.value,
+      },
+    )
+    hasUnsavedChanges.value = false
+  }
+
   return {
     selectedStrategyId,
     selectedStrategy,
@@ -67,5 +98,6 @@ export const useStrategyStore = defineStore('strategy', () => {
     setRulesForScenario,
     hasUnsavedChanges,
     markStrategySaved,
+    saveStrategy,
   }
 })

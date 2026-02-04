@@ -25,13 +25,15 @@
           placeholder="Enter name"
         />
       </label>
-      <button
+      <v-btn
         type="button"
         class="strategy-tab__save"
-        :disabled="!hasUnsavedChanges || !draftName.trim()"
+        color="success"
+        :disabled="!canSave"
+        @click="handleSave"
       >
         Save Strategy
-      </button>
+      </v-btn>
     </div>
     <div class="strategy-tab__panels">
       <Transition :name="detailTransitionName" mode="out-in">
@@ -65,6 +67,9 @@
         </div>
       </Transition>
     </div>
+    <v-snackbar v-model="snackbar.visible" :color="snackbar.color" timeout="2500">
+      {{ snackbar.text }}
+    </v-snackbar>
   </section>
 </template>
 
@@ -76,6 +81,7 @@ import { useStrategyStore } from '@/stores/strategy'
 import StrategyTileDetail from '@/components/strategy/StrategyTileDetail.vue'
 import type {ScenarioKey} from "@/types/strategies.ts";
 import {type PlayerAction} from "@/types/actions.ts";
+import { getAuth } from 'firebase/auth'
 
 const hardTotals = Array.from({ length: 19 }, (_, index) => 2 + index)
 const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
@@ -84,6 +90,7 @@ const strategyStore = useStrategyStore()
 const { selectedStrategyId, hasUnsavedChanges } = storeToRefs(strategyStore)
 const strategies = strategyStore.strategies
 const draftName = ref('')
+const isAuthenticated = computed(() => Boolean(getAuth().currentUser))
 
 const actionMap: Record<string, PlayerAction> = {
   hit: 'Hit',
@@ -115,6 +122,22 @@ const selectedStrategyModel = computed({
   get: () => selectedStrategyId.value,
   set: value => strategyStore.setSelectedStrategy(value),
 })
+
+const canSave = computed(() => !!draftName.value.trim() && hasUnsavedChanges.value && isAuthenticated.value)
+
+const snackbar = ref({ visible: false, text: '', color: 'success' as 'success' | 'error' })
+
+const handleSave = async () => {
+  if (!canSave.value) return
+  try {
+    await strategyStore.saveStrategy(draftName.value.trim())
+    draftName.value = ''
+    snackbar.value = { visible: true, text: 'Strategy saved', color: 'success' }
+  } catch (error) {
+    console.error('Failed to save strategy', error)
+    snackbar.value = { visible: true, text: 'Failed to save strategy', color: 'error' }
+  }
+}
 
 const formatUpCard = (value: number) => (value === 1 ? 'A' : value)
 
