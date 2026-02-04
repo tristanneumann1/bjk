@@ -52,6 +52,7 @@ import {useDealerStore} from '@/stores/dealer'
 import {determineCorrectAction} from "@/models/strategy/determineCorrectAction.ts";
 import {basicStrategyH17} from "@/models/strategy/basicStrategyH17.ts";
 import {useSettingsStore} from "@/stores/settings.ts";
+import {useStrategyStore} from "@/stores/strategy.ts";
 
 const activeRound = ref<boolean>(false)
 const roundCanStart = ref<boolean>(false)
@@ -60,12 +61,13 @@ const needsReshuffle = ref<boolean>(false)
 const playerActions = usePlayerActionsStore()
 const dealerStore = useDealerStore()
 const settingsStore = useSettingsStore()
+const strategyStore = useStrategyStore()
 const actions = PLAYER_ACTIONS
 const mistakeSnackbar = ref({ visible: false, text: '' })
 
 const onActionClick = (action: PlayerAction) => {
     try {
-      const correctActions = determineCorrectAction(Session.getInstance(), basicStrategyH17)
+      const correctActions = determineCorrectAction(Session.getInstance(), strategyStore.selectedStrategy)
       if (!correctActions.includes(action)) {
         if (settingsStore.showMistakeSnackbar) {
           const recommended = Array.from(new Set(correctActions)).join(', ')
