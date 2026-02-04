@@ -93,6 +93,13 @@ export const useStrategyStore = defineStore('strategy', () => {
 
     const targetId = strategyId ?? buildStrategyDocId()
 
+    const a = {
+      id: targetId,
+      name,
+      rules: strategyModel.value,
+    }
+    console.log('a', a)
+
     await upsertPlayerDoc<StrategyDoc>(currentUid.value, [STRATEGY_COLLECTION, targetId], {
       id: targetId,
       name,

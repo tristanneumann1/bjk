@@ -1,16 +1,12 @@
 import type {PlayerAction} from "@/types/actions.ts";
 
 export type ComparisonRule = {
-  count_gt?: number
-  count_gte?: number
-  count_lt?: number
-  count_lte?: number
-
   isSoft?: boolean
   canSplit?: boolean
   canDouble?: boolean
   canSurrender?: boolean
   DAS?: boolean
+  trueCountGreaterEqualTo?: number | null
 
   action: PlayerAction
 }

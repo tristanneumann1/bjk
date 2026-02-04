@@ -43,6 +43,18 @@
             </option>
           </select>
         </label>
+        <v-text-field
+          v-model.number="rule.trueCountGreaterEqualTo"
+          type="number"
+          variant="outlined"
+          density="compact"
+          hide-details
+          class="strategy-tile-detail__true-count"
+          label="True count ≥"
+          min="-20"
+          max="20"
+          step="1"
+        />
       </div>
 
       <button
@@ -89,26 +101,18 @@ const toggles = [
   { key: 'DAS', label: 'DAS' },
 ] as const
 
-type ToggleKey = (typeof toggles)[number]['key']
-
-type EditableRule = {
+type CustomRule = ComparisonRule & {
   id: string
-  action: PlayerAction
-} & Record<ToggleKey, boolean>
+}
+const createRule = (): CustomRule => ({
+  id: crypto.randomUUID(),
+  action: 'Hit',
+  trueCountGreaterEqualTo: null,
+})
 
 const availableActions: PlayerAction[] = ['Hit', 'Stand', 'Double', 'Split', 'Surrender', 'Insurance']
 
-const createRule = (): EditableRule => ({
-  id: crypto.randomUUID(),
-  action: 'Hit',
-  canSplit: false,
-  isSoft: false,
-  canDouble: false,
-  DAS: false,
-  canSurrender: false,
-})
-
-const editableRules = ref<EditableRule[]>([])
+const editableRules = ref<CustomRule[]>([])
 const finalAction = ref<PlayerAction>('Hit')
 
 const addRule = () => {
@@ -130,29 +134,14 @@ const hydrateFromStore = () => {
   const fallback = rules[rules.length - 1]
   const conditionals = rules.slice(0, -1)
   editableRules.value = conditionals.length
-    ? conditionals.map(rule => ({
-        id: crypto.randomUUID(),
-        action: (rule.action as PlayerAction) ?? 'Hit',
-        canSplit: Boolean(rule.canSplit),
-        isSoft: Boolean(rule.isSoft),
-        canDouble: Boolean(rule.canDouble),
-        DAS: Boolean(rule.DAS),
-        canSurrender: Boolean(rule.canSurrender),
-      }))
+    ? conditionals.map(rule => ({id: crypto.randomUUID(), ...rule}))
     : []
   finalAction.value = (fallback?.action as PlayerAction) ?? 'Hit'
 }
 
 const persistToStore = () => {
   const serialized: ComparisonRule[] = [
-    ...editableRules.value.map(rule => ({
-      action: rule.action,
-      canSplit: rule.canSplit || undefined,
-      isSoft: rule.isSoft || undefined,
-      canDouble: rule.canDouble || undefined,
-      DAS: rule.DAS || undefined,
-      canSurrender: rule.canSurrender || undefined,
-    })),
+    ...editableRules.value.map(({ id, ...rule }) => rule),
     { action: finalAction.value },
   ]
   strategyStore.setRulesForScenario(scenarioKey.value, serialized)

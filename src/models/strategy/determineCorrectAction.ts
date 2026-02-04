@@ -67,18 +67,9 @@ const matchesCountRule = (ruleMeta: RulesMeta, count: number, rule: ComparisonRu
   if (rule.DAS && !ruleMeta.DAS) {
     return false
   }
-  // if (typeof rule.count_gt === 'number' && !(count > rule.count_gt)) {
-  //   return false
-  // }
-  // if (typeof rule.count_gte === 'number' && !(count >= rule.count_gte)) {
-  //   return false
-  // }
-  // if (typeof rule.count_lt === 'number' && !(count < rule.count_lt)) {
-  //   return false
-  // }
-  // if (typeof rule.count_lte === 'number' && !(count <= rule.count_lte)) {
-  //   return false
-  // }
+  if (typeof rule.trueCountGreaterEqualTo === 'number' && count < rule.trueCountGreaterEqualTo) {
+    return false
+  }
   return true
 }
 
