@@ -16,10 +16,19 @@
           </option>
         </select>
       </label>
+      <label class="strategy-tab__name">
+        <span>New strategy name</span>
+        <input
+          type="text"
+          v-model="draftName"
+          maxlength="25"
+          placeholder="Enter name"
+        />
+      </label>
       <button
         type="button"
         class="strategy-tab__save"
-        :disabled="!hasUnsavedChanges"
+        :disabled="!hasUnsavedChanges || !draftName.trim()"
       >
         Save Strategy
       </button>
@@ -74,6 +83,7 @@ const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
 const strategyStore = useStrategyStore()
 const { selectedStrategyId, hasUnsavedChanges } = storeToRefs(strategyStore)
 const strategies = strategyStore.strategies
+const draftName = ref('')
 
 const actionMap: Record<string, PlayerAction> = {
   hit: 'Hit',
@@ -163,6 +173,22 @@ const strategyGrid = computed(() =>
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+}
+
+.strategy-tab__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+
+  input {
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.3rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+  }
 }
 
 .strategy-tab__selector {
