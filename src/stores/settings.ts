@@ -4,6 +4,7 @@ import {SETTINGS_STORAGE_KEY} from "@/constants.ts";
 
 type StoredSettings = {
   showCounter: boolean
+  showMistakeSnackbar: boolean
 }
 
 const readSettings = (): StoredSettings | null => {
@@ -29,16 +30,19 @@ const writeSettings = (settings: StoredSettings) => {
 
 export const useSettingsStore = defineStore('settings', () => {
   const showCounter = ref(true)
+  const showMistakeSnackbar = ref(false)
 
   const hydrate = () => {
     const stored = readSettings()
     if (!stored) return
     showCounter.value = stored.showCounter
+    showMistakeSnackbar.value = stored.showMistakeSnackbar ?? false
   }
 
   const persist = () => {
     writeSettings({
       showCounter: showCounter.value,
+      showMistakeSnackbar: showMistakeSnackbar.value,
     })
   }
 
@@ -46,12 +50,18 @@ export const useSettingsStore = defineStore('settings', () => {
     showCounter.value = !!value
   }
 
+  const setShowMistakeSnackbar = (value: boolean | null) => {
+    showMistakeSnackbar.value = !!value
+  }
+
   hydrate()
 
-  watch(showCounter, persist, { deep: false })
+  watch([showCounter, showMistakeSnackbar], persist, { deep: false })
 
   return {
     showCounter,
     setShowCounter,
+    showMistakeSnackbar,
+    setShowMistakeSnackbar,
   }
 })

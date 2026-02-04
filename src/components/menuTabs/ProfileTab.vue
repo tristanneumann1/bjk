@@ -15,6 +15,16 @@
         :model-value="settingsStore.showCounter"
         @update:model-value="settingsStore.setShowCounter"
       />
+      <v-switch
+        class="profile-tab__switch"
+        color="primary"
+        hide-details
+        inset
+        density="compact"
+        label="Inform on mistakes"
+        :model-value="settingsStore.showMistakeSnackbar"
+        @update:model-value="settingsStore.setShowMistakeSnackbar"
+      />
     </div>
   </div>
 </template>

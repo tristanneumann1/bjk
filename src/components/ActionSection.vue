@@ -24,6 +24,15 @@
       </div>
     </template>
   </section>
+  <v-snackbar
+    v-model="mistakeSnackbar.visible"
+    color="error"
+    timeout="1000"
+    variant="flat"
+    location="top"
+  >
+    {{ mistakeSnackbar.text }}
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -42,6 +51,7 @@ import {CHAIR_EVENT} from "@/models/table.ts";
 import {useDealerStore} from '@/stores/dealer'
 import {determineCorrectAction} from "@/models/strategy/determineCorrectAction.ts";
 import {basicStrategyH17} from "@/models/strategy/basicStrategyH17.ts";
+import {useSettingsStore} from "@/stores/settings.ts";
 
 const activeRound = ref<boolean>(false)
 const roundCanStart = ref<boolean>(false)
@@ -49,13 +59,21 @@ const needsReshuffle = ref<boolean>(false)
 
 const playerActions = usePlayerActionsStore()
 const dealerStore = useDealerStore()
+const settingsStore = useSettingsStore()
 const actions = PLAYER_ACTIONS
+const mistakeSnackbar = ref({ visible: false, text: '' })
 
 const onActionClick = (action: PlayerAction) => {
     try {
       const correctActions = determineCorrectAction(Session.getInstance(), basicStrategyH17)
       if (!correctActions.includes(action)) {
-        console.log(`Incorrect action chosen: ${action}. Recommended actions: ${Array.from(new Set(correctActions)).join(', ')}`)
+        if (settingsStore.showMistakeSnackbar) {
+          const recommended = Array.from(new Set(correctActions)).join(', ')
+          mistakeSnackbar.value = {
+            visible: true,
+            text: `Incorrect action. Try: ${recommended}`,
+          }
+        }
       }
     } catch (e) {
       console.error('Error determining correct action:', e)
