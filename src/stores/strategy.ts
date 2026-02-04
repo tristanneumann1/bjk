@@ -1,10 +1,16 @@
-import { defineStore } from 'pinia'
-import { computed, ref, watch } from 'vue'
-import { STRATEGIES } from '@/models/strategy/strategies'
-import type { ComparisonRule, ScenarioKey, StrategyGrid } from '@/types/strategies'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { getPlayerDocs, upsertPlayerDoc } from '@/lib/firestore'
-import { buildStrategyDocId, STRATEGY_COLLECTION, type StrategyDoc, toStrategyGrid } from '@/docs/strategy'
+import {defineStore} from 'pinia'
+import {computed, ref, watch} from 'vue'
+import {STRATEGIES} from '@/models/strategy/strategies'
+import type {ComparisonRule, ScenarioKey, StrategyGrid} from '@/types/strategies'
+import {getAuth, onAuthStateChanged} from 'firebase/auth'
+import {getPlayerDocs, upsertPlayerDoc} from '@/lib/firestore'
+import {
+  buildStrategyDocId,
+  STRATEGY_COLLECTION,
+  type StrategyDoc,
+  toStrategyGrid
+} from '@/docs/strategy'
+import {STRATEGY_STORAGE_KEY} from "@/constants.ts";
 
 const isScenarioKey = (key: string): key is ScenarioKey => /\d+_\d+/.test(key)
 
@@ -17,8 +23,28 @@ const cloneStrategyGrid = (grid: StrategyGrid): Record<ScenarioKey, ComparisonRu
   return Object.fromEntries(entries)
 }
 
+const readStoredStrategyId = (): string | null => {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage.getItem(STRATEGY_STORAGE_KEY)
+  } catch (error) {
+    console.warn('Unable to read stored strategy id', error)
+    return null
+  }
+}
+
+const persistSelectedStrategyId = (id: string) => {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(STRATEGY_STORAGE_KEY, id)
+  } catch (error) {
+    console.warn('Unable to persist strategy id', error)
+  }
+}
+
 export const useStrategyStore = defineStore('strategy', () => {
-  const selectedStrategyId = ref(STRATEGIES[0]?.id ?? '')
+  const defaultStrategyId = STRATEGIES[0]?.id ?? ''
+  const selectedStrategyId = ref(defaultStrategyId)
   const strategyModel = ref<Record<ScenarioKey, ComparisonRule[]>>({})
   const hasUnsavedChanges = ref(false)
   const customStrategies = ref<StrategyGrid[]>([])
@@ -27,9 +53,27 @@ export const useStrategyStore = defineStore('strategy', () => {
   const currentUid = ref<string | null>(auth.currentUser?.uid ?? null)
   const isAuthenticated = computed(() => Boolean(currentUid.value))
 
+  const findStrategyById = (id: string) =>
+    STRATEGIES.find(strategy => strategy.id === id) ?? customStrategies.value.find(strategy => strategy.id === id)
+
+  const applyStoredStrategySelection = () => {
+    const storedId = readStoredStrategyId()
+    if (storedId && findStrategyById(storedId)) {
+      selectedStrategyId.value = storedId
+      return true
+    }
+
+    if (!selectedStrategyId.value) {
+      selectedStrategyId.value = defaultStrategyId
+    }
+
+    return false
+  }
+
   const loadCustomStrategies = async () => {
     if (!currentUid.value) {
       customStrategies.value = []
+      applyStoredStrategySelection()
       return
     }
 
@@ -42,15 +86,14 @@ export const useStrategyStore = defineStore('strategy', () => {
       console.error('Failed to load strategies', error)
       customStrategies.value = []
     }
+
+    applyStoredStrategySelection()
   }
 
   onAuthStateChanged(auth, user => {
     currentUid.value = user?.uid ?? null
     void loadCustomStrategies()
   })
-
-  const findStrategyById = (id: string) =>
-    STRATEGIES.find(strategy => strategy.id === id) ?? customStrategies.value.find(strategy => strategy.id === id)
 
   const applyStrategyById = (id: string) => {
     const nextStrategy = findStrategyById(id)
@@ -69,6 +112,7 @@ export const useStrategyStore = defineStore('strategy', () => {
   const setSelectedStrategy = (id: string) => {
     if (findStrategyById(id)) {
       selectedStrategyId.value = id
+      persistSelectedStrategyId(id)
     }
   }
 

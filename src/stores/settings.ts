@@ -1,7 +1,6 @@
-import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
-
-const SETTINGS_STORAGE_KEY = 'bjk_settings'
+import {defineStore} from 'pinia'
+import {ref, watch} from 'vue'
+import {SETTINGS_STORAGE_KEY} from "@/constants.ts";
 
 type StoredSettings = {
   showCounter: boolean
