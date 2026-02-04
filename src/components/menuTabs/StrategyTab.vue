@@ -204,8 +204,7 @@ const strategyGrid = computed(() =>
 .strategy-panel {
   position: absolute;
   inset: 0;
-  overflow-x: auto;
-  overflow-y: visible;
+  overflow: auto;
   padding: 0.5rem 0.25rem 0.5rem 0;
 }
 
@@ -238,6 +237,7 @@ const strategyGrid = computed(() =>
 }
 
 .strategy-chart {
+  position: relative;
   display: inline-grid;
   grid-template-columns: 2.5rem repeat(10, 3rem);
   gap: 0;
@@ -254,21 +254,34 @@ const strategyGrid = computed(() =>
   font-weight: 600;
   text-transform: uppercase;
   color: #fff;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.strategy-chart__cell--corner,
+.strategy-chart__cell--header,
+.strategy-chart__cell--row-label {
+  z-index: 2;
 }
 
 .strategy-chart__cell--corner {
-  background: rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 3;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
 }
 
-.strategy-chart__cell--header,
-.strategy-chart__cell--row-label {
-  background: rgba(255, 255, 255, 0.08);
+.strategy-chart__cell--header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .strategy-chart__cell--row-label {
+  position: sticky;
+  left: 0;
   font-size: 0.85rem;
+  z-index: 2;
 }
 </style>
