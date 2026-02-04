@@ -88,7 +88,7 @@ const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
 
 const strategyStore = useStrategyStore()
 const { selectedStrategyId, hasUnsavedChanges } = storeToRefs(strategyStore)
-const strategies = strategyStore.strategies
+const strategies = computed(() => strategyStore.strategies)
 const draftName = ref('')
 const isAuthenticated = computed(() => Boolean(getAuth().currentUser))
 

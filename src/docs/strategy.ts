@@ -9,6 +9,12 @@ export type StrategyDoc = BaseDoc & {
   rules: Record<ScenarioKey, ComparisonRule[]>
 }
 
+export const toStrategyGrid = (doc: StrategyDoc): StrategyGrid => ({
+  id: doc.id,
+  name: doc.name,
+  ...doc.rules,
+})
+
 export const buildStrategyDocId = (id?: string | number) => `stg_${id ?? nanoid()}`
 
 export const STRATEGY_COLLECTION = 'Strategies'

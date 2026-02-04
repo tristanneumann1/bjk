@@ -2,9 +2,9 @@ import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { STRATEGIES } from '@/models/strategy/strategies'
 import type { ComparisonRule, ScenarioKey, StrategyGrid } from '@/types/strategies'
-import { getAuth } from 'firebase/auth'
-import { upsertPlayerDoc } from '@/lib/firestore'
-import {buildStrategyDocId, STRATEGY_COLLECTION, type StrategyDoc} from '@/docs/strategy'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { getPlayerDocs, upsertPlayerDoc } from '@/lib/firestore'
+import { buildStrategyDocId, STRATEGY_COLLECTION, type StrategyDoc, toStrategyGrid } from '@/docs/strategy'
 
 const isScenarioKey = (key: string): key is ScenarioKey => /\d+_\d+/.test(key)
 
@@ -21,28 +21,53 @@ export const useStrategyStore = defineStore('strategy', () => {
   const selectedStrategyId = ref(STRATEGIES[0]?.id ?? '')
   const strategyModel = ref<Record<ScenarioKey, ComparisonRule[]>>({})
   const hasUnsavedChanges = ref(false)
+  const customStrategies = ref<StrategyGrid[]>([])
 
   const auth = getAuth()
-  const currentUserUid = computed(() => auth.currentUser?.uid ?? null)
+  const currentUid = ref<string | null>(auth.currentUser?.uid ?? null)
+  const isAuthenticated = computed(() => Boolean(currentUid.value))
 
-  watch(
-    selectedStrategyId,
-    id => {
-      const nextStrategy = STRATEGIES.find(strategy => strategy.id === id)
-      if (nextStrategy) {
-        strategyModel.value = cloneStrategyGrid(nextStrategy)
-        hasUnsavedChanges.value = false
-      }
-    },
-    { immediate: true },
-  )
+  const loadCustomStrategies = async () => {
+    if (!currentUid.value) {
+      customStrategies.value = []
+      return
+    }
+
+    try {
+      const docs = await getPlayerDocs<StrategyDoc>(currentUid.value, [STRATEGY_COLLECTION], {})
+      customStrategies.value = docs
+        .filter((entry): entry is StrategyDoc => Boolean(entry))
+        .map(doc => toStrategyGrid(doc))
+    } catch (error) {
+      console.error('Failed to load strategies', error)
+      customStrategies.value = []
+    }
+  }
+
+  onAuthStateChanged(auth, user => {
+    currentUid.value = user?.uid ?? null
+    void loadCustomStrategies()
+  })
+
+  const findStrategyById = (id: string) =>
+    STRATEGIES.find(strategy => strategy.id === id) ?? customStrategies.value.find(strategy => strategy.id === id)
+
+  const applyStrategyById = (id: string) => {
+    const nextStrategy = findStrategyById(id)
+    if (nextStrategy) {
+      strategyModel.value = cloneStrategyGrid(nextStrategy)
+      hasUnsavedChanges.value = false
+    }
+  }
+
+  watch(selectedStrategyId, applyStrategyById, { immediate: true })
 
   const selectedStrategy = computed<StrategyGrid>(() =>
-    STRATEGIES.find(strategy => strategy.id === selectedStrategyId.value) ?? STRATEGIES[0],
+    findStrategyById(selectedStrategyId.value) ?? STRATEGIES[0],
   )
 
   const setSelectedStrategy = (id: string) => {
-    if (STRATEGIES.some(strategy => strategy.id === id)) {
+    if (findStrategyById(id)) {
       selectedStrategyId.value = id
     }
   }
@@ -64,40 +89,38 @@ export const useStrategyStore = defineStore('strategy', () => {
   }
 
   const saveStrategy = async (name: string, strategyId?: string) => {
-    const userUid = currentUserUid.value
-    if (!userUid || !name.trim()) return
+    if (!currentUid.value || !name.trim()) return
 
     const targetId = strategyId ?? buildStrategyDocId()
 
-    const a = {
-        id: targetId,
-        name,
-        rules: strategyModel.value,
-    }
-    console.log('a', a)
+    await upsertPlayerDoc<StrategyDoc>(currentUid.value, [STRATEGY_COLLECTION, targetId], {
+      id: targetId,
+      name,
+      rules: strategyModel.value,
+    })
 
-    await upsertPlayerDoc<StrategyDoc>(
-      userUid,
-      [STRATEGY_COLLECTION, targetId],
-      {
-        id: targetId,
-        name,
-        rules: strategyModel.value,
-      },
-    )
+    await loadCustomStrategies()
+    selectedStrategyId.value = targetId
     hasUnsavedChanges.value = false
   }
+
+  const availableStrategies = computed(() => [...STRATEGIES, ...customStrategies.value])
+
+  void loadCustomStrategies()
 
   return {
     selectedStrategyId,
     selectedStrategy,
     setSelectedStrategy,
-    strategies: STRATEGIES,
+    strategies: availableStrategies,
     strategyModel,
     getRulesForScenario,
     setRulesForScenario,
     hasUnsavedChanges,
     markStrategySaved,
     saveStrategy,
+    customStrategies,
+    loadCustomStrategies,
+    isAuthenticated,
   }
 })
