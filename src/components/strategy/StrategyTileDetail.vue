@@ -16,6 +16,22 @@
       >
         <header>
           <h4>Condition {{ index + 1 }}</h4>
+          <div class="strategy-tile-detail__order">
+            <v-btn
+              icon="mdi-chevron-up"
+              size="small"
+              variant="text"
+              :disabled="index === 0"
+              @click="moveRule(index, -1)"
+            />
+            <v-btn
+              icon="mdi-chevron-down"
+              size="small"
+              variant="text"
+              :disabled="index === editableRules.length - 1"
+              @click="moveRule(index, 1)"
+            />
+          </div>
           <button
             type="button"
             class="strategy-tile-detail__remove"
@@ -124,6 +140,16 @@ const removeRule = (index: number) => {
   editableRules.value.splice(index, 1)
 }
 
+const moveRule = (index: number, delta: 1 | -1) => {
+  const targetIndex = index + delta
+  if (targetIndex < 0 || targetIndex >= editableRules.value.length) return
+  const current = editableRules.value[index]
+  const rules = [...editableRules.value]
+  rules.splice(index, 1)
+  rules.splice(targetIndex, 0, current)
+  editableRules.value = rules
+}
+
 const hydrateFromStore = () => {
   const rules = strategyStore.getRulesForScenario(scenarioKey.value)
   if (!rules.length) {
@@ -197,6 +223,11 @@ watch(
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.strategy-tile-detail__order {
+  display: flex;
+  gap: 0.2rem;
 }
 
 .strategy-tile-detail__section h4 {
