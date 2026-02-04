@@ -154,7 +154,7 @@ export const useGameStore = defineStore('game', () => {
         startingTrueCountLower,
         startingTrueCountUpper,
         betAmounts,
-        strategyId: strategyStore.selectedStrategyId.value,
+        strategyId: strategyStore.selectedStrategyId,
       },
     )
   }
