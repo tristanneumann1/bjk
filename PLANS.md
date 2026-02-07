@@ -1,13 +1,13 @@
 # Upcoming Tasks
 
-- [ ] Insurance rule
-- [ ] Rule to prevent hit after split aces
-- [ ] Change betting slider for better functionality
+- [n] Insurance rule
+- [n] Rule to prevent hit after split aces
+- [n] Change betting slider for better functionality
+- [n] graph of Bankroll over time
 - [ ] Inform if bets are correct value
 - [ ] Offline Access
 - [ ] Measure player overall EV
 - [ ] Felt, custom art
-- [ ] graph of Bankroll over time
 - [s] version indicator in menu
 - [s] minimize CSS by creating components
 - [s] Round summary still too wide

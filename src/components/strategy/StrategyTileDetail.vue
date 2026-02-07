@@ -18,14 +18,14 @@
           <h4>Condition {{ index + 1 }}</h4>
           <div class="strategy-tile-detail__order">
             <v-btn
-              icon="mdi-chevron-up"
+              :icon="mdiChevronUp"
               size="small"
               variant="text"
               :disabled="index === 0"
               @click="moveRule(index, -1)"
             />
             <v-btn
-              icon="mdi-chevron-down"
+              :icon="mdiChevronDown"
               size="small"
               variant="text"
               :disabled="index === editableRules.length - 1"
@@ -101,6 +101,7 @@ import { computed, ref, watch } from 'vue'
 import {type PlayerAction} from "@/types/actions.ts";
 import { useStrategyStore } from '@/stores/strategy'
 import type { ScenarioKey, ComparisonRule } from '@/types/strategies'
+import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 
 const MAX_RULES_COUNT = 7
 

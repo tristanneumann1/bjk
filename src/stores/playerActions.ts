@@ -8,13 +8,13 @@ import {isAction} from "@/models/hand.ts";
 import {Session} from "@/models/session.ts";
 import type {Card} from "@/types/card.ts";
 import {determineCorrectAction} from "@/models/strategy/determineCorrectAction.ts";
-import {basicStrategyH17} from "@/models/strategy/basicStrategyH17.ts";
 import {getAuth} from "firebase/auth";
 import {useGameStore} from "@/stores/game.ts";
 import {upsertPlayerDoc} from "@/lib/firestore.ts";
 import {GAMES_SUBCOLLECTION} from "@/docs/game.ts";
 import {buildRoundDocId} from "@/docs/round.ts";
 import {type ActionDoc, ACTIONS_SUBCOLLECTION, buildActionDocId} from "@/docs/action.ts";
+import {useStrategyStore} from "@/stores/strategy.ts";
 
 export const PLAYER_ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance'] as const
 
@@ -31,6 +31,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
   const enabledMap: {[action in PlayerAction]: boolean} = reactive(createDefaultState())
 
   const gameStore = useGameStore()
+  const strategyStore = useStrategyStore()
 
   const isEnabled = (action: PlayerAction) => enabledMap[action]
 
@@ -88,7 +89,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
     const startingTrueCountLower = table.trueCountLower
     const startingTrueCountUpper = table.trueCountUpper
 
-    const correctActions = determineCorrectAction(Session.getInstance(), basicStrategyH17)
+    const correctActions = determineCorrectAction(Session.getInstance(), strategyStore.selectedStrategy)
 
     const actionDoc: ActionDoc = {
       cards,
@@ -96,7 +97,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
       startingTrueCountLower,
       startingTrueCountUpper,
       chosenAction: action,
-      strategyId: basicStrategyH17.id,
+      strategyId: strategyStore.selectedStrategyId,
       expectedAction: correctActions,
       actionIsCorrect: correctActions.includes(action),
       roundId: buildRoundDocId(roundId)

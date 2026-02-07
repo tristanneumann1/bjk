@@ -50,7 +50,6 @@ import {Session} from "@/models/session.ts";
 import {CHAIR_EVENT} from "@/models/table.ts";
 import {useDealerStore} from '@/stores/dealer'
 import {determineCorrectAction} from "@/models/strategy/determineCorrectAction.ts";
-import {basicStrategyH17} from "@/models/strategy/basicStrategyH17.ts";
 import {useSettingsStore} from "@/stores/settings.ts";
 import {useStrategyStore} from "@/stores/strategy.ts";
 
