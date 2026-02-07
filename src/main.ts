@@ -12,10 +12,12 @@ import router from '@/router'
 import './lib/mitt'
 
 import initializeSession from '@/lib/initializeSession.ts'
+import { initColorVariables } from '@/constants/colors'
 
 import '@/lib/firebase.ts'
 
-
+// Initialize CSS color variables from TypeScript
+initColorVariables()
 initializeSession()
 // document['_session'] = Session
 // document['_events'] = modelEvents

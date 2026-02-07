@@ -231,7 +231,6 @@ const strategyGrid = computed(() =>
 }
 
 .strategy-tab__save {
-  background: rgba(34, 197, 94, 0.2);
   border: 1px solid rgba(34, 197, 94, 0.7);
   color: #fff;
   border-radius: 0.3rem;
