@@ -162,6 +162,7 @@ export class Chair {
   }
 
   act (action: PlayerAction, dealer: Dealer) {
+    const rules = Session.getInstance().rules
     if (!this.activeHand) {
       throw new Error('No active hand');
     }
@@ -187,13 +188,25 @@ export class Chair {
         if (!splitCard) {
           throw new Error('No card to split');
         }
+        const isSplittingAces = splitCard.isAce();
         const newHand = new Hand([splitCard]);
         newHand.split();
         this.activeHand.split();
         this.splitCount++
         this.addHand(newHand)
+
+        // Deal one card to the first hand
         this.activeHand.addCard(dealer.dealCard())
-        if (this.activeHand.isDone) {
+
+        // If splitting aces and hitAfterSplitAces is false
+        if (isSplittingAces && !rules.hitAfterSplitAces) {
+          this.moveToNextHand(dealer);
+          // Deal one card to the second hand
+          if (this.activeHand) {
+            this.activeHand.addCard(dealer.dealCard())
+          }
+          this.moveToNextHand(dealer);
+        } else if (this.activeHand.isDone) {
           this.moveToNextHand(dealer);
         }
         break;

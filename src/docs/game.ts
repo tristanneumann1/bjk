@@ -12,6 +12,7 @@ export type RulesDoc = Pick<Rules,
   | 'blackjackPayout'
   | 'penetration'
   | 'dealerPeekA10'
+  | 'hitAfterSplitAces'
 >
 
 export type GameDoc = BaseDoc & RulesDoc & {
@@ -34,4 +35,5 @@ export const serializeRulesDoc = (rules: Rules): RulesDoc => ({
   blackjackPayout: rules.blackjackPayout,
   penetration: rules.penetration,
   dealerPeekA10: rules.dealerPeekA10,
+  hitAfterSplitAces: rules.hitAfterSplitAces,
 })

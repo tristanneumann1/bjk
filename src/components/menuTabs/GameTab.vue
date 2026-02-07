@@ -80,6 +80,16 @@
         hide-details
         inset
         density="compact"
+        label="Hit after split aces"
+        :model-value="gameStore.hitAfterSplitAces"
+        @update:model-value="gameStore.setHitAfterSplitAces"
+      />
+      <v-switch
+        class="game-tab__switch"
+        color="primary"
+        hide-details
+        inset
+        density="compact"
         label="Surrender allowed"
         :model-value="gameStore.surrenderAllowed"
         @update:model-value="gameStore.setSurrenderAllowed"

@@ -7,6 +7,7 @@ import {Dealer} from "@/models/dealer";
 
 export interface SessionOptions {
   playerBalance?: number;
+  shoePrefix?: Card[]
 }
 
 export class Session {
@@ -14,13 +15,18 @@ export class Session {
   public rules: Rules;
   public table: Table
   private static instance: Session;
+  private static options: SessionOptions;
 
   static initialize(rules: Rules, options: SessionOptions = {}) {
+    Session.options = options
     const shoe: Card[] = buildNDeckShoe(rules.deckCount)
     const player = new Player(options.playerBalance ?? 100_000)
     const dealerChair = new Chair()
     const dealer = new Dealer(shoe)
     dealer.shuffle()
+    if (options.shoePrefix) {
+      dealer.shoe.unshift(...options.shoePrefix)
+    }
 
     const table = new Table(dealer, dealerChair, [], {logAfterAction: false})
     Session.instance = new Session({ rules, player, table });
@@ -43,6 +49,9 @@ export class Session {
     const shoe: Card[] = buildNDeckShoe(newRules.deckCount)
     const dealer = new Dealer(shoe)
     dealer.shuffle()
+    if (Session.options.shoePrefix) {
+      dealer.shoe.unshift(...Session.options.shoePrefix)
+    }
     const table = currentSession.table
     table.dealer = dealer
 

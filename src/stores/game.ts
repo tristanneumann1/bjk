@@ -54,6 +54,7 @@ export const useGameStore = defineStore('game', () => {
   const pendingMaxSplits = ref(clampMaxSplits(storedConfig?.maxSplits ?? sessionInitial.rules.maxSplits))
   const blackjackPayout = ref(normalizeBlackjackPayout(storedConfig?.blackjackPayout ?? sessionInitial.rules.blackjackPayout))
   const dealerPeekA10 = ref(storedConfig?.dealerPeekA10 ?? sessionInitial.rules.dealerPeekA10)
+  const hitAfterSplitAces = ref(storedConfig?.hitAfterSplitAces ?? sessionInitial.rules.hitAfterSplitAces)
 
   const setPenetration = (value: number) => {
     pendingPenetration.value = clampPenetration(value, maxPenetration.value)
@@ -91,6 +92,10 @@ export const useGameStore = defineStore('game', () => {
     dealerPeekA10.value = Boolean(value)
   }
 
+  const setHitAfterSplitAces = (value: boolean | null) => {
+    hitAfterSplitAces.value = Boolean(value)
+  }
+
   const persistGameConfig = () => {
     writeGameConfig({
       penetration: pendingPenetration.value,
@@ -102,6 +107,7 @@ export const useGameStore = defineStore('game', () => {
       maxSplits: pendingMaxSplits.value,
       blackjackPayout: blackjackPayout.value,
       dealerPeekA10: dealerPeekA10.value,
+      hitAfterSplitAces: hitAfterSplitAces.value,
     })
   }
 
@@ -118,6 +124,7 @@ export const useGameStore = defineStore('game', () => {
     newRules.maxSplits = pendingMaxSplits.value
     newRules.blackjackPayout = blackjackPayout.value
     newRules.dealerPeekA10 = dealerPeekA10.value
+    newRules.hitAfterSplitAces = hitAfterSplitAces.value
     newRules.penetration = nextPenetration
 
     Session.changeRules(newRules)
@@ -246,6 +253,7 @@ export const useGameStore = defineStore('game', () => {
       pendingMaxSplits,
       blackjackPayout,
       dealerPeekA10,
+      hitAfterSplitAces,
     ],
     persistGameConfig,
     { immediate: true },
@@ -273,6 +281,8 @@ export const useGameStore = defineStore('game', () => {
     setBlackjackPayout,
     dealerPeekA10,
     setDealerPeekA10,
+    hitAfterSplitAces,
+    setHitAfterSplitAces,
     applyPendingConfig,
     persistGameBalance,
   }

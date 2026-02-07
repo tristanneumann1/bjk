@@ -10,6 +10,7 @@ export type StoredGameConfig = Partial<{
   maxSplits: number
   blackjackPayout: number
   dealerPeekA10: boolean
+  hitAfterSplitAces: boolean
 }>
 
 export const readGameConfig = (): StoredGameConfig | null => {

@@ -9,6 +9,7 @@ export class Rules {
   blackjackPayout: number;
   penetration: number;
   dealerPeekA10: boolean;
+  hitAfterSplitAces: boolean;
   // insuranceAllowed: boolean; // Insurance allowed
 
   constructor() {
@@ -21,6 +22,7 @@ export class Rules {
     this.blackjackPayout = 1.5; // Blackjack pays 3:2
     this.penetration = 52; // Number of cards left in the shoe to trigger reshuffle
     this.dealerPeekA10 = true; // Dealer peeks for blackjack when showing an Ace or 10-value card
+    this.hitAfterSplitAces = true; // Allow hitting after splitting aces
     // this.insuranceAllowed = true; // Insurance allowed
   }
 }
