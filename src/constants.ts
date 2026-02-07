@@ -1,3 +1,5 @@
+import type {PlayerAction} from "@/types/actions.ts";
+
 export const CARD_SCALE_SMALL = 0.6;
 export const CARD_SCALE_LARGE = 1.1;
 
@@ -15,3 +17,12 @@ export const LOCAL_KEY_EMAIL = 'User_Email';
 export const GAME_CONFIG_STORAGE_KEY = 'bjk_game_config'
 export const STRATEGY_STORAGE_KEY = 'selectedStrategyId'
 export const SETTINGS_STORAGE_KEY = 'bjk_settings'
+
+export const ACTION_COLORS: Record<PlayerAction, { label: string; color: string }> = {
+  Hit: {label: 'H', color: '#f5f5f5'},
+  Stand: {label: 'S', color: '#fde047'},
+  Double: {label: 'D', color: '#f472b6'},
+  Split: {label: 'Y', color: '#38bdf8'},
+  Surrender: {label: 'R', color: '#f97316'},
+  Insurance: {label: 'I', color: '#000000'},
+}

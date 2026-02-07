@@ -49,9 +49,37 @@
                 <label>Dealer Upcard</label>
                 <PlayingCard :rank="mistake.upCard?.rank" :suit="mistake.upCard?.suit" />
               </div>
+              <div class="mistakes-list__count">
+                <label>True Count</label>
+                <p class="mistakes-list__count-value">
+                  <template v-if="mistake.startingTrueCountLower === mistake.startingTrueCountUpper">
+                    {{ mistake.startingTrueCountLower }}
+                  </template>
+                  <template v-else>
+                    {{ mistake.startingTrueCountLower }} to {{ mistake.startingTrueCountUpper }}
+                  </template>
+                </p>
+              </div>
               <div class="mistakes-list__actions">
-                <p><strong>Taken:</strong> {{ mistake.chosenAction }}</p>
-                <p><strong>Expected:</strong> {{ mistake.expectedAction?.join(', ') }}</p>
+                <div class="mistakes-list__action-row">
+                  <strong>Taken:</strong>
+                  <span class="action-pill" :style="{ backgroundColor: ACTION_COLORS[mistake.chosenAction]?.color }">
+                    {{ mistake.chosenAction }}
+                  </span>
+                </div>
+                <div class="mistakes-list__action-row">
+                  <strong>Expected:</strong>
+                  <div class="mistakes-list__expected-actions">
+                    <span
+                      v-for="action in getUniqueActions(mistake.expectedAction)"
+                      :key="action"
+                      class="action-pill"
+                      :style="{ backgroundColor: ACTION_COLORS[action]?.color }"
+                    >
+                      {{ action }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </li>
           </ul>
@@ -73,6 +101,8 @@ import { storeToRefs } from 'pinia'
 import CardHand from '@/components/CardHand.vue'
 import PlayingCard from '@/components/PlayingCard.vue'
 import { useStatsStore } from '@/stores/stats'
+import type { PlayerAction } from '@/types/actions'
+import {ACTION_COLORS} from "@/constants.ts";
 
 const tabs = [
   { id: 'stats', label: 'Stats' },
@@ -86,6 +116,11 @@ const { stats, mistakes, isLoadingMistakes, hasUser, latestGuess, finalRunningCo
 const showGuessComparison = computed(() => latestGuess.value !== null && finalRunningCount.value !== null)
 const guessIsCorrect = computed(() => showGuessComparison.value && latestGuess.value === finalRunningCount.value)
 const guessChipClass = computed(() => (guessIsCorrect.value ? 'round-summary__guess-chip--correct' : 'round-summary__guess-chip--incorrect'))
+
+const getUniqueActions = (actions?: PlayerAction[]): PlayerAction[] => {
+  if (!actions) return []
+  return Array.from(new Set(actions))
+}
 </script>
 
 <style scoped>
@@ -224,7 +259,7 @@ const guessChipClass = computed(() => (guessIsCorrect.value ? 'round-summary__gu
 
 .mistakes-list__item {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 1rem;
   padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -234,6 +269,7 @@ const guessChipClass = computed(() => (guessIsCorrect.value ? 'round-summary__gu
 
 .mistakes-list__hand,
 .mistakes-list__upcard,
+.mistakes-list__count,
 .mistakes-list__actions {
   display: flex;
   flex-direction: column;
@@ -241,14 +277,48 @@ const guessChipClass = computed(() => (guessIsCorrect.value ? 'round-summary__gu
 }
 
 .mistakes-list__hand label,
-.mistakes-list__upcard label {
+.mistakes-list__upcard label,
+.mistakes-list__count label {
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   opacity: 0.8;
 }
 
+.mistakes-list__count-value {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fbbf24;
+}
+
 .mistakes-list__actions p {
   margin: 0;
+}
+
+.mistakes-list__action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mistakes-list__expected-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  text-transform: capitalize;
 }
 </style>

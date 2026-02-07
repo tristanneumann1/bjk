@@ -15,26 +15,19 @@
 import { computed } from 'vue'
 import {type PlayerAction} from "@/types/actions.ts";
 
+import {ACTION_COLORS} from "@/constants.ts";
+
 const emit = defineEmits<{ select: [] }>()
 
 const props = withDefaults(defineProps<{ actions?: PlayerAction[] }>(), {
   actions: () => ['Split', 'Hit', 'Stand'] as PlayerAction[],
 })
 
-const actionMap: Record<PlayerAction, { label: string; color: string }> = {
-  Hit: { label: 'H', color: '#f5f5f5' },
-  Stand: { label: 'S', color: '#fde047' },
-  Double: { label: 'D', color: '#f472b6' },
-  Split: { label: 'Y', color: '#38bdf8' },
-  Surrender: { label: 'R', color: '#f97316' },
-  Insurance: { label: 'I', color: '#000000' },
-}
-
 const resolvedActions = computed(() => props.actions.slice(0, 4))
 const hasOverflow = computed(() => props.actions.length > 4)
 
 const labelText = computed(() => {
-  const labels = resolvedActions.value.map(action => actionMap[action].label).join('.')
+  const labels = resolvedActions.value.map(action => ACTION_COLORS[action].label).join('.')
   return hasOverflow.value ? `${labels}+` : labels
 })
 
@@ -45,7 +38,7 @@ const gradientBackground = computed(() => {
   const segments = actions.map((action, index) => {
     const start = index * segmentSize
     const end = (index + 1) * segmentSize
-    return `${actionMap[action].color} ${start}% ${end}%`
+    return `${ACTION_COLORS[action].color} ${start}% ${end}%`
   })
   return `linear-gradient(120deg, ${segments.join(', ')})`
 })
