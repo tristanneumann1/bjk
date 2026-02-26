@@ -20,7 +20,7 @@ import {ACTION_COLORS} from "@/constants.ts";
 const emit = defineEmits<{ select: [] }>()
 
 const props = withDefaults(defineProps<{ actions?: PlayerAction[] }>(), {
-  actions: () => ['Split', 'Hit', 'Stand'] as PlayerAction[],
+  actions: () => [] as PlayerAction[],
 })
 
 const resolvedActions = computed(() => props.actions.slice(0, 4))

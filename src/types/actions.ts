@@ -1,1 +1,1 @@
-export type PlayerAction = 'Hit' | 'Stand' | 'Split' | 'Double' | 'Surrender' | 'Insurance'
+export type PlayerAction = 'Hit' | 'Stand' | 'Split' | 'Double' | 'Surrender' | 'Insurance' | 'DeclineInsurance'

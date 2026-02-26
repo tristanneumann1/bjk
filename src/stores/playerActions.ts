@@ -7,7 +7,10 @@ import * as userEvents from "@/lib/userEvents.ts";
 import {isAction} from "@/models/hand.ts";
 import {Session} from "@/models/session.ts";
 import type {Card} from "@/types/card.ts";
-import {determineCorrectAction} from "@/models/strategy/determineCorrectAction.ts";
+import {
+  determineCorrectAction,
+  isActionIncorrect
+} from "@/models/strategy/determineCorrectAction.ts";
 import {getAuth} from "firebase/auth";
 import {useGameStore} from "@/stores/game.ts";
 import {upsertPlayerDoc} from "@/lib/firestore.ts";
@@ -16,7 +19,7 @@ import {buildRoundDocId} from "@/docs/round.ts";
 import {type ActionDoc, ACTIONS_SUBCOLLECTION, buildActionDocId} from "@/docs/action.ts";
 import {useStrategyStore} from "@/stores/strategy.ts";
 
-export const PLAYER_ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance'] as const
+const PLAYER_ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance', 'DeclineInsurance']
 
 const createDefaultState = (): {[action in PlayerAction]: boolean} => ({
   Hit: true,
@@ -25,6 +28,7 @@ const createDefaultState = (): {[action in PlayerAction]: boolean} => ({
   Double: false,
   Surrender: false,
   Insurance: false,
+  DeclineInsurance: false,
 } satisfies Record<PlayerAction, boolean>)
 
 export const usePlayerActionsStore = defineStore('playerActions', () => {
@@ -99,7 +103,7 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
       chosenAction: action,
       strategyId: strategyStore.selectedStrategyId,
       expectedAction: correctActions,
-      actionIsCorrect: correctActions.includes(action),
+      actionIsCorrect: !isActionIncorrect(Session.getInstance(), strategyStore.selectedStrategy, action),
       roundId: buildRoundDocId(roundId)
     }
 

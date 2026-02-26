@@ -1,16 +1,25 @@
 import prompt from 'prompt';
 import { type PlayerAction } from '@/types/actions';
-import { Game3Chair } from '@/models/games/game3Chair';
+import {GameRigged} from "@/models/games/gameRigged";
+import {Card} from "@/models/card";
 
 async function run () {
-  const game = new Game3Chair()
-  game.start()
-  // game.start([new Card('Hearts', 'K'), new Card('Clubs', 'A'), new Card('Hearts', '5'), new Card('Clubs', 'K')])
+  const game = new GameRigged()
+  // game.start()
+  game.start([new Card('Hearts', 'A'), new Card('Clubs', '5'), new Card('Hearts', '5'), new Card('Clubs', 'K')])
   let stop = false
   while(!stop) {
     let action: PlayerAction | null = null
     const { act } = await prompt.get(['act'])
     switch (act) {
+      case 'i':
+      case 'I':
+        action = 'Insurance'
+        break
+      case 'di':
+      case 'DI':
+        action = 'DeclineInsurance'
+        break
       case 'h':
       case 'H':
         action = 'Hit'

@@ -30,20 +30,44 @@ const OPTIONAL_STARTING_CARDS = {
     new Card( 'Hearts', 'A'),
   ],
   dealerBlackJack: [
-    new Card('Spades', 'K'),
+    new Card('Diamonds', '5'),
+    new Card('Diamonds', '4'),
+    new Card( 'Diamonds', '3'),
+    new Card( 'Diamonds', '2'),
+    new Card('Diamonds', '5'),
+    new Card('Diamonds', '4'),
+    new Card( 'Diamonds', '3'),
+    new Card( 'Diamonds', '2'),
+    new Card('Diamonds', '5'),
+    new Card('Diamonds', '4'),
+    new Card( 'Diamonds', '3'),
+    new Card( 'Diamonds', '2'),
+    new Card('Diamonds', '5'),
+    new Card('Diamonds', '4'),
+    new Card( 'Diamonds', '3'),
+    new Card( 'Diamonds', '2'),
+    new Card('Diamonds', '5'),
+    new Card('Diamonds', '4'),
+    new Card( 'Diamonds', '3'),
+    new Card( 'Diamonds', '2'),
+    new Card('Diamonds', '5'),
+    new Card('Diamonds', '4'),
+    new Card( 'Diamonds', '3'),
+    new Card( 'Diamonds', '2'),
     new Card( 'Hearts', 'A'),
+    new Card('Spades', '7'),
     new Card('Spades', '6'),
     new Card( 'Hearts', '5'),
-    new Card('Spades', 'K'),
     new Card( 'Hearts', 'A'),
+    new Card('Spades', 'K'),
     new Card('Spades', '2'),
     new Card( 'Hearts', '3'),
-    new Card('Spades', 'K'),
     new Card( 'Hearts', 'A'),
+    new Card('Spades', 'A'),
     new Card('Spades', '6'),
     new Card( 'Hearts', '5'),
-    new Card('Spades', 'K'),
     new Card( 'Hearts', 'A'),
+    new Card('Spades', 'J'),
   ],
   doubleWith2Players: [
     new Card('Spades', '2'),
@@ -159,7 +183,7 @@ const OPTIONAL_STARTING_CARDS = {
 export default function initializeSession() {
   const rules = new Rules()
 
-  const session = Session.initialize(rules)
-  // const session = Session.initialize(rules, { shoePrefix: OPTIONAL_STARTING_CARDS.splittingAces })
+  // const session = Session.initialize(rules)
+  const session = Session.initialize(rules, { shoePrefix: OPTIONAL_STARTING_CARDS.dealerBlackJack })
   return session
 }

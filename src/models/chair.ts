@@ -61,30 +61,48 @@ export class Chair {
     this.activeHand.addCard(card);
   }
 
-  payout (other: Hand): number {
+  payout (dealerHand: Hand): number {
     let payout = 0
+
     for(const hand of this.hands) {
-      payout += this.handPayout(hand, other)
+      payout += this.handPayout(hand, dealerHand)
     }
     return payout;
   }
+
   private handPayout(hand: Hand, other: Hand): number {
+    if (hand.tookEvenMoney) {
+      return this.bet * 2
+    }
+
+    let payout = 0
+    if (hand.insuranceTaken && other.isBlackJack) {
+        payout += hand.insuranceAmount * 2
+      }
+
     switch (hand.beatsHand(other)) {
       case 'Win':
       case 'Double_Push':
-        return this.bet * 2;
+        payout += this.bet * 2;
+        break;
       case 'Push':
-        return this.bet;
+        payout += this.bet;
+        break;
       case 'BlackJack_Win':
-        return Math.floor(this.bet * (1 + Session.getInstance().rules.blackjackPayout));
+        payout += Math.floor(this.bet * (1 + Session.getInstance().rules.blackjackPayout));
+        break;
+      case "Double_Win":
+        payout += this.bet * 4;
+        break;
+      case "Surrendered":
+        payout += this.bet / 2;
+        break;
       case 'Lose':
       case 'Double_Lose':
-        return 0
-      case "Double_Win":
-        return this.bet * 4;
-      case "Surrendered":
-        return this.bet / 2;
+      default:
+        break
     }
+    return payout
   }
 
   moveToNextHand(dealer: Dealer) {
@@ -96,7 +114,7 @@ export class Chair {
       this.moveToNextHand(dealer);
     }
   }
-  private static readonly ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender']
+  private static readonly ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance', 'DeclineInsurance']
 
   listViableActions(): Record<PlayerAction, boolean> {
     return Chair.ACTIONS.reduce((result, action) => {
@@ -115,7 +133,15 @@ export class Chair {
       return 'Hand not active'
     }
 
+    const table = Session.getInstance().table
     const rules = Session.getInstance().rules
+
+    if (table.inInsurancePhase) {
+      if (action !== 'Insurance' && action !== 'DeclineInsurance') {
+        return 'Must decide on insurance first'
+      }
+    }
+
     switch (action) {
       case 'Stand':
         return null
@@ -156,8 +182,31 @@ export class Chair {
           return 'Surrender not allowed'
         }
         return null
-      case 'Insurance':
-        return 'Insurance not supported'
+      case 'Insurance': {
+        if (!table.inInsurancePhase) {
+          return 'Insurance only during insurance phase'
+        }
+        if (activeHand.insuranceTaken) {
+          return 'Insurance already taken'
+        }
+        if (activeHand.cards.length !== 2) {
+          return 'Insurance only available on first two cards'
+        }
+        const insuranceCost = this.bet / 2
+        if (Session.getInstance().player.balance < insuranceCost) {
+          return 'Not enough balance for insurance'
+        }
+        return null
+      }
+      case 'DeclineInsurance': {
+        if (!table.inInsurancePhase) {
+          return 'Can only decline insurance during insurance phase'
+        }
+        if (activeHand.insuranceTaken) {
+          return 'Insurance already taken'
+        }
+        return null
+      }
     }
   }
 
@@ -219,6 +268,19 @@ export class Chair {
       case 'Surrender':
         this.activeHand.isSurrendered = true
         this.moveToNextHand(dealer);
+        break;
+      case 'Insurance': {
+        const insuranceCost = this.bet / 2
+        Session.getInstance().player.removeMoney(insuranceCost)
+        this.activeHand.insuranceTaken = true
+        this.activeHand.insuranceAmount = insuranceCost
+
+        if (this.activeHand.isBlackJack) {
+          this.activeHand.tookEvenMoney = true
+        }
+        break;
+      }
+      case 'DeclineInsurance':
         break;
     }
   }

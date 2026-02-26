@@ -11,7 +11,7 @@ import {ensureInstanceId, getModelInstanceId} from "@/lib/modelEvents";
 import {type PlayerAction} from "@/types/actions";
 
 export function isAction(value: string): value is PlayerAction {
-  return ['Hit', 'Stand', 'Double', 'Split', 'Surrender'].includes(value);
+  return ['Hit', 'Stand', 'Double', 'Split', 'Surrender', 'Insurance', 'DeclineInsurance'].includes(value);
 }
 
 export const NEW_CARD_EVENT = 'new_card'
@@ -22,7 +22,10 @@ export class Hand {
   public isSplit = false;
   public isDoubled = false;
   public hasStood = false;
-  public isSurrendered = false
+  public isSurrendered = false;
+  public insuranceTaken = false;
+  public insuranceAmount = 0;
+  public tookEvenMoney = false;
   public lastOutcome: HandResult | null = null
   constructor(public cards: Card[] = []) {
     ensureInstanceId(Hand, 'hand', this as Record<string | symbol, unknown>)

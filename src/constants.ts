@@ -25,4 +25,5 @@ export const ACTION_COLORS: Record<PlayerAction, { label: string; color: string 
   Split: {label: 'Y', color: '#38bdf8'},
   Surrender: {label: 'R', color: '#f97316'},
   Insurance: {label: 'I', color: '#000000'},
+  DeclineInsurance: {label: 'X', color: '#6b7280'}
 }

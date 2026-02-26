@@ -109,6 +109,8 @@ Chair (player seat)
 Hand (single player hand)
 ├── cards: Card[]
 ├── softValue, isSoft, bestValue (computed)
+├── insuranceTaken, insuranceAmount, tookEvenMoney (insurance tracking)
+├── isSplit, isDoubled, hasStood, isSurrendered (state flags)
 └── beatsHand(other) → HandResult
 ```
 
@@ -261,11 +263,12 @@ The app uses `interactive-widget=resizes-visual` in the viewport meta tag to pre
 ### Adding a New Player Action
 
 1. Add action to `PlayerAction` type in `/src/types/actions.ts`
-2. Add to `PLAYER_ACTIONS` array in `/src/stores/playerActions.ts`
-3. Implement validation logic in `Chair.validateAction()`
-4. Implement execution logic in `Chair.act()`
-5. Update strategy grids if action affects decision-making
-6. Add UI button in `ActionSection.vue`
+2. Add to `Chair.ACTIONS` array in `/src/models/chair.ts`
+3. Add to `PLAYER_ACTIONS` array in `/src/stores/playerActions.ts`
+4. Implement validation logic in `Chair.validateAction()`
+5. Implement execution logic in `Chair.act()`
+6. Update strategy grids if action affects decision-making
+7. Add UI button in `ActionSection.vue`
 
 ### Adding a New Game Rule
 
@@ -273,8 +276,28 @@ The app uses `interactive-widget=resizes-visual` in the viewport meta tag to pre
 2. Add to `useGameStore` state and setters
 3. Update `serializeRulesDoc()` in `/src/docs/game.ts`
 4. Add to `GameTab.vue` settings UI
-5. Update persistence in `readGameConfig()`/`writeGameConfig()`
-6. If affects strategy: update `determineCorrectAction()` logic
+5. Update persistence in `readGameConfig()`/`writeGameConfig()` and `StoredGameConfig` type
+6. Add to watch array in `useGameStore`
+7. If affects strategy: update `determineCorrectAction()` logic
+
+## Game Rules Implementation
+
+### Insurance Rule
+
+When `insuranceAllowed` is true and dealer shows Ace:
+- Available only on first two cards before any other action
+- Costs half of original bet
+- Pays 2:1 if dealer has blackjack
+- Special case: Player blackjack + insurance = "even money" (immediate 1:1 payout, hand complete)
+- Implementation: `Hand.insuranceTaken`, `Hand.insuranceAmount`, `Hand.tookEvenMoney` flags
+- Payout handled in `Chair.payout()` before regular hand payouts
+
+### Hit After Split Aces Rule
+
+When `hitAfterSplitAces` is false:
+- After splitting aces, each hand receives one card and automatically stands
+- No further actions allowed on either split ace hand
+- Implementation in `Chair.act()` Split case checks flag and stands both hands
 
 ### Modifying Event Tracking
 
@@ -314,6 +337,13 @@ Key files:
 - src/stores/game.ts                 # Game lifecycle and persistence
 - src/stores/playerActions.ts        # Action triggering and validation
 ```
+
+## Color System
+
+Colors are defined once in `/src/constants/colors.ts` and automatically available in both TypeScript and CSS:
+- **TypeScript**: `import { COLORS } from '@/constants/colors'`
+- **CSS**: `var(--color-background)`, `var(--primary-400)`, etc.
+- Single source of truth, change colors in `colors.ts` only
 
 ## Technology Notes
 

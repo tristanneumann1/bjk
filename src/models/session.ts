@@ -7,7 +7,8 @@ import {Dealer} from "@/models/dealer";
 
 export interface SessionOptions {
   playerBalance?: number;
-  shoePrefix?: Card[]
+  shoePrefix?: Card[];
+  logAfterAction?: boolean;
 }
 
 export class Session {
@@ -28,7 +29,9 @@ export class Session {
       dealer.shoe.unshift(...options.shoePrefix)
     }
 
-    const table = new Table(dealer, dealerChair, [], {logAfterAction: false})
+    const logAfterAction = options.logAfterAction ?? false
+
+    const table = new Table(dealer, dealerChair, [], { logAfterAction })
     Session.instance = new Session({ rules, player, table });
     return Session.instance
   }

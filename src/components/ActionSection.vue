@@ -19,7 +19,7 @@
         :disabled="!playerActions.isEnabled(action)"
         @click="onActionClick(action)"
       >
-        {{ action }}
+        {{ formatAction(action) }}
       </button>
       </div>
     </template>
@@ -36,8 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue'
-import { PLAYER_ACTIONS, usePlayerActionsStore } from '@/stores/playerActions'
+import {ref, computed} from 'vue'
+import { usePlayerActionsStore } from '@/stores/playerActions'
 import { type PlayerAction } from '@/types/actions.ts'
 import {
   modelCustomEvent,
@@ -49,7 +49,10 @@ import {NEW_CARD_EVENT} from "@/models/hand.ts";
 import {Session} from "@/models/session.ts";
 import {CHAIR_EVENT} from "@/models/table.ts";
 import {useDealerStore} from '@/stores/dealer'
-import {determineCorrectAction} from "@/models/strategy/determineCorrectAction.ts";
+import {
+  determineCorrectAction,
+  isActionIncorrect
+} from "@/models/strategy/determineCorrectAction.ts";
 import {useSettingsStore} from "@/stores/settings.ts";
 import {useStrategyStore} from "@/stores/strategy.ts";
 
@@ -61,13 +64,26 @@ const playerActions = usePlayerActionsStore()
 const dealerStore = useDealerStore()
 const settingsStore = useSettingsStore()
 const strategyStore = useStrategyStore()
-const actions = PLAYER_ACTIONS
 const mistakeSnackbar = ref({ visible: false, text: '' })
+
+const actions = computed<PlayerAction[]>(() => {
+  const baseActions: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance']
+
+  if (playerActions.isEnabled('Insurance') && playerActions.isEnabled('DeclineInsurance')) {
+    return baseActions.map(action => action === 'Surrender' ? 'DeclineInsurance' : action)
+  }
+
+  return baseActions
+})
+const formatAction = (action: PlayerAction): string => {
+  if(action === 'DeclineInsurance') return 'Decline Insurance'
+  return action
+}
 
 const onActionClick = (action: PlayerAction) => {
     try {
       const correctActions = determineCorrectAction(Session.getInstance(), strategyStore.selectedStrategy)
-      if (!correctActions.includes(action)) {
+      if (isActionIncorrect(Session.getInstance(), strategyStore.selectedStrategy, action)) {
         if (settingsStore.showMistakeSnackbar) {
           const recommended = Array.from(new Set(correctActions)).join(', ')
           mistakeSnackbar.value = {

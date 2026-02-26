@@ -30,6 +30,8 @@ export class Table {
   chairIndex = 0;
   public runningCount = 0;
   public chairTurnIndex = 0;
+  public inInsurancePhase = false;
+  public chairsInsuranceDecided: Set<number> = new Set();
   constructor(public dealer: Dealer, public dealerChair: Chair, public playerChairs: PlayerChair = {}, public configuration: TableConfiguration = DEFAULT_TABLE_CONFIGURATION) {}
 
   get dealerPeekedBlackjack(): boolean {
@@ -60,10 +62,10 @@ export class Table {
   get playerRoundsComplete(): boolean {
     return this.dealerPeekedBlackjack || !this.playerChairArray.find(pc => !pc.chairDone)
   }
-  get allPlayerHandsBustedOrBlackjack(): boolean {
+  get allPlayerHandsBustedSurrenderedOrBlackjack(): boolean {
     for (const chair of this.playerChairArray) {
       for (const hand of chair.hands) {
-        if (!hand.isBusted && !hand.isBlackJack) {
+        if (!hand.isBusted && !hand.isBlackJack && !hand.isSurrendered) {
           return false
         }
       }
@@ -157,7 +159,13 @@ export class Table {
 
     this.chairTurnIndex = -1;
 
-    if (this.dealerPeekedBlackjack) {
+    const rules = Session.getInstance().rules
+    const dealerShowsAce = this.upCard.isAce()
+
+    if (rules.insuranceAllowed && dealerShowsAce) {
+      this.inInsurancePhase = true
+      this.chairsInsuranceDecided = new Set()
+    } else if (this.dealerPeekedBlackjack) {
       this.chairTurnIndex = this.playerChairArray.length
     }
 
@@ -167,7 +175,7 @@ export class Table {
       this.view()
     }
 
-    this.dealer.holeCardHidden = !this.playerRoundsComplete
+    this.dealer.holeCardHidden = this.inInsurancePhase || !this.playerRoundsComplete
     this.updateRunningCount()
 
     if (!this.activeChair) {
@@ -192,14 +200,30 @@ export class Table {
     if (!this.activeChair) {
       throw new Error('No active chair');
     }
+
     this.activeChair.act(action, this.dealer)
 
-    if (this.activeChair.activeHand === undefined) {
+    if (this.inInsurancePhase && (action === 'Insurance' || action === 'DeclineInsurance')) {
+      this.chairsInsuranceDecided.add(this.chairTurnIndex)
+
+      if (this.chairsInsuranceDecided.size === this.playerChairArray.length) {
+        this.inInsurancePhase = false
+
+        if (this.dealerPeekedBlackjack) {
+          this.chairTurnIndex = this.playerChairArray.length
+          this.dealer.revealHoleCard()
+        } else {
+          this.chairTurnIndex = -1
+        }
+      }
+    }
+
+    if (this.activeChair?.activeHand === undefined) {
       this.nextChair()
     }
 
     if (this.playerRoundsComplete) {
-      if (this.allPlayerHandsBustedOrBlackjack) {
+      if (this.allPlayerHandsBustedSurrenderedOrBlackjack) {
         this.dealer.revealHoleCard()
       } else {
         this.dealer.completeDealerHand(this.dealerChair.activeHand)

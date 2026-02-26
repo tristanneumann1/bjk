@@ -6,7 +6,7 @@ export class Game1 {
   public table: Table;
   constructor() {
     const rules = new Rules();
-    const session = Session.initialize(rules)
+    const session = Session.initialize(rules, { logAfterAction: true })
     this.table = session.table
     this.table.addPlayerChair()
   }
@@ -18,8 +18,7 @@ export class Game1 {
   }
 
   nextRound() {
-    this.table.payout()
-    this.table.resetAllChairs()
+    console.log('player.balance', Session.getInstance().player.balance)
     this.table.startRound()
   }
 }

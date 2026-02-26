@@ -5,6 +5,19 @@ import type { PlayerAction } from '@/types/actions'
 import type {Session} from "@/models/session.ts"
 import type {ComparisonRule, RulesMeta, ScenarioKey, StrategyGrid} from "@/types/strategies.ts";
 
+export function isActionIncorrect(session: Session, strategy: StrategyGrid, action: PlayerAction) {
+  const correctActions = determineCorrectAction(session, strategy)
+
+  if (action === 'DeclineInsurance' && !correctActions.every(action => action === 'Insurance')) {
+    return false
+  }
+
+  if (correctActions.includes(action)) {
+    return false
+  }
+  return true
+}
+
 export function determineCorrectAction(
   session: Session,
   strategyGrid: StrategyGrid,
