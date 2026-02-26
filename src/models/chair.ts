@@ -42,7 +42,7 @@ export class Chair {
   }
   get allHandsOff(): boolean {
     for (const hand of this.hands) {
-      if (!hand.isBusted && !hand.isSurrendered && !hand.isBlackJack) {
+      if (!hand.isBusted && !hand.isSurrendered && (!hand.isBlackJack || hand.pendingInsurance)) {
         return false;
       }
     }
@@ -77,8 +77,8 @@ export class Chair {
 
     let payout = 0
     if (hand.insuranceTaken && other.isBlackJack) {
-        payout += hand.insuranceAmount * 2
-      }
+      payout += hand.insuranceAmount * 3
+    }
 
     switch (hand.beatsHand(other)) {
       case 'Win':
@@ -270,17 +270,19 @@ export class Chair {
         this.moveToNextHand(dealer);
         break;
       case 'Insurance': {
-        const insuranceCost = this.bet / 2
-        Session.getInstance().player.removeMoney(insuranceCost)
-        this.activeHand.insuranceTaken = true
-        this.activeHand.insuranceAmount = insuranceCost
-
+        this.activeHand.pendingInsurance = false
         if (this.activeHand.isBlackJack) {
           this.activeHand.tookEvenMoney = true
+        } else {
+          const insuranceCost = this.bet / 2
+          Session.getInstance().player.removeMoney(insuranceCost)
+          this.activeHand.insuranceTaken = true
+          this.activeHand.insuranceAmount = insuranceCost
         }
         break;
       }
       case 'DeclineInsurance':
+        this.activeHand.pendingInsurance = false
         break;
     }
   }

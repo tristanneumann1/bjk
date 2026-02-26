@@ -29,35 +29,27 @@ const OPTIONAL_STARTING_CARDS = {
     new Card('Spades', 'K'),
     new Card( 'Hearts', 'A'),
   ],
-  dealerBlackJack: [
-    new Card('Diamonds', '5'),
-    new Card('Diamonds', '4'),
-    new Card( 'Diamonds', '3'),
-    new Card( 'Diamonds', '2'),
-    new Card('Diamonds', '5'),
-    new Card('Diamonds', '4'),
-    new Card( 'Diamonds', '3'),
-    new Card( 'Diamonds', '2'),
-    new Card('Diamonds', '5'),
-    new Card('Diamonds', '4'),
-    new Card( 'Diamonds', '3'),
-    new Card( 'Diamonds', '2'),
-    new Card('Diamonds', '5'),
-    new Card('Diamonds', '4'),
-    new Card( 'Diamonds', '3'),
-    new Card( 'Diamonds', '2'),
-    new Card('Diamonds', '5'),
-    new Card('Diamonds', '4'),
-    new Card( 'Diamonds', '3'),
-    new Card( 'Diamonds', '2'),
-    new Card('Diamonds', '5'),
-    new Card('Diamonds', '4'),
-    new Card( 'Diamonds', '3'),
-    new Card( 'Diamonds', '2'),
+  insuranceExercises: [
     new Card( 'Hearts', 'A'),
     new Card('Spades', '7'),
     new Card('Spades', '6'),
     new Card( 'Hearts', '5'),
+    new Card('Spades', 'J'),
+    new Card( 'Hearts', 'A'),
+    new Card('Spades', '10'),
+    new Card('Spades', '6'),
+    new Card( 'Hearts', '5'),
+    new Card( 'Hearts', 'A'),
+    new Card('Spades', 'J'),
+    new Card('Spades', 'J'),
+    new Card( 'Hearts', 'A'),
+    new Card( 'Hearts', 'A'),
+    new Card('Spades', '3'),
+    new Card('Spades', 'J'),
+    new Card( 'Hearts', 'A'),
+
+  ],
+  dealerBlackJack: [
     new Card( 'Hearts', 'A'),
     new Card('Spades', 'K'),
     new Card('Spades', '2'),
@@ -184,6 +176,6 @@ export default function initializeSession() {
   const rules = new Rules()
 
   // const session = Session.initialize(rules)
-  const session = Session.initialize(rules, { shoePrefix: OPTIONAL_STARTING_CARDS.dealerBlackJack })
+  const session = Session.initialize(rules, { shoePrefix: OPTIONAL_STARTING_CARDS.insuranceExercises })
   return session
 }

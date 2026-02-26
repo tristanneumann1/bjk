@@ -165,6 +165,9 @@ export class Table {
     if (rules.insuranceAllowed && dealerShowsAce) {
       this.inInsurancePhase = true
       this.chairsInsuranceDecided = new Set()
+      for (const chair of this.playerChairArray) {
+        if (chair.activeHand) chair.activeHand.pendingInsurance = true
+      }
     } else if (this.dealerPeekedBlackjack) {
       this.chairTurnIndex = this.playerChairArray.length
     }

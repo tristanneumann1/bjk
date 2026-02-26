@@ -23,6 +23,7 @@ export class Hand {
   public isDoubled = false;
   public hasStood = false;
   public isSurrendered = false;
+  public pendingInsurance = false;
   public insuranceTaken = false;
   public insuranceAmount = 0;
   public tookEvenMoney = false;
@@ -42,7 +43,7 @@ export class Hand {
     return this.cards.some(card => card.isAce()) && this.softValue + 10 <= 21;
   }
   get isDone(): boolean {
-    return this.isBusted || this.hasStood || this.isSurrendered || this.bestValue === 21
+    return (this.isBusted || this.hasStood || this.isSurrendered || this.bestValue === 21) && !this.pendingInsurance
   }
   get isBusted(): boolean {
     return this.softValue > 21;
