@@ -7,6 +7,7 @@ export type StoredGameConfig = Partial<{
   doubleAllowedAfterSplit: boolean
   resplitAcesAllowed: boolean
   surrenderAllowed: boolean
+  insuranceAllowed: boolean
   maxSplits: number
   blackjackPayout: number
   dealerPeekA10: boolean

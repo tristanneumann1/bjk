@@ -12,3 +12,4 @@
 - [s] minimize CSS by creating components
 - [s] Round summary still too wide
 - [s] Can't get menu to be right width
+- [b] Even money when wrong creates wrong alert message

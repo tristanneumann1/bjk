@@ -175,7 +175,7 @@ const OPTIONAL_STARTING_CARDS = {
 export default function initializeSession() {
   const rules = new Rules()
 
-  // const session = Session.initialize(rules)
-  const session = Session.initialize(rules, { shoePrefix: OPTIONAL_STARTING_CARDS.insuranceExercises })
+  const session = Session.initialize(rules)
+  // const session = Session.initialize(rules, { shoePrefix: OPTIONAL_STARTING_CARDS.insuranceExercises })
   return session
 }

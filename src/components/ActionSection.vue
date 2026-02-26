@@ -77,6 +77,7 @@ const actions = computed<PlayerAction[]>(() => {
 })
 const formatAction = (action: PlayerAction): string => {
   if(action === 'DeclineInsurance') return 'Decline Insurance'
+  if(action === 'Insurance' && Session.getInstance().table.activeChair?.activeHand?.isBlackJack) return 'Even Money'
   return action
 }
 

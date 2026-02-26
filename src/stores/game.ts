@@ -51,6 +51,7 @@ export const useGameStore = defineStore('game', () => {
   )
   const resplitAcesAllowed = ref(storedConfig?.resplitAcesAllowed ?? sessionInitial.rules.resplitAcesAllowed)
   const surrenderAllowed = ref(storedConfig?.surrenderAllowed ?? sessionInitial.rules.surrenderAllowed)
+  const insuranceAllowed = ref(storedConfig?.insuranceAllowed ?? sessionInitial.rules.insuranceAllowed)
   const pendingMaxSplits = ref(clampMaxSplits(storedConfig?.maxSplits ?? sessionInitial.rules.maxSplits))
   const blackjackPayout = ref(normalizeBlackjackPayout(storedConfig?.blackjackPayout ?? sessionInitial.rules.blackjackPayout))
   const dealerPeekA10 = ref(storedConfig?.dealerPeekA10 ?? sessionInitial.rules.dealerPeekA10)
@@ -88,6 +89,10 @@ export const useGameStore = defineStore('game', () => {
     surrenderAllowed.value = Boolean(value)
   }
 
+  const setInsuranceAllowed = (value: boolean | null) => {
+    insuranceAllowed.value = Boolean(value)
+  }
+
   const setDealerPeekA10 = (value: boolean | null) => {
     dealerPeekA10.value = Boolean(value)
   }
@@ -104,6 +109,7 @@ export const useGameStore = defineStore('game', () => {
       doubleAllowedAfterSplit: doubleAllowedAfterSplit.value,
       resplitAcesAllowed: resplitAcesAllowed.value,
       surrenderAllowed: surrenderAllowed.value,
+      insuranceAllowed: insuranceAllowed.value,
       maxSplits: pendingMaxSplits.value,
       blackjackPayout: blackjackPayout.value,
       dealerPeekA10: dealerPeekA10.value,
@@ -121,6 +127,7 @@ export const useGameStore = defineStore('game', () => {
     newRules.doubleAllowedAfterSplit = doubleAllowedAfterSplit.value
     newRules.resplitAcesAllowed = resplitAcesAllowed.value
     newRules.surrenderAllowed = surrenderAllowed.value
+    newRules.insuranceAllowed = insuranceAllowed.value
     newRules.maxSplits = pendingMaxSplits.value
     newRules.blackjackPayout = blackjackPayout.value
     newRules.dealerPeekA10 = dealerPeekA10.value
@@ -250,6 +257,7 @@ export const useGameStore = defineStore('game', () => {
       doubleAllowedAfterSplit,
       resplitAcesAllowed,
       surrenderAllowed,
+      insuranceAllowed,
       pendingMaxSplits,
       blackjackPayout,
       dealerPeekA10,
@@ -275,6 +283,8 @@ export const useGameStore = defineStore('game', () => {
     setResplitAcesAllowed,
     surrenderAllowed,
     setSurrenderAllowed,
+    insuranceAllowed,
+    setInsuranceAllowed,
     pendingMaxSplits,
     setMaxSplits,
     blackjackPayout,

@@ -90,6 +90,16 @@
         hide-details
         inset
         density="compact"
+        label="Insurance allowed"
+        :model-value="gameStore.insuranceAllowed"
+        @update:model-value="gameStore.setInsuranceAllowed"
+      />
+      <v-switch
+        class="game-tab__switch"
+        color="primary"
+        hide-details
+        inset
+        density="compact"
         label="Surrender allowed"
         :model-value="gameStore.surrenderAllowed"
         @update:model-value="gameStore.setSurrenderAllowed"
