@@ -37,6 +37,7 @@ export function determineCorrectAction(
   const canSplit = !activeChair.validateAction('Split')
   const canDouble = !activeChair.validateAction('Double')
   const canSurrender = !activeChair.validateAction('Surrender')
+  const canInsure = !activeChair.validateAction('Insurance')
   const isSoft = playerHand.isSoft
 
   const ruleMeta: RulesMeta = {
@@ -46,6 +47,7 @@ export function determineCorrectAction(
     canDouble,
     canSurrender,
     isSoft,
+    canInsure,
     DAS: rules.doubleAllowedAfterSplit,
   }
 
@@ -55,6 +57,14 @@ export function determineCorrectAction(
 
   const scenarioKey = buildScenarioKey(playerHand, dealerUpCard)
   const ruleSet = strategyGrid[scenarioKey] ?? []
+
+  if (canInsure) {
+    const matchedUpper = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountUpper, rule))
+    const matchedLower = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountLower, rule))
+    const upper: PlayerAction = matchedUpper?.action === 'Insurance' ? 'Insurance' : 'DeclineInsurance'
+    const lower: PlayerAction = matchedLower?.action === 'Insurance' ? 'Insurance' : 'DeclineInsurance'
+    return [upper, lower]
+  }
 
   const matchedRuleUpper = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountUpper, rule))
   const matchedRuleLower = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountLower, rule))
@@ -78,6 +88,9 @@ const matchesCountRule = (ruleMeta: RulesMeta, count: number, rule: ComparisonRu
     return false
   }
   if (rule.DAS && !ruleMeta.DAS) {
+    return false
+  }
+  if (rule.canInsure && !ruleMeta.canInsure) {
     return false
   }
   if (typeof rule.trueCountGreaterEqualTo === 'number' && count < rule.trueCountGreaterEqualTo) {

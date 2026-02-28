@@ -18,12 +18,12 @@ export const GAME_CONFIG_STORAGE_KEY = 'bjk_game_config'
 export const STRATEGY_STORAGE_KEY = 'selectedStrategyId'
 export const SETTINGS_STORAGE_KEY = 'bjk_settings'
 
-export const ACTION_COLORS: Record<PlayerAction, { label: string; color: string }> = {
-  Hit: {label: 'H', color: '#f5f5f5'},
-  Stand: {label: 'S', color: '#fde047'},
-  Double: {label: 'D', color: '#f472b6'},
-  Split: {label: 'Y', color: '#38bdf8'},
-  Surrender: {label: 'R', color: '#f97316'},
-  Insurance: {label: 'I', color: '#000000'},
-  DeclineInsurance: {label: 'X', color: '#6b7280'}
+export const ACTION_COLORS: Record<PlayerAction, { label: string; color: string, text: string }> = {
+  Hit: {label: 'H', color: '#f5f5f5', text: '#111'},
+  Stand: {label: 'S', color: '#fde047', text: '#111'},
+  Double: {label: 'D', color: '#f472b6', text: '#111'},
+  Split: {label: 'Y', color: '#38bdf8', text: '#111'},
+  Surrender: {label: 'R', color: '#f97316', text: '#111'},
+  Insurance: {label: 'I', color: '#000000', text: '#eee'},
+  DeclineInsurance: {label: 'X', color: '#6b7280', text: '#111'}
 }

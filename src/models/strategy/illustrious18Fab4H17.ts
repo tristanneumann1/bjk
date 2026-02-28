@@ -45,11 +45,12 @@ illustrious18Fab4H17 = {
   '15_1': [{canSurrender: true, trueCountGreaterEqualTo: 1, action: 'Surrender'}, {action: 'Hit'}],
 }
 
+// Insurance
 for (const key in illustrious18Fab4H17) {
   const scenarioKey = key as keyof StrategyGrid
   if (!isScenarioKey(scenarioKey)) continue
 
-  illustrious18Fab4H17[scenarioKey] = [{trueCountGreaterEqualTo: 3, action: 'Insurance'}, ...illustrious18Fab4H17[scenarioKey]]
+  illustrious18Fab4H17[scenarioKey] = [{trueCountGreaterEqualTo: 3, canInsure: true, action: 'Insurance'}, ...illustrious18Fab4H17[scenarioKey]]
 }
 
 export { illustrious18Fab4H17 }

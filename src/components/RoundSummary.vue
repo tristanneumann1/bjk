@@ -63,7 +63,7 @@
               <div class="mistakes-list__actions">
                 <div class="mistakes-list__action-row">
                   <strong>Taken:</strong>
-                  <span class="action-pill" :style="{ backgroundColor: ACTION_COLORS[mistake.chosenAction]?.color }">
+                  <span class="action-pill" :style="{ backgroundColor: ACTION_COLORS[mistake.chosenAction]?.color, color: ACTION_COLORS[mistake.chosenAction]?.text }">
                     {{ mistake.chosenAction }}
                   </span>
                 </div>
@@ -74,7 +74,7 @@
                       v-for="action in getUniqueActions(mistake.expectedAction)"
                       :key="action"
                       class="action-pill"
-                      :style="{ backgroundColor: ACTION_COLORS[action]?.color }"
+                      :style="{ backgroundColor: ACTION_COLORS[action]?.color, color: ACTION_COLORS[action]?.text }"
                     >
                       {{ action }}
                     </span>
@@ -317,7 +317,6 @@ const getUniqueActions = (actions?: PlayerAction[]): PlayerAction[] => {
   border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111;
   border: 1px solid rgba(0, 0, 0, 0.2);
   text-transform: capitalize;
 }

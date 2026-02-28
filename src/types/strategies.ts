@@ -5,6 +5,7 @@ export type ComparisonRule = {
   canSplit?: boolean
   canDouble?: boolean
   canSurrender?: boolean
+  canInsure?: boolean
   DAS?: boolean
   trueCountGreaterEqualTo?: number | null
 
@@ -12,7 +13,7 @@ export type ComparisonRule = {
 }
 
 export type ScenarioKey = `${number}_${number}`
-export const isScenarioKey = (input: any | ScenarioKey): input is ScenarioKey => new RegExp('/^\\d+_\\d+$/').test(input)
+export const isScenarioKey = (input: any | ScenarioKey): input is ScenarioKey => /^\d+_\d+$/.test(input)
 
 export type StrategyGrid = { id: string, name: string } & {
   [K in ScenarioKey]: ComparisonRule[]
@@ -25,6 +26,7 @@ export interface RulesMeta {
   canSplit: boolean
   canDouble: boolean
   canSurrender: boolean
+  canInsure: boolean
   isSoft: boolean
   DAS: boolean
 }
