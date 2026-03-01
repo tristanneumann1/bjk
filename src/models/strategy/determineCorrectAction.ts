@@ -12,10 +12,8 @@ export function isActionIncorrect(session: Session, strategy: StrategyGrid, acti
     return false
   }
 
-  if (correctActions.includes(action)) {
-    return false
-  }
-  return true
+  return !correctActions.includes(action);
+
 }
 
 export function determineCorrectAction(
@@ -93,10 +91,8 @@ const matchesCountRule = (ruleMeta: RulesMeta, count: number, rule: ComparisonRu
   if (rule.canInsure && !ruleMeta.canInsure) {
     return false
   }
-  if (typeof rule.trueCountGreaterEqualTo === 'number' && count < rule.trueCountGreaterEqualTo) {
-    return false
-  }
-  return true
+  return !(typeof rule.trueCountGreaterEqualTo === 'number' && count < rule.trueCountGreaterEqualTo);
+
 }
 
 const buildScenarioKey = (hand: Hand, dealerCard: Card): ScenarioKey => {
