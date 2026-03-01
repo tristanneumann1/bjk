@@ -1,10 +1,10 @@
 import { initializeApp } from 'firebase/app'
-import { getAnalytics } from 'firebase/analytics'
+import { getAnalytics, isSupported } from 'firebase/analytics'
 import { FIREBASE_CONFIG } from '@/constants.ts'
 
 const PORT = 8080
 const fbApp = initializeApp(FIREBASE_CONFIG)
-const analytics = getAnalytics(fbApp)
+const analytics = isSupported().then(yes => yes ? getAnalytics(fbApp) : null)
 
 const fallbackDomain = (import.meta.env.VITE_APP_DOMAIN as string | undefined)?.replace(/\/$/, '')
 const finishSignUpPath = `/finishSignUp`
