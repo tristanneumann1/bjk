@@ -6,9 +6,11 @@ import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import Auth from '@/components/Auth.vue'
 
 const router = useRouter()
+const isMounted = ref(false)
 const currentUser = ref<User | null>(null)
 
 onMounted(() => {
+  isMounted.value = true
   onAuthStateChanged(getAuth(), user => {
     currentUser.value = user
   })
@@ -100,13 +102,14 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
         Play Now
       </v-btn>
 
-      <div v-if="!currentUser" class="landing-shell__auth">
+      <div v-if="isMounted && !currentUser" class="landing-shell__auth">
         <p class="landing-shell__auth-label">Sign in to save your progress</p>
         <Auth />
       </div>
-      <p v-else class="landing-shell__signed-in">
+      <p v-else-if="isMounted && currentUser" class="landing-shell__signed-in">
         Signed in as <strong>{{ currentUser.displayName ?? currentUser.email }}</strong>
       </p>
+      <v-skeleton-loader v-else type="button, text" width="280" color="transparent" />
     </section>
 
     <section class="landing-shell__features">
@@ -285,6 +288,7 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
   position: absolute;
   left: 0;
 }
+
 
 @media (max-width: 560px) {
   .landing-shell__title {

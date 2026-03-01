@@ -1,6 +1,7 @@
 # Upcoming Tasks
 
 - [n] Rule to prevent hit after split aces
+- [ ] Feedback
 - [ ] Change betting slider for better functionality
 - [ ] graph of Bankroll over time
 - [ ] Offline Access
