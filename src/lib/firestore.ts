@@ -2,7 +2,11 @@
 
 import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, getCountFromServer, type QueryFieldFilterConstraint } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
-import {PLAYER_COLLECTION, playerDocId} from "@/docs/player.ts";
+import { PLAYER_COLLECTION, playerDocId } from "@/docs/player.ts"
+import { FIREBASE_ENABLED, FIREBASE_ALLOWED_UIDS } from '@/constants.ts'
+
+const isAllowed = (address: string[]) =>
+  FIREBASE_ENABLED || FIREBASE_ALLOWED_UIDS.some(uid => address[0] === playerDocId(uid))
 
 export interface QueryOptions {
   limit?: number,
@@ -14,6 +18,7 @@ const DEFAULT_LIMIT = 100
 export const firestore = getFirestore(fbApp)
 
 export const getFbDoc = async <T>(collectionId: string, address: string[]): Promise<T | null> => {
+  if (!isAllowed(address)) return null
   const fbDoc = doc(firestore, collectionId, ...address)
   const snap = await getDoc(fbDoc)
   return snap.exists() ? (snap.data() as T) : null
@@ -24,9 +29,10 @@ export const getPlayerDoc = async <T>(playerUid: string, address: string[]): Pro
 }
 
 export const getFbDocs = async <T>(collectionId: string, address: string[], options: QueryOptions): Promise<(T | null)[]> => {
+  if (!isAllowed(address)) return []
   const col = collection(firestore, collectionId, ...address)
   const q = query(col, limit(options.limit ?? DEFAULT_LIMIT), ...(options.wheres ?? []))
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocs(q)
 
   return querySnapshot.docs.map(doc => {
     return doc.exists() ? (doc.data() as T) : null
@@ -34,10 +40,11 @@ export const getFbDocs = async <T>(collectionId: string, address: string[], opti
 }
 
 export const getPlayerDocs = async<T>(playerUid: string, address: string[], options: QueryOptions): Promise<(T | null)[]> => {
-    return getFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
+  return getFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
 }
 
 export const countFbDocs = async (collectionId: string, address: string[], options: QueryOptions): Promise<number> => {
+  if (!isAllowed(address)) return 0
   const col = collection(firestore, collectionId, ...address)
   const q = query(col, limit(options.limit ?? DEFAULT_LIMIT), ...(options.wheres ?? []))
 
@@ -45,11 +52,12 @@ export const countFbDocs = async (collectionId: string, address: string[], optio
   return snapshot.data().count
 }
 
-export const countPlayerDocs = async(playerUid: string, address: string[], options: QueryOptions): Promise<(number)> => {
-    return countFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
+export const countPlayerDocs = async(playerUid: string, address: string[], options: QueryOptions): Promise<number> => {
+  return countFbDocs(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
 }
 
 export const upsertFbDoc = async <T>(collectionId: string, address: string[], data: Partial<T>) => {
+  if (!isAllowed(address)) return
   const fbDoc = doc(firestore, collectionId, ...address)
   const snapshot = await getDoc(fbDoc)
   const payload: Record<string, unknown> = {

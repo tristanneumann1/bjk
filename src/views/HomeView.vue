@@ -87,7 +87,7 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
         class="landing-shell__cta"
         @click="router.push('/game')"
       >
-        Play Now — It's Free
+        Play Now
       </v-btn>
     </section>
 

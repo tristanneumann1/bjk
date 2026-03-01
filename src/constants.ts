@@ -13,6 +13,15 @@ export const FIREBASE_CONFIG = {
   measurementId: "G-BNTT6670HE"
 };
 
+/** Kill switch — set to false to disable all Firebase reads, writes, and sign-in */
+export const FIREBASE_ENABLED = true
+
+/** UIDs exempt from the kill switch */
+export const FIREBASE_ALLOWED_UIDS = [
+  '7WJxFBy16CUVUBFO0Cyg84adT4y1',
+  'LiyOfAXpiBbC86757705dzJn4Ga2',
+]
+
 export const LOCAL_KEY_EMAIL = 'User_Email';
 export const GAME_CONFIG_STORAGE_KEY = 'bjk_game_config'
 export const STRATEGY_STORAGE_KEY = 'selectedStrategyId'

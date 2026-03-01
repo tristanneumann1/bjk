@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { sendSignInLinkToEmail, getAuth, onAuthStateChanged, signOut } from 'firebase/auth'
 import { actionCodeSettings } from '@/lib/firebase.ts'
-import { LOCAL_KEY_EMAIL } from '@/constants.ts'
+import { LOCAL_KEY_EMAIL, FIREBASE_ENABLED } from '@/constants.ts'
 
 const email = ref(window.localStorage.getItem(LOCAL_KEY_EMAIL) ?? '')
 const isSubmitting = ref(false)
@@ -55,7 +55,8 @@ const handleSignOut = async () => {
 
 <template>
   <section class="auth-shell">
-    <form v-if="!currentUser" class="auth-form" @submit.prevent="passwordlessSignIn">
+    <p v-if="!FIREBASE_ENABLED" class="auth-form__status">Accounts are temporarily unavailable.</p>
+    <form v-else-if="!currentUser" class="auth-form" @submit.prevent="passwordlessSignIn">
       <label for="email-input" class="auth-form__label">Email</label>
       <input
         v-model="email"
@@ -71,7 +72,7 @@ const handleSignOut = async () => {
       </button>
     </form>
 
-    <div v-else class="auth-current">
+    <div v-else-if="currentUser" class="auth-current">
       <p class="auth-current__text">Signed in as: <strong>{{ currentUser?.email }}</strong></p>
       <button class="auth-form__submit" type="button" @click="handleSignOut">Log Out</button>
     </div>
