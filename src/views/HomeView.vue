@@ -1,8 +1,18 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
+import { ref, onMounted } from 'vue'
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import Auth from '@/components/Auth.vue'
 
 const router = useRouter()
+const currentUser = ref<User | null>(null)
+
+onMounted(() => {
+  onAuthStateChanged(getAuth(), user => {
+    currentUser.value = user
+  })
+})
 
 useHead({
   script: [
@@ -89,6 +99,14 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
       >
         Play Now
       </v-btn>
+
+      <div v-if="!currentUser" class="landing-shell__auth">
+        <p class="landing-shell__auth-label">Sign in to save your progress</p>
+        <Auth />
+      </div>
+      <p v-else class="landing-shell__signed-in">
+        Signed in as <strong>{{ currentUser.displayName ?? currentUser.email }}</strong>
+      </p>
     </section>
 
     <section class="landing-shell__features">
@@ -148,6 +166,26 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
   font-size: 2rem;
   margin: 0;
   line-height: 1.2;
+}
+
+.landing-shell__auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.landing-shell__auth-label {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.landing-shell__signed-in {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .landing-shell__description {
