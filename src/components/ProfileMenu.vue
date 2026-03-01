@@ -12,10 +12,13 @@
         <path d="M3 12v9h18v-9" />
       </svg>
     </button>
+
+    <p v-if="welcomeName" class="profile-menu__welcome">Welcome back, {{ welcomeName }}</p>
+
     <v-menu
       v-model="isOpen"
       :close-on-content-click="false"
-      location="bottom start"
+      location="bottom end"
       offset="8"
     >
       <template #activator="{ props }">
@@ -26,7 +29,15 @@
           :aria-expanded="isOpen ? 'true' : 'false'"
           v-bind="props"
         >
-          <ProfileIcon class="profile-menu__icon" aria-label="Profile" role="img" />
+          <img
+            v-if="currentUser?.photoURL"
+            :src="currentUser.photoURL"
+            class="profile-menu__avatar"
+            alt="Profile"
+            referrerpolicy="no-referrer"
+          />
+          <span v-else-if="currentUser" class="profile-menu__initials" aria-label="Profile">{{ initials }}</span>
+          <ProfileIcon v-else class="profile-menu__icon" aria-label="Profile" role="img" />
         </button>
       </template>
 
@@ -63,8 +74,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, type Component } from 'vue'
+import { computed, ref, onMounted, type Component } from 'vue'
 import { useRouter } from 'vue-router'
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import StrategyTab from '@/components/menuTabs/StrategyTab.vue'
@@ -76,6 +88,28 @@ import StyleIcon from '@/assets/icons/style.svg?component'
 
 const router = useRouter()
 const isOpen = ref(false)
+const currentUser = ref<User | null>(null)
+
+onMounted(() => {
+  onAuthStateChanged(getAuth(), user => {
+    currentUser.value = user
+  })
+})
+
+const welcomeName = computed(() => {
+  if (!currentUser.value) return null
+  return currentUser.value.displayName?.split(' ')[0] ?? currentUser.value.email?.split('@')[0] ?? 'Player'
+})
+
+const initials = computed(() => {
+  if (!currentUser.value) return ''
+  const name = currentUser.value.displayName
+  if (name) {
+    const parts = name.trim().split(' ')
+    return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase() : parts[0][0].toUpperCase()
+  }
+  return (currentUser.value.email?.[0] ?? '?').toUpperCase()
+})
 const activeSection = ref<MenuSectionId>('profile')
 
 type MenuSectionId = 'profile' | 'game' | 'strategy' | 'stats' | 'style'
@@ -115,16 +149,34 @@ const activeSectionComponent = computed(() => tabComponents[activeSection.value]
 <style scoped>
 .profile-menu {
   position: fixed;
-  top: 1rem;
-  left: 1rem;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 20;
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.75rem;
+  height: 52px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-menu__welcome {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .profile-menu__button {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   background: rgba(0, 0, 0, 0.35);
@@ -134,6 +186,22 @@ const activeSectionComponent = computed(() => tabComponents[activeSection.value]
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.1s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profile-menu__avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 9999px;
+}
+
+.profile-menu__initials {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
 }
 
 .profile-menu__button:hover,

@@ -41,12 +41,6 @@ const completeSignIn = async () => {
     const result: UserCredential = await signInWithEmailLink(auth, email, pendingLink.value || window.location.href)
     window.localStorage.removeItem(LOCAL_KEY_EMAIL)
     const info = getAdditionalUserInfo(result)
-    console.log('Firebase sign-in complete', {
-      user: result.user,
-      providerId: info?.providerId,
-      isNewUser: info?.isNewUser,
-      profile: info?.profile,
-    })
     statusMessage.value = `Welcome back${info?.profile ? ', profile info logged in console.' : '!'} Signed in as ${result.user.email ?? email}.`
     await router.push('/game')
   } catch (error) {

@@ -14,7 +14,7 @@ import Table from '@/components/Table.vue'
 .home-shell {
   position: relative;
   min-height: 100vh;
-  padding: 1rem 1rem calc(env(safe-area-inset-bottom, 0px) + 120px);
+  padding: 69px 1rem calc(env(safe-area-inset-bottom, 0px) + 120px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@ import Table from '@/components/Table.vue'
 
 @media (--bp-landscape-min) {
   .home-shell {
-    padding: 2rem 2rem calc(env(safe-area-inset-bottom, 0px) + 160px);
+    padding: 69px 2rem calc(env(safe-area-inset-bottom, 0px) + 160px);
   }
 }
 </style>
