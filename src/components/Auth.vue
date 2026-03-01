@@ -11,7 +11,7 @@ import {
 import { actionCodeSettings } from '@/lib/firebase.ts'
 import { LOCAL_KEY_EMAIL, FIREBASE_ENABLED } from '@/constants.ts'
 
-const email = ref(window.localStorage.getItem(LOCAL_KEY_EMAIL) ?? '')
+const email = ref(typeof window !== 'undefined' ? window.localStorage.getItem(LOCAL_KEY_EMAIL) ?? '' : '')
 const isSubmitting = ref(false)
 const isGoogleSubmitting = ref(false)
 const statusMessage = ref('')
