@@ -118,6 +118,8 @@ const close = () => {
   font-size: 0.85rem;
   opacity: 0.65;
   padding-bottom: 0;
+  white-space: normal;
+  -webkit-line-clamp: unset;
 }
 
 .feedback-card__email {

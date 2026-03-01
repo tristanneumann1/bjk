@@ -13,8 +13,6 @@
       </svg>
     </button>
 
-    <p v-if="welcomeName" class="profile-menu__welcome">Welcome back, {{ welcomeName }}</p>
-
     <button
       class="profile-menu__button"
       type="button"
@@ -109,11 +107,6 @@ onMounted(() => {
   onAuthStateChanged(getAuth(), user => {
     currentUser.value = user
   })
-})
-
-const welcomeName = computed(() => {
-  if (!currentUser.value) return null
-  return currentUser.value.displayName?.split(' ')[0] ?? currentUser.value.email?.split('@')[0] ?? 'Player'
 })
 
 const initials = computed(() => {
