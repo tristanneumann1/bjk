@@ -38,7 +38,6 @@ type ChairRegistryEntry = {
 }
 
 export const useChairsStore = defineStore('chairs', () => {
-  const tableInitial = Session.getInstance().table
   const activeChairId = ref<number | null>(null)
 
   const chairs = reactive<Record<number, ChairView>>({})

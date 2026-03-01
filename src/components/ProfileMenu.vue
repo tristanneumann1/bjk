@@ -15,6 +15,19 @@
 
     <p v-if="welcomeName" class="profile-menu__welcome">Welcome back, {{ welcomeName }}</p>
 
+    <button
+      class="profile-menu__button"
+      type="button"
+      aria-label="Send feedback"
+      @click="isFeedbackOpen = true"
+    >
+      <svg class="profile-menu__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    </button>
+
+    <FeedbackDialog v-model="isFeedbackOpen" />
+
     <v-menu
       v-model="isOpen"
       :close-on-content-click="false"
@@ -80,6 +93,7 @@ import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import StrategyTab from '@/components/menuTabs/StrategyTab.vue'
+import FeedbackDialog from '@/components/FeedbackDialog.vue'
 import ProfileIcon from '@/assets/icons/profile.svg?component'
 import GameIcon from '@/assets/icons/game.svg?component'
 import StrategyIcon from '@/assets/icons/strategy.svg?component'
@@ -88,6 +102,7 @@ import StyleIcon from '@/assets/icons/style.svg?component'
 
 const router = useRouter()
 const isOpen = ref(false)
+const isFeedbackOpen = ref(false)
 const currentUser = ref<User | null>(null)
 
 onMounted(() => {
