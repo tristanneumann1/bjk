@@ -1,28 +1,34 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useHead } from '@unhead/vue'
 
 const router = useRouter()
+
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'Blackjack Strategy Trainer',
+        url: 'https://blackjackstrategytrainer.com',
+        description:
+          'Practice blackjack basic strategy and card counting with real-time feedback. Includes Illustrious 18 and Fab 4 count-dependent deviations, true count range guidance, and session performance tracking.',
+        applicationCategory: 'GameApplication',
+        operatingSystem: 'Web',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+      }),
+    },
+  ],
+})
 </script>
 
 <template>
-<!--  <Teleport to="head">-->
-<!--    <script type="application/ld+json">-->
-<!--    {-->
-<!--      "@context": "https://schema.org",-->
-<!--      "@type": "WebApplication",-->
-<!--      "name": "Blackjack Strategy Trainer",-->
-<!--      "url": "https://blackjackstrategytrainer.com",-->
-<!--      "description": "Practice blackjack basic strategy and card counting with real-time feedback. Includes Illustrious 18 and Fab 4 count-dependent deviations, true count range guidance, and session performance tracking.",-->
-<!--      "applicationCategory": "GameApplication",-->
-<!--      "operatingSystem": "Web",-->
-<!--      "offers": {-->
-<!--        "@type": "Offer",-->
-<!--        "price": "0",-->
-<!--        "priceCurrency": "USD"-->
-<!--      }-->
-<!--    }-->
-<!--    </script>-->
-<!--  </Teleport>-->
   <main class="landing-shell">
     <div class="landing-shell__content">
       <img src="/blackjack-strategy-trainer-logo.jpg" alt="Blackjack Strategyt Trainer" class="landing-shell__logo" />
