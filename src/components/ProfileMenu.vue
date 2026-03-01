@@ -1,5 +1,17 @@
 <template>
   <div class="profile-menu">
+    <button
+      class="profile-menu__button"
+      type="button"
+      aria-label="Home"
+      @click="router.push('/')"
+    >
+      <svg class="profile-menu__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 12L12 3l9 9" />
+        <path d="M9 21V12h6v9" />
+        <path d="M3 12v9h18v-9" />
+      </svg>
+    </button>
     <v-menu
       v-model="isOpen"
       :close-on-content-click="false"
@@ -52,6 +64,7 @@
 
 <script setup lang="ts">
 import { computed, ref, type Component } from 'vue'
+import { useRouter } from 'vue-router'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import StrategyTab from '@/components/menuTabs/StrategyTab.vue'
@@ -61,6 +74,7 @@ import StrategyIcon from '@/assets/icons/strategy.svg?component'
 import StatsIcon from '@/assets/icons/stats.svg?component'
 import StyleIcon from '@/assets/icons/style.svg?component'
 
+const router = useRouter()
 const isOpen = ref(false)
 const activeSection = ref<MenuSectionId>('profile')
 

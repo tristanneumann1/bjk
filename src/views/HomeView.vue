@@ -26,16 +26,60 @@ useHead({
     },
   ],
 })
+
+const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }> = [
+  {
+    heading: 'Basic Strategy',
+    items: [
+      'Correct play for every hand vs every upcard',
+      'Supports H17, S17, DAS, and custom rule sets',
+      'Real-time feedback on every decision',
+      'Build muscle memory through repetition',
+    ],
+  },
+  {
+    heading: 'Card Counting',
+    items: [
+      'Hi-Lo true count guidance as you play',
+      'True count range accounts for deck estimation uncertainty',
+      'Running count tracked automatically',
+      'Count-dependent strategy shifts highlighted',
+    ],
+  },
+  {
+    heading: 'Illustrious 18 & Fab 4',
+    items: [
+      'All 18 highest-value basic strategy deviations',
+      'Fab 4 surrender deviations by true count',
+      'Know exactly when to deviate from basic strategy',
+      'Fully customizable — build and save your own strategy grids and deviations',
+    ],
+  },
+  {
+    heading: 'Performance Tracking',
+    comingSoon: true,
+    items: [
+      'Session history across multiple games',
+      'Action-by-action accuracy breakdown',
+      'Track progress over time',
+      'Identify your most common mistakes',
+    ],
+  },
+]
 </script>
 
 <template>
   <main class="landing-shell">
-    <div class="landing-shell__content">
-      <img src="/blackjack-strategy-trainer-logo.jpg" alt="Blackjack Strategyt Trainer" class="landing-shell__logo" />
+    <section class="landing-shell__hero">
+      <img
+        src="/blackjack-strategy-trainer-logo.jpg"
+        alt="Blackjack Strategy Trainer"
+        class="landing-shell__logo"
+      />
       <h1 class="landing-shell__title">Blackjack Strategy Trainer</h1>
       <p class="landing-shell__description">
-        Master blackjack basic strategy and card counting with real-time feedback,
-        count-dependent play deviations, and detailed performance tracking.
+        The free tool for serious advantaged players. Master blackjack basic strategy and card counting
+        with real-time feedback, Illustrious 18 deviations, and session performance tracking.
       </p>
       <v-btn
         size="large"
@@ -43,15 +87,29 @@ useHead({
         class="landing-shell__cta"
         @click="router.push('/game')"
       >
-        Play Now
+        Play Now — It's Free
       </v-btn>
-      <ul class="landing-shell__features">
-        <li>Basic strategy for any rule set</li>
-        <li>Illustrious 18 &amp; Fab 4 deviations</li>
-        <li>True count range guidance</li>
-        <li>Session performance history</li>
-      </ul>
-    </div>
+    </section>
+
+    <section class="landing-shell__features">
+      <h2 class="landing-shell__features-heading">Everything you need to beat the house</h2>
+      <div class="landing-shell__grid">
+        <div
+          v-for="feature in features"
+          :key="feature.heading"
+          class="landing-shell__card"
+          :class="{ 'landing-shell__card--coming-soon': feature.comingSoon }"
+        >
+          <div class="landing-shell__card-header">
+            <h3 class="landing-shell__card-heading">{{ feature.heading }}</h3>
+            <span v-if="feature.comingSoon" class="landing-shell__badge">Coming Soon</span>
+          </div>
+          <ul class="landing-shell__card-list">
+            <li v-for="item in feature.items" :key="item">{{ item }}</li>
+          </ul>
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -59,20 +117,22 @@ useHead({
 .landing-shell {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  padding: 3rem 1.5rem;
   box-sizing: border-box;
   background: linear-gradient(160deg, #041b0b, #0b3d1b);
+  gap: 4rem;
 }
 
-.landing-shell__content {
+/* Hero */
+.landing-shell__hero {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 1.5rem;
-  max-width: 560px;
+  max-width: 600px;
 }
 
 .landing-shell__logo {
@@ -98,10 +158,72 @@ useHead({
 }
 
 .landing-shell__cta {
-  min-width: 160px;
+  min-width: 180px;
 }
 
+/* Features */
 .landing-shell__features {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.landing-shell__features-heading {
+  color: #f5f5f5;
+  font-size: 1.3rem;
+  margin: 0;
+  text-align: center;
+}
+
+.landing-shell__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.landing-shell__card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.landing-shell__card--coming-soon {
+  opacity: 0.6;
+}
+
+.landing-shell__card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.landing-shell__card-heading {
+  color: #81c784;
+  font-size: 1rem;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.landing-shell__badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a5d6a7;
+  border: 1px solid #a5d6a7;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+}
+
+.landing-shell__card-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -110,20 +232,29 @@ useHead({
   gap: 0.5rem;
 }
 
-.landing-shell__features li {
-  color: #a5d6a7;
-  font-size: 0.95rem;
+.landing-shell__card-list li {
+  color: #c8e6c9;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  padding-left: 1.1rem;
+  position: relative;
 }
 
-.landing-shell__features li::before {
-  content: '✓ ';
+.landing-shell__card-list li::before {
+  content: '✓';
   color: #66bb6a;
   font-weight: bold;
+  position: absolute;
+  left: 0;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 560px) {
   .landing-shell__title {
     font-size: 1.5rem;
+  }
+
+  .landing-shell__grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
