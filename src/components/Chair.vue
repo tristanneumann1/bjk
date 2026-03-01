@@ -332,6 +332,7 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
+  border: 1px gray inset;
   border-radius: 12px;
   padding: 0.5rem 0.25rem;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
@@ -340,7 +341,7 @@ watch(
 }
 
 .chair--active {
-  box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.4);
+  box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.9), 0 0 12px rgba(76, 201, 240, 0.35);
   transform: translateY(-2px);
 }
 

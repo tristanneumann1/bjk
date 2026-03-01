@@ -161,6 +161,7 @@ modelEvents.on(modelPropertyEvent('dealer', 'dealIndex'), (_event: ModelProperty
   setCurrentActions()
 })
 
+setCurrentActions()
 /*
   End Event Listeners
  */

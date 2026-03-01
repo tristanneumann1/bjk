@@ -39,7 +39,7 @@ type ChairRegistryEntry = {
 
 export const useChairsStore = defineStore('chairs', () => {
   const tableInitial = Session.getInstance().table
-  const activeChairId = ref<number | null>(tableInitial.chairTurnIndex >= 0 ? tableInitial.chairTurnIndex : null)
+  const activeChairId = ref<number | null>(null)
 
   const chairs = reactive<Record<number, ChairView>>({})
   const activeChair = computed(() => {
@@ -408,7 +408,12 @@ export const useChairsStore = defineStore('chairs', () => {
     const nextIndex = typeof event.value === 'number'
       ? event.value
       : Number(event.value ?? -1)
-    activeChairId.value = nextIndex >= 0 ? nextIndex : null
+    if (nextIndex < 0) {
+      activeChairId.value = null
+      return
+    }
+    const activeChair = Session.getInstance().table.playerChairArray[nextIndex]
+    activeChairId.value = findSeatIndex(activeChair)
   }
 
   modelEvents.on(chairTurnEvent, onChairTurnIndexChange)
