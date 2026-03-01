@@ -1,0 +1,7 @@
+#!/bin/sh
+# Update sitemap lastmod date to today on every commit
+TODAY=$(date +%Y-%m-%d)
+SITEMAP="public/sitemap.xml"
+
+sed -i '' "s|<lastmod>.*</lastmod>|<lastmod>$TODAY</lastmod>|" "$SITEMAP"
+git add "$SITEMAP"

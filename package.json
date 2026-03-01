@@ -7,10 +7,11 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "test:unit": "vitest",
-    "build-only": "vite build",
+    "build-only": "vite-ssg build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
@@ -58,6 +59,7 @@
     "vite": "^7.3.0",
     "vite-plugin-vue-devtools": "^8.0.0",
     "vite-plugin-vuetify": "^2.0.3",
+    "vite-ssg": "^28.3.0",
     "vite-svg-loader": "^5.1.0",
     "vitest": "^3.2.4",
     "vue-router": "^4.6.4",

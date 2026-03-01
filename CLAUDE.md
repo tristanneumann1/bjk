@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Domain
+
+**Production:** https://blackjackstrategytrainer.com
+
 ## SEO Keywords
 
 | Priority  | Keyword                    | Notes                                              |

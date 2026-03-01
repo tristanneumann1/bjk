@@ -1,5 +1,6 @@
-import { createApp, reactive } from 'vue'
+import { ViteSSG } from 'vite-ssg'
 import { createPinia } from 'pinia'
+import { reactive } from 'vue'
 
 import 'vuetify/styles'
 import 'unfonts.css'
@@ -7,41 +8,39 @@ import '@/assets/media.css'
 import { createVuetify } from 'vuetify'
 
 import App from '@/App.vue'
-import router from '@/router'
+import { routes } from '@/router'
 
 import './lib/mitt'
-
 import initializeSession from '@/lib/initializeSession.ts'
 import { initColorVariables } from '@/constants/colors'
 
-import '@/lib/firebase.ts'
-
-// Initialize CSS color variables from TypeScript
-initColorVariables()
-initializeSession()
-// document['_session'] = Session
-// document['_events'] = modelEvents
-// const eventsToLog = [HAND_OUTCOME_EVENT]
-// modelEvents.on('*', (type, e) => {
-//   if(type)
-//   console.log('[Event]',type, e.value)
-// })
-
 const vuetify = createVuetify()
 
-const pinia = createPinia()
-const app = createApp(App)
+export const createApp = ViteSSG(
+  App,
+  { routes, base: import.meta.env.BASE_URL },
+  ({ app, router }) => {
+    const pinia = createPinia()
 
-const viewport = reactive({ size: `${window.innerWidth}×${window.innerHeight}` })
+    app.use(vuetify)
+    app.use(pinia)
 
-window.addEventListener('resize', () => {
-  viewport.size = `${window.innerWidth}×${window.innerHeight}`
-})
+    router.afterEach((to) => {
+      if (!import.meta.env.SSR) {
+        document.title = (to.meta.title as string) ?? 'Blackjack Strategy Trainer'
+      }
+    })
 
-app.provide('viewport', viewport)
+    if (!import.meta.env.SSR) {
+      import('@/lib/firebase.ts')
+      initColorVariables()
+      initializeSession()
 
-app.use(vuetify)
-app.use(pinia)
-app.use(router)
-
-app.mount('#app')
+      const viewport = reactive({ size: `${window.innerWidth}×${window.innerHeight}` })
+      window.addEventListener('resize', () => {
+        viewport.size = `${window.innerWidth}×${window.innerHeight}`
+      })
+      app.provide('viewport', viewport)
+    }
+  },
+)

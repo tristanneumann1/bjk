@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
+import type { ViteSSGOptions } from 'vite-ssg'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import vueDevTools from 'vite-plugin-vue-devtools'
@@ -24,6 +25,9 @@ const viteFontsConfig: Options = {
 
 // https://vite.dev/config/
 export default defineConfig({
+  ssgOptions: {
+    includedRoutes: () => ['/'],
+  } satisfies ViteSSGOptions,
   server: {
     port: 8080,
     host: '0.0.0.0',
@@ -45,12 +49,21 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  ssr: {
+    noExternal: ['vuetify'],
+  },
   build: {
     rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return
+        warn(warning)
+      },
       output: {
-        manualChunks: {
-          'vendor-vue': ['vue', 'pinia', 'vue-router'],
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        manualChunks(id) {
+          if (id.includes('node_modules/vue/') || id.includes('node_modules/pinia/') || id.includes('node_modules/vue-router/'))
+            return 'vendor-vue'
+          if (id.includes('node_modules/firebase/'))
+            return 'firebase'
         },
       },
     },

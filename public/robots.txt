@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /finishSignUp
+
+Sitemap: https://blackjackstrategytrainer.com/sitemap.xml

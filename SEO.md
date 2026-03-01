@@ -19,8 +19,8 @@ When someone shares the link, platforms use these to generate previews. Use `bla
 ```html
 <meta property="og:title" content="Blackjack Strategy Trainer">
 <meta property="og:description" content="Practice blackjack basic strategy and card counting with real-time feedback, Illustrious 18 deviations, and session tracking.">
-<meta property="og:image" content="https://yourdomain.com/blackjack-strategy-trainer-logo.jpg">
-<meta property="og:url" content="https://yourdomain.com">
+<meta property="og:image" content="https://blackjackstrategytrainer.com/blackjack-strategy-trainer-logo.jpg">
+<meta property="og:url" content="https://blackjackstrategytrainer.com">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 ```
@@ -43,7 +43,7 @@ User-agent: *
 Allow: /
 Disallow: /finishSignUp
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://blackjackstrategytrainer.com/sitemap.xml
 ```
 
 **`/public/sitemap.xml`**
@@ -51,12 +51,12 @@ Sitemap: https://yourdomain.com/sitemap.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://yourdomain.com/</loc>
+    <loc>https://blackjackstrategytrainer.com/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/game</loc>
+    <loc>https://blackjackstrategytrainer.com/game</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -74,7 +74,7 @@ Add to the landing page `<head>` to make the app eligible for rich result featur
   "description": "Practice blackjack basic strategy and card counting with real-time feedback.",
   "applicationCategory": "GameApplication",
   "operatingSystem": "Web",
-  "url": "https://yourdomain.com"
+  "url": "https://blackjackstrategytrainer.com"
 }
 </script>
 ```
