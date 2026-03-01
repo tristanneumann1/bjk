@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## SEO Keywords
+
+| Priority  | Keyword                    | Notes                                              |
+|-----------|----------------------------|----------------------------------------------------|
+| Primary   | Blackjack Strategy Trainer | Main keyword — use in titles, headings, meta tags  |
+| Audience  | Card Counting              | Defines the target user — use in descriptions     |
+| Secondary | Illustrious 18             | Low competition, high-intent niche audience        |
+| Secondary | Fab 4                      | Low competition, high-intent niche audience        |
+
+When writing copy, meta descriptions, or landing page content, ensure the primary keyword appears in the `<title>` and `<h1>`, and that all four keywords are naturally represented on the page.
+
 ## Project Overview
 
 This is a **Blackjack Strategy Trainer** - a Vue 3 + TypeScript web application for learning and practicing blackjack strategy with real-time feedback, card counting assistance, and performance tracking. Users can practice basic strategy, learn count-dependent plays (Illustrious 18, Fab 4), customize strategies, and track their progress across multiple game sessions.

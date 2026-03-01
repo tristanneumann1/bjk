@@ -2,6 +2,14 @@
   <main class="finish-shell">
     <h1>Completing Sign In…</h1>
     <p id="status-message" class="finish-shell__status">{{ statusMessage }}</p>
+    <v-btn
+      :loading="isLoading"
+      variant="outlined"
+      class="finish-shell__home-btn"
+      @click="router.push('/')"
+    >
+      Back to Home
+    </v-btn>
   </main>
 </template>
 
@@ -14,6 +22,9 @@ import {useRouter} from "vue-router";
 
 const statusMessage = ref('Checking link…')
 const pendingLink = ref('')
+const isLoading = ref(true)
+
+setTimeout(() => { isLoading.value = false }, 2000)
 
 const router = useRouter()
 
@@ -37,7 +48,7 @@ const completeSignIn = async () => {
       profile: info?.profile,
     })
     statusMessage.value = `Welcome back${info?.profile ? ', profile info logged in console.' : '!'} Signed in as ${result.user.email ?? email}.`
-    await router.push('/')
+    await router.push('/game')
   } catch (error) {
     console.error('Failed to finish email link sign-in', error)
     statusMessage.value = 'Failed to finish signing in. Please request a new link and try again.'
@@ -85,4 +96,7 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.finish-shell__home-btn {
+  margin-top: 2rem;
+}
 </style>
