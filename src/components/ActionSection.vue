@@ -27,16 +27,17 @@
   <v-snackbar
     v-model="mistakeSnackbar.visible"
     color="error"
-    timeout="1000"
+    :timeout="currentUser ? 3500 : 1500"
     variant="flat"
     location="top"
   >
-    {{ mistakeSnackbar.text }}
+    <div>{{ mistakeSnackbar.text }}</div>
+    <div v-if="!currentUser" class="mistake-snackbar__hint">Mistakes are saved — Log in to track and review them at the end of the shoe</div>
   </v-snackbar>
 </template>
 
 <script setup lang="ts">
-import {ref, computed} from 'vue'
+import {ref, computed, onMounted} from 'vue'
 import { usePlayerActionsStore } from '@/stores/playerActions'
 import { type PlayerAction } from '@/types/actions.ts'
 import {
@@ -55,6 +56,7 @@ import {
 } from "@/models/strategy/determineCorrectAction.ts";
 import {useSettingsStore} from "@/stores/settings.ts";
 import {useStrategyStore} from "@/stores/strategy.ts";
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 
 const activeRound = ref<boolean>(false)
 const roundCanStart = ref<boolean>(false)
@@ -64,7 +66,14 @@ const playerActions = usePlayerActionsStore()
 const dealerStore = useDealerStore()
 const settingsStore = useSettingsStore()
 const strategyStore = useStrategyStore()
+const currentUser = ref<User | null>(null)
 const mistakeSnackbar = ref({ visible: false, text: '' })
+
+onMounted(() => {
+  onAuthStateChanged(getAuth(), user => {
+    currentUser.value = user
+  })
+})
 
 const actions = computed<PlayerAction[]>(() => {
   const baseActions: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance']
@@ -168,6 +177,12 @@ setCurrentActions()
 </script>
 
 <style scoped>
+.mistake-snackbar__hint {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  margin-top: 0.2rem;
+}
+
 .action-section {
   display: grid;
   width: 100%;

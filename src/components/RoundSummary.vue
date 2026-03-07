@@ -90,7 +90,16 @@
       </div>
     </div>
     <div v-else class="round-summary__content round-summary__content--unauth">
-      <p>Please log in to view your round stats.</p>
+      <div class="round-summary__login-prompt">
+        <p class="round-summary__login-heading">Log in to see your results</p>
+        <ul class="round-summary__login-benefits">
+          <li>Review accuracy and mistakes from this session</li>
+          <li>Track progress across every shoe you play</li>
+          <li>Save custom strategy grids to your account</li>
+          <li>Sync across devices — free</li>
+        </ul>
+        <Auth />
+      </div>
     </div>
   </section>
 </template>
@@ -100,6 +109,7 @@ import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import CardHand from '@/components/CardHand.vue'
 import PlayingCard from '@/components/PlayingCard.vue'
+import Auth from '@/components/Auth.vue'
 import { useStatsStore } from '@/stores/stats'
 import type { PlayerAction } from '@/types/actions'
 import {ACTION_COLORS} from "@/constants.ts";
@@ -169,10 +179,46 @@ const getUniqueActions = (actions?: PlayerAction[]): PlayerAction[] => {
 }
 
 .round-summary__content--unauth {
+  align-items: flex-start;
+}
+
+.round-summary__login-prompt {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  opacity: 0.85;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.round-summary__login-heading {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #a5d6a7;
+}
+
+.round-summary__login-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.round-summary__login-benefits li {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.round-summary__login-benefits li::before {
+  content: '✓';
+  color: #66bb6a;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
 }
 
 .round-summary__stats {

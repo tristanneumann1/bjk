@@ -103,7 +103,15 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
       </v-btn>
 
       <div v-if="isMounted && !currentUser" class="landing-shell__auth">
-        <p class="landing-shell__auth-label">Sign in to save your progress</p>
+        <div class="landing-shell__auth-pitch">
+          <p class="landing-shell__auth-heading">Track your progress</p>
+          <ul class="landing-shell__auth-benefits">
+            <li>Session history and accuracy over time</li>
+            <li>Review every mistake after each shoe</li>
+            <li>Save custom strategy grids to your account</li>
+            <li>Sync across devices — free</li>
+          </ul>
+        </div>
         <Auth />
       </div>
       <p v-else-if="isMounted && currentUser" class="landing-shell__signed-in">
@@ -175,14 +183,52 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.25rem;
 }
 
-.landing-shell__auth-label {
+.landing-shell__auth-pitch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 320px;
+  text-align: left;
+}
+
+.landing-shell__auth-heading {
   margin: 0;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #a5d6a7;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.landing-shell__auth-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.landing-shell__auth-benefits li {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.landing-shell__auth-benefits li::before {
+  content: '✓';
+  color: #66bb6a;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
 }
 
 .landing-shell__signed-in {

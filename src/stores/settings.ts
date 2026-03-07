@@ -30,7 +30,7 @@ const writeSettings = (settings: StoredSettings) => {
 
 export const useSettingsStore = defineStore('settings', () => {
   const showCounter = ref(true)
-  const showMistakeSnackbar = ref(false)
+  const showMistakeSnackbar = ref(true)
 
   const hydrate = () => {
     const stored = readSettings()

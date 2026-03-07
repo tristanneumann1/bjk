@@ -13,13 +13,18 @@
       >
         Round Active
       </span>
-      <span v-else aria-hidden="true">+</span>
+      <svg v-else aria-hidden="true" class="chair__seat-icon" viewBox="0 0 24 24">
+        <path :d="seatIcon" />
+      </svg>
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { mdiAccountPlus } from '@mdi/js'
 import { useChairsStore } from '@/stores/chairs'
+
+const seatIcon = mdiAccountPlus
 
 const props = defineProps<{
   chairId: number
@@ -50,8 +55,6 @@ const onSitClick = () => {
   border: 2px dashed rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.85);
-  font-size: 4rem;
-  line-height: 1;
   cursor: pointer;
   transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
@@ -69,6 +72,12 @@ const onSitClick = () => {
   border-color: rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.5);
   transform: none;
+}
+
+.chair__seat-icon {
+  width: 52px;
+  height: 52px;
+  fill: currentColor;
 }
 
 .chair__inactive-label {

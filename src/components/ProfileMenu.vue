@@ -34,6 +34,17 @@
     >
       <template #activator="{ props }">
         <button
+          v-if="authLoaded && !currentUser"
+          class="profile-menu__sign-in"
+          type="button"
+          aria-haspopup="true"
+          :aria-expanded="isOpen ? 'true' : 'false'"
+          v-bind="props"
+        >
+          Sign In
+        </button>
+        <button
+          v-else
           class="profile-menu__button"
           type="button"
           aria-haspopup="true"
@@ -52,7 +63,21 @@
         </button>
       </template>
 
-      <div class="profile-menu__panel" role="dialog" aria-label="Player menu">
+      <div v-if="!currentUser" class="profile-menu__panel profile-menu__panel--auth" role="dialog" aria-label="Sign in">
+        <header class="profile-menu__auth-header">
+          <p class="profile-menu__eyebrow">Your Account</p>
+          <h2 class="profile-menu__auth-title">Sign in to track your game</h2>
+          <ul class="profile-menu__auth-benefits">
+            <li>Session history and accuracy over time</li>
+            <li>Review every mistake after each shoe</li>
+            <li>Save custom strategy grids to your account</li>
+            <li>Sync across devices — free</li>
+          </ul>
+        </header>
+        <Auth />
+      </div>
+
+      <div v-else class="profile-menu__panel" role="dialog" aria-label="Player menu">
         <header class="profile-menu__header">
           <p class="profile-menu__eyebrow">Player Hub</p>
         </header>
@@ -88,6 +113,7 @@
 import { computed, ref, onMounted, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import Auth from '@/components/Auth.vue'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import StrategyTab from '@/components/menuTabs/StrategyTab.vue'
@@ -102,10 +128,12 @@ const router = useRouter()
 const isOpen = ref(false)
 const isFeedbackOpen = ref(false)
 const currentUser = ref<User | null>(null)
+const authLoaded = ref(false)
 
 onMounted(() => {
   onAuthStateChanged(getAuth(), user => {
     currentUser.value = user
+    authLoaded.value = true
   })
 })
 
@@ -171,15 +199,64 @@ const activeSectionComponent = computed(() => tabComponents[activeSection.value]
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.profile-menu__welcome {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.75);
+.profile-menu__sign-in {
+  height: 36px;
+  padding: 0 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(102, 187, 106, 0.6);
+  background: rgba(67, 160, 71, 0.2);
+  color: #a5d6a7;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
   white-space: nowrap;
-  pointer-events: none;
+}
+
+.profile-menu__sign-in:hover {
+  background: rgba(67, 160, 71, 0.35);
+}
+
+.profile-menu__panel--auth {
+  min-width: 300px;
+}
+
+.profile-menu__auth-header {
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-menu__auth-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f5f5f5;
+}
+
+.profile-menu__auth-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.profile-menu__auth-benefits li {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.65);
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.profile-menu__auth-benefits li::before {
+  content: '✓';
+  color: #66bb6a;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
 }
 
 .profile-menu__button {

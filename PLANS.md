@@ -10,6 +10,7 @@
 - [ ] Simulate
 - [ ] Felt, custom art
 - [ ] paid access
+- [ ] background view of active rules
 - [s] add FAQ, instructions, tutorial page, helper page...
 - [s] Add charts for easy access
 - [s] version indicator in menu

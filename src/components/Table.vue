@@ -93,7 +93,8 @@ const handleGuessSubmit = (guess: number | null) => {
 
 .summary-container {
   width: 100%;
-  display: block;
+  display: flex;
+  justify-content: center;
 }
 
 @media (--bp-landscape-max) {

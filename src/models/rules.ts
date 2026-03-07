@@ -13,16 +13,16 @@ export class Rules {
   insuranceAllowed: boolean;
 
   constructor() {
-    this.deckCount = 6; // number of decks in shoe
+    this.deckCount = 2; // number of decks in shoe
     this.dealerHitsSoft17 = true; // Dealer hits on soft 17
     this.doubleAllowedAfterSplit = true; // Double down allowed after split
     this.resplitAcesAllowed = true; // Resplitting aces not allowed
     this.surrenderAllowed = true; // Surrender allowed
     this.maxSplits = 2; // Maximum number of splits
     this.blackjackPayout = 1.5; // Blackjack pays 3:2
-    this.penetration = 52; // Number of cards left in the shoe to trigger reshuffle
+    this.penetration = 35; // Number of cards left in the shoe to trigger reshuffle
     this.dealerPeekA10 = true; // Dealer peeks for blackjack when showing an Ace or 10-value card
     this.hitAfterSplitAces = true; // Allow hitting after splitting aces
-    this.insuranceAllowed = true; // Insurance allowed
+    this.insuranceAllowed = false; // Insurance allowed
   }
 }
