@@ -60,6 +60,7 @@ export class Table {
     return this.playerChairArray.some(chair => chair.hands.some(hand => hand.cards.length > 0))
   }
   get playerRoundsComplete(): boolean {
+    if (this.inInsurancePhase) return false
     return this.dealerPeekedBlackjack || !this.playerChairArray.find(pc => !pc.chairDone)
   }
   get allPlayerHandsBustedSurrenderedOrBlackjack(): boolean {
@@ -218,6 +219,11 @@ export class Table {
         } else {
           this.chairTurnIndex = -1
         }
+      } else {
+        // WHY: During the insurance phase, activeHand remains defined (pendingInsurance = true),
+        // so the generic `activeHand === undefined` check below never fires. We must explicitly
+        // advance to the next chair so each chair gets to make its own insurance decision.
+        this.nextChair()
       }
     }
 
