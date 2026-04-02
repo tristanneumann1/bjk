@@ -74,8 +74,6 @@ export const useChairsStore = defineStore('chairs', () => {
     Win: 2,
     Double_Win: 4,
   }
-  const BLACKJACK_WIN_MULTIPLIER = 1 + Session.getInstance().rules.blackjackPayout
-
   const resolveOutcomeAmount = (result: HandResult | null, bet: number): number => {
     if (!result) {
       return 0
@@ -100,7 +98,7 @@ export const useChairsStore = defineStore('chairs', () => {
       return 0
     }
     if (result === 'BlackJack_Win') {
-      return Math.floor(normalizedBet * BLACKJACK_WIN_MULTIPLIER)
+      return Math.floor(normalizedBet * (1 + Session.getInstance().rules.blackjackPayout))
     }
     return 0
   }

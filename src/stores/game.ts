@@ -135,6 +135,7 @@ export const useGameStore = defineStore('game', () => {
     newRules.penetration = nextPenetration
 
     Session.changeRules(newRules)
+    modelEvents.emit(userEvent(userEvents.SESSION_RULES_CHANGED), { event: userEvents.SESSION_RULES_CHANGED })
   }
 
   async function persistGameAndRound() {

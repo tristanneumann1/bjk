@@ -12,7 +12,7 @@ import { getModelInstanceId } from '@/lib/modelEvents'
 import type { Chair } from '@/models/chair'
 import { Hand, NEW_CARD_EVENT } from '@/models/hand'
 import type { Card as CardType } from '@/types/card'
-import {RESHUFFLE} from "@/lib/userEvents.ts";
+import {RESHUFFLE, SESSION_RULES_CHANGED} from "@/lib/userEvents.ts";
 
 export const useDealerStore = defineStore('dealer', () => {
   const cards = ref<CardType[]>([])
@@ -52,13 +52,18 @@ export const useDealerStore = defineStore('dealer', () => {
   const setHoleCardHidden = () => holeCardHidden.value = Session.getInstance().table.dealer.holeCardHidden
 
   const resetShoe = () => {
-    totalShoeSize.value = Session.getInstance().rules.deckCount * 52
-    remainingShoeSize.value = Session.getInstance().rules.deckCount * 52
-    pastPenetration.value = false
     Session.getInstance().table.dealer.reset()
     Session.getInstance().table.dealer.resetDealIndex()
+    remainingShoeSize.value = totalShoeSize.value
+    pastPenetration.value = false
     setRunningCount()
   }
+
+  modelEvents.on(userEvent(SESSION_RULES_CHANGED), () => {
+    const deckCount = Session.getInstance().rules.deckCount
+    totalShoeSize.value = deckCount * 52
+    remainingShoeSize.value = deckCount * 52
+  })
 
   const reset = () => {
     resetCards()
