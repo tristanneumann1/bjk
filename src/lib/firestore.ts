@@ -1,6 +1,6 @@
 // This doc is a model agnostic client for firestore db, model specific logic exists in the docs/ directory
 
-import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, getCountFromServer, type QueryFieldFilterConstraint } from 'firebase/firestore'
+import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, orderBy, getCountFromServer, type QueryFieldFilterConstraint, type OrderByDirection } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
 import { PLAYER_COLLECTION, playerDocId } from "@/docs/player.ts"
 import { FIREBASE_ENABLED, FIREBASE_ALLOWED_UIDS } from '@/constants.ts'
@@ -11,6 +11,7 @@ const isAllowed = (address: string[]) =>
 export interface QueryOptions {
   limit?: number,
   wheres?: Array<QueryFieldFilterConstraint>,
+  orderBys?: Array<{ field: string; direction?: OrderByDirection }>,
 }
 
 const DEFAULT_LIMIT = 100
@@ -31,7 +32,8 @@ export const getPlayerDoc = async <T>(playerUid: string, address: string[]): Pro
 export const getFbDocs = async <T>(collectionId: string, address: string[], options: QueryOptions): Promise<(T | null)[]> => {
   if (!isAllowed(address)) return []
   const col = collection(firestore, collectionId, ...address)
-  const q = query(col, limit(options.limit ?? DEFAULT_LIMIT), ...(options.wheres ?? []))
+  const orderByConstraints = (options.orderBys ?? []).map(o => orderBy(o.field, o.direction))
+  const q = query(col, ...orderByConstraints, limit(options.limit ?? DEFAULT_LIMIT), ...(options.wheres ?? []))
   const querySnapshot = await getDocs(q)
 
   return querySnapshot.docs.map(doc => {

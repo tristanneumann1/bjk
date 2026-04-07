@@ -117,6 +117,7 @@ import Auth from '@/components/Auth.vue'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import StrategyTab from '@/components/menuTabs/StrategyTab.vue'
+import StatsTab from '@/components/menuTabs/StatsTab.vue'
 import FeedbackDialog from '@/components/FeedbackDialog.vue'
 import ProfileIcon from '@/assets/icons/profile.svg?component'
 import GameIcon from '@/assets/icons/game.svg?component'
@@ -170,6 +171,7 @@ const tabComponents: Partial<Record<MenuSectionId, Component>> = {
   profile: ProfileTab,
   game: GameTab,
   strategy: StrategyTab,
+  stats: StatsTab,
 }
 
 const getIcon = (id: MenuSectionId) => iconMap[id]

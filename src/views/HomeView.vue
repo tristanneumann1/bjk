@@ -71,7 +71,7 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
     heading: 'Performance Tracking',
     comingSoon: true,
     items: [
-      'Session history across multiple games',
+      'Bankroll history across your last 100 games',
       'Action-by-action accuracy breakdown',
       'Track progress over time',
       'Identify your most common mistakes',
