@@ -144,6 +144,7 @@ const getUniqueActions = (actions?: PlayerAction[]): PlayerAction[] => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  scroll-margin-top: var(--profile-menu-height, 52px);
 }
 
 .round-summary__header {

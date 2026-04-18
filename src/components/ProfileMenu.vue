@@ -186,16 +186,14 @@ const activeSectionComponent = computed(() => tabComponents[activeSection.value]
 
 <style scoped>
 .profile-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 0.75rem;
-  height: 52px;
+  flex: 0 0 auto;
+  height: var(--profile-menu-height, 52px);
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);

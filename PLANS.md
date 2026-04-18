@@ -1,15 +1,15 @@
 # Upcoming Tasks
 
 - [n] Rule to prevent hit after split aces
-- [ ] Feedback
+- [ ] Landscape not good
 - [ ] Change betting slider for better functionality
-- [ ] graph of Bankroll over time
 - [ ] Offline Access
 - [ ] Inform if bets are correct value
 - [ ] Measure player overall EV
 - [ ] Simulate
 - [ ] Felt, custom art
 - [ ] paid access
+- [ ] have to reshuffle twice
 - [ ] background view of active rules
 - [s] add FAQ, instructions, tutorial page, helper page...
 - [s] Add charts for easy access

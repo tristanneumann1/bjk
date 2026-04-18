@@ -13,13 +13,12 @@ import { RouterView } from 'vue-router'
 html,
 body,
 #app {
-  min-height: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 body {
-  margin: 0;
   background-color: #006400;
-  min-height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
 }
 </style>

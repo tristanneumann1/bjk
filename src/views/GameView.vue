@@ -6,15 +6,28 @@ import Table from '@/components/Table.vue'
 <template>
   <div class="home-shell">
     <ProfileMenu />
-    <Table />
+    <div class="home-shell__body">
+      <Table />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .home-shell {
   position: relative;
-  min-height: 100vh;
-  padding: 69px 1rem calc(env(safe-area-inset-bottom, 0px) + 120px);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.home-shell__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1rem calc(env(safe-area-inset-bottom, 0px) + 120px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -22,8 +35,8 @@ import Table from '@/components/Table.vue'
 }
 
 @media (--bp-landscape-min) {
-  .home-shell {
-    padding: 69px 2rem calc(env(safe-area-inset-bottom, 0px) + 160px);
+  .home-shell__body {
+    padding: 1rem 2rem calc(env(safe-area-inset-bottom, 0px) + 160px);
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import Chair from '@/components/Chair.vue'
 import InactiveChair from '@/components/InactiveChair.vue'
 import PlayerBalanceDisplay from '@/components/PlayerBalanceDisplay.vue'
@@ -34,6 +34,13 @@ watch(
     }
   },
 )
+
+watch(showSummary, value => {
+  if (!value) return
+  nextTick(() => {
+    document.querySelector('.home-shell__body')?.scrollTo({ top: 0, behavior: 'smooth' })
+  })
+})
 
 const handleGuessSubmit = (guess: number | null) => {
   statsStore.submitCountGuess(guess)
