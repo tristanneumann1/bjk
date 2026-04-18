@@ -23,8 +23,8 @@ illustrious18Fab4H17 = {
   '12_2': [{canSplit: true, DAS: true, action: 'Split'}, { trueCountGreaterEqualTo: 3, action: 'Stand' }, {action: 'Hit'}],
   '12_3': [{canSplit: true, action: 'Split'}, { trueCountGreaterEqualTo: 2, action: 'Stand' }, {action: 'Hit'}],
   '12_4': [{canSplit: true, action: 'Split'}, { trueCountGreaterEqualTo: 0, action: 'Stand' }, {action: 'Hit'}],
-  '12_5': [{canSplit: true, action: 'Split'}, { trueCountGreaterEqualTo: -1, action: 'Stand' }, {action: 'Stand'}],
-  '12_6': [{canSplit: true, action: 'Split'}, { trueCountGreaterEqualTo: -2, action: 'Stand' }, {action: 'Stand'}],
+  '12_5': [{canSplit: true, action: 'Split'}, { trueCountGreaterEqualTo: -1, action: 'Stand' }, {action: 'Hit'}],
+  '12_6': [{canSplit: true, action: 'Split'}, { trueCountGreaterEqualTo: -2, action: 'Stand' }, {action: 'Hit'}],
 
   '13_2': [{ trueCountGreaterEqualTo: -1, action: 'Stand' }, {action: 'Hit'}],
   '13_3': [{ trueCountGreaterEqualTo: -2, action: 'Stand' }, {action: 'Hit'}],
