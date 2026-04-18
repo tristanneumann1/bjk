@@ -1,11 +1,13 @@
 import {defineStore} from 'pinia'
 import {ref, watch} from 'vue'
 import {SETTINGS_STORAGE_KEY} from "@/constants.ts";
+import { DEFAULT_BET_SPREAD, normaliseSpread } from '@/lib/betSpread'
 
 type StoredSettings = {
   showCounter: boolean
   showMistakeSnackbar: boolean
   menuHidden: boolean
+  betSpread: number[]
 }
 
 const readSettings = (): StoredSettings | null => {
@@ -33,6 +35,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const showCounter = ref(true)
   const showMistakeSnackbar = ref(true)
   const menuHidden = ref(false)
+  const betSpread = ref<number[]>([...DEFAULT_BET_SPREAD])
 
   const hydrate = () => {
     const stored = readSettings()
@@ -40,6 +43,9 @@ export const useSettingsStore = defineStore('settings', () => {
     showCounter.value = stored.showCounter
     showMistakeSnackbar.value = stored.showMistakeSnackbar ?? false
     menuHidden.value = stored.menuHidden ?? false
+    if (Array.isArray(stored.betSpread) && stored.betSpread.length >= 2) {
+      betSpread.value = normaliseSpread(stored.betSpread)
+    }
   }
 
   const persist = () => {
@@ -47,6 +53,7 @@ export const useSettingsStore = defineStore('settings', () => {
       showCounter: showCounter.value,
       showMistakeSnackbar: showMistakeSnackbar.value,
       menuHidden: menuHidden.value,
+      betSpread: betSpread.value,
     })
   }
 
@@ -62,9 +69,16 @@ export const useSettingsStore = defineStore('settings', () => {
     menuHidden.value = !!value
   }
 
+  const setBetSpread = (values: number[]) => {
+    const normalised = normaliseSpread(values)
+    if (normalised.length >= 2) {
+      betSpread.value = normalised
+    }
+  }
+
   hydrate()
 
-  watch([showCounter, showMistakeSnackbar, menuHidden], persist, { deep: false })
+  watch([showCounter, showMistakeSnackbar, menuHidden, betSpread], persist, { deep: true })
 
   return {
     showCounter,
@@ -73,5 +87,7 @@ export const useSettingsStore = defineStore('settings', () => {
     setShowMistakeSnackbar,
     menuHidden,
     setMenuHidden,
+    betSpread,
+    setBetSpread,
   }
 })

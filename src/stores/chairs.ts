@@ -15,6 +15,8 @@ import { Hand, HAND_OUTCOME_EVENT, NEW_CARD_EVENT, SPLIT_CARDS_EVENT } from '@/m
 import { CHAIR_EVENT } from '@/models/table.ts'
 import {RESHUFFLE} from "@/lib/userEvents.ts";
 import {isNumber} from "@/lib/utils.ts";
+import { MAX_BET } from '@/lib/betSpread'
+import { useSettingsStore } from '@/stores/settings'
 
 type HandOutcomeView = {
   result: Hand['lastOutcome']
@@ -362,13 +364,21 @@ export const useChairsStore = defineStore('chairs', () => {
   const sit = (index: number) => {
     if (roundInProgress.value) return
     Session.getInstance().table.addPlayerChair(index)
+    const chair = chairRegistry.get(index)?.chair
+    if (chair && chair.bet === 0) {
+      const settingsStore = useSettingsStore()
+      const firstValue = settingsStore.betSpread[0]
+      if (typeof firstValue === 'number') {
+        chair.bet = firstValue
+      }
+    }
   }
 
   const adjustBet = (index: number, bet: number) => {
     if (roundInProgress.value) return
     const chair = chairRegistry.get(index)?.chair
     if (!chair) return
-    chair.bet = Math.max(bet, 0)
+    chair.bet = Math.min(MAX_BET, Math.max(bet, 0))
   }
 
   const leave = (index: number) => {

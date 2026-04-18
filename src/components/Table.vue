@@ -80,7 +80,6 @@ const handleGuessSubmit = (guess: number | null) => {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) minmax(320px, 2fr);
   align-items: start;
-  margin-bottom: 1rem;
 }
 .table-lower {
   width: 100%;

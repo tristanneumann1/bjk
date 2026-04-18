@@ -30,6 +30,16 @@
         @update:model-value="settingsStore.setShowMistakeSnackbar"
       />
     </div>
+
+    <v-divider class="profile-tab__divider" />
+
+    <div class="profile-tab__section">
+      <h3>Bet spread</h3>
+      <p class="profile-tab__hint">
+        Up to 10 bets, from $5 to $300. The chair buttons cycle through these values in order.
+      </p>
+      <BetSpreadEditor />
+    </div>
   </div>
 </template>
 
@@ -37,6 +47,7 @@
 import { ref, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, signOut, type User } from 'firebase/auth'
 import { useSettingsStore } from '@/stores/settings'
+import BetSpreadEditor from '@/components/BetSpreadEditor.vue'
 
 const settingsStore = useSettingsStore()
 const currentUser = ref<User | null>(null)
@@ -115,10 +126,23 @@ const handleSignOut = async () => {
   gap: 0.35rem;
 }
 
-.profile-tab__settings h3 {
+.profile-tab__settings h3,
+.profile-tab__section h3 {
   margin: 0;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.profile-tab__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-tab__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.7;
 }
 </style>

@@ -146,10 +146,10 @@
         </button>
       </div>
     </div>
-    <BettingSlider
-      :initial-value="currentBet"
-      @change="onBetChange"
+    <BetControl
+      :value="currentBet"
       :disabled="!canAdjustBet"
+      @change="onBetChange"
     />
   </div>
 </template>
@@ -158,7 +158,7 @@
 import { computed, ref, watch } from 'vue'
 import CardHand from '@/components/CardHand.vue'
 import ResultCounter from '@/components/ResultCounter.vue'
-import BettingSlider from "@/components/BettingSlider.vue";
+import BetControl from "@/components/BetControl.vue";
 import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
 import type { HandResult } from '@/models/chair'
