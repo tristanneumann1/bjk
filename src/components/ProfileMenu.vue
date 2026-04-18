@@ -1,9 +1,15 @@
 <template>
-  <div class="profile-menu">
+  <div
+    class="profile-menu"
+    :class="{ 'profile-menu--hidden': settingsStore.menuHidden }"
+    :style="menuStyle"
+    :aria-hidden="settingsStore.menuHidden"
+  >
     <button
       class="profile-menu__button"
       type="button"
       aria-label="Home"
+      :tabindex="settingsStore.menuHidden ? -1 : 0"
       @click="router.push('/')"
     >
       <svg class="profile-menu__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -17,10 +23,25 @@
       class="profile-menu__button"
       type="button"
       aria-label="Send feedback"
+      :tabindex="settingsStore.menuHidden ? -1 : 0"
       @click="isFeedbackOpen = true"
     >
       <svg class="profile-menu__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    </button>
+
+    <button
+      ref="toggleButtonRef"
+      class="profile-menu__button profile-menu__toggle"
+      type="button"
+      aria-label="Hide menu"
+      :tabindex="settingsStore.menuHidden ? -1 : 0"
+      @click="settingsStore.setMenuHidden(true)"
+    >
+      <svg class="profile-menu__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 15l6-6 6 6" />
+        <path d="M6 9h12" />
       </svg>
     </button>
 
@@ -124,12 +145,26 @@ import GameIcon from '@/assets/icons/game.svg?component'
 import StrategyIcon from '@/assets/icons/strategy.svg?component'
 import StatsIcon from '@/assets/icons/stats.svg?component'
 import StyleIcon from '@/assets/icons/style.svg?component'
+import { useSettingsStore } from '@/stores/settings'
 
 const router = useRouter()
+const settingsStore = useSettingsStore()
 const isOpen = ref(false)
 const isFeedbackOpen = ref(false)
 const currentUser = ref<User | null>(null)
 const authLoaded = ref(false)
+const toggleButtonRef = ref<HTMLButtonElement | null>(null)
+
+const focusToggle = () => {
+  toggleButtonRef.value?.focus()
+}
+
+defineExpose({ focusToggle })
+
+const menuStyle = computed(() => ({
+  '--profile-menu-height': settingsStore.menuHidden ? '0px' : '52px',
+  '--menu-opacity': settingsStore.menuHidden ? '0' : '1',
+}))
 
 onMounted(() => {
   onAuthStateChanged(getAuth(), user => {
@@ -194,9 +229,26 @@ const activeSectionComponent = computed(() => tabComponents[activeSection.value]
   padding: 0 0.75rem;
   flex: 0 0 auto;
   height: var(--profile-menu-height, 52px);
+  opacity: var(--menu-opacity, 1);
+  overflow: hidden;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    height 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 220ms linear;
+}
+
+.profile-menu--hidden {
+  pointer-events: none;
+  border-bottom-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-menu {
+    transition: none;
+  }
 }
 
 .profile-menu__sign-in {

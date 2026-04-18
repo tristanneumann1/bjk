@@ -1,11 +1,25 @@
 <script setup lang="ts">
+import { nextTick, ref } from 'vue'
 import ProfileMenu from '@/components/ProfileMenu.vue'
+import PeekBar from '@/components/PeekBar.vue'
 import Table from '@/components/Table.vue'
+import { useSettingsStore } from '@/stores/settings'
+
+const settingsStore = useSettingsStore()
+const profileMenuRef = ref<InstanceType<typeof ProfileMenu> | null>(null)
+
+const handleReveal = () => {
+  settingsStore.setMenuHidden(false)
+  nextTick(() => {
+    profileMenuRef.value?.focusToggle()
+  })
+}
 </script>
 
 <template>
   <div class="home-shell">
-    <ProfileMenu />
+    <ProfileMenu ref="profileMenuRef" />
+    <PeekBar :visible="settingsStore.menuHidden" @reveal="handleReveal" />
     <div class="home-shell__body">
       <Table />
     </div>
