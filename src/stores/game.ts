@@ -34,6 +34,7 @@ const normalizeBlackjackPayout = (value: number): number => {
 export const useGameStore = defineStore('game', () => {
   const currentGameId = ref<string | null>(null)
   const roundId = ref<number>(0)
+  const startingBalance = ref<number | null>(null)
   const strategyStore = useStrategyStore()
 
   const sessionInitial = Session.getInstance()
@@ -178,6 +179,7 @@ export const useGameStore = defineStore('game', () => {
     roundId.value++
 
     if (!currentGameId.value) {
+      startingBalance.value = Session.getInstance().player.balance
       applyPendingConfig()
     }
 
@@ -194,6 +196,7 @@ export const useGameStore = defineStore('game', () => {
     applyPendingConfig()
     roundId.value = 0
     currentGameId.value = null
+    startingBalance.value = null
   }
 
   const persistGameBalance = async (finalBalance: number | null) => {
@@ -295,6 +298,7 @@ export const useGameStore = defineStore('game', () => {
     hitAfterSplitAces,
     setHitAfterSplitAces,
     applyPendingConfig,
+    startingBalance,
     persistGameBalance,
   }
 })

@@ -6,12 +6,14 @@ import { countPlayerDocs, getPlayerDocs, upsertPlayerDoc } from '@/lib/firestore
 import { GAMES_SUBCOLLECTION, type GameDoc } from '@/docs/game'
 import { ACTIONS_SUBCOLLECTION, type ActionDoc } from '@/docs/action'
 import { useGameStore } from '@/stores/game'
+import { usePlayerStore } from '@/stores/player'
 import { Session } from '@/models/session.ts'
 import { modelEvents, userEvent } from '@/lib/mitt'
 import * as userEvents from '@/lib/userEvents'
 
 export const useStatsStore = defineStore('stats', () => {
   const gameStore = useGameStore()
+  const playerStore = usePlayerStore()
   const auth = getAuth()
   const userId = ref<string | null>(auth.currentUser?.uid ?? null)
   const totalActions = ref(0)
@@ -25,10 +27,27 @@ export const useStatsStore = defineStore('stats', () => {
     userId.value = user?.uid ?? null
   })
 
-  const stats = computed(() => [
-    { label: 'Actions Taken', value: totalActions.value },
-    { label: 'Mistakes Made', value: incorrectActions.value },
-  ])
+  const balanceChange = computed(() => {
+    const start = gameStore.startingBalance
+    if (start === null) return null
+    return playerStore.balance - start
+  })
+
+  const formatCents = (cents: number) => {
+    const sign = cents >= 0 ? '+' : ''
+    return `${sign}$${(cents / 100).toFixed(2)}`
+  }
+
+  const stats = computed(() => {
+    const items: { label: string; value: number | string }[] = [
+      { label: 'Actions Taken', value: totalActions.value },
+      { label: 'Mistakes Made', value: incorrectActions.value },
+    ]
+    if (balanceChange.value !== null) {
+      items.push({ label: 'Balance Change', value: formatCents(balanceChange.value) })
+    }
+    return items
+  })
 
   const hasUser = computed(() => Boolean(userId.value))
 
