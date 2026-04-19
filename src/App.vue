@@ -13,12 +13,11 @@ import { RouterView } from 'vue-router'
 html,
 body,
 #app {
-  height: 100%;
   margin: 0;
 }
 
 body {
   background-color: #006400;
-  overflow: hidden;
+  overscroll-behavior-y: contain;
 }
 </style>

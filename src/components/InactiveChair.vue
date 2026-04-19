@@ -1,5 +1,5 @@
 <template>
-  <div class="chair" aria-label="Player Spot" :style="{ width: '272px' }">
+  <div class="chair" aria-label="Player Spot">
     <button
       class="chair__empty-button"
       type="button"
@@ -43,6 +43,7 @@ const onSitClick = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 10rem;
 }
 
 .chair__empty-button {

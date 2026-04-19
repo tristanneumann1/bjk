@@ -18,8 +18,10 @@ const handleReveal = () => {
 
 <template>
   <div class="home-shell">
-    <ProfileMenu ref="profileMenuRef" />
-    <PeekBar :visible="settingsStore.menuHidden" @reveal="handleReveal" />
+    <div class="home-shell__header">
+      <PeekBar :visible="settingsStore.menuHidden" @reveal="handleReveal" />
+      <ProfileMenu ref="profileMenuRef" />
+    </div>
     <div class="home-shell__body">
       <TableSection />
     </div>
@@ -28,19 +30,23 @@ const handleReveal = () => {
 
 <style scoped>
 .home-shell {
-  position: relative;
-  height: 100dvh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: transparent;
 }
 
+.home-shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .home-shell__body {
   flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
   padding: 1rem 1rem calc(env(safe-area-inset-bottom, 0px) + 120px);
   box-sizing: border-box;
   display: flex;

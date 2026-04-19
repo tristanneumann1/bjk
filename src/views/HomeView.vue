@@ -144,10 +144,7 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
 
 <style scoped>
 .landing-shell {
-  height: 100dvh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -38,7 +38,7 @@ watch(
 watch(showSummary, value => {
   if (!value) return
   nextTick(() => {
-    document.querySelector('.home-shell__body')?.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   })
 })
 
@@ -91,11 +91,20 @@ const handleGuessSubmit = (guess: number | null) => {
 }
 
 .chairs-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
-  align-items: flex-end;
-  justify-content: center;
+  align-items: end;
+  width: 100%;
 }
+
+
+/*
+.chairs-container > :deep(*) {
+  min-width: 0;
+  overflow: hidden;
+}
+ */
 
 .summary-container {
   width: 100%;
@@ -113,8 +122,7 @@ const handleGuessSubmit = (guess: number | null) => {
   }
 
   .chairs-container {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: 1fr;
   }
 }
 </style>
