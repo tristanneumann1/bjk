@@ -1,6 +1,5 @@
 # Upcoming Tasks
 
-- [ ] Change betting slider for better functionality
 - [ ] Displayed running count more subtle
 - [ ] Offline Access
 - [ ] Inform if bets are correct value
