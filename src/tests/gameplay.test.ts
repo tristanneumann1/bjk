@@ -121,6 +121,7 @@ describe('Gameplay', () => {
       const { session, table } = setupGame({
         dealer: [c('A'), c('K')],   // dealer blackjack
         player: [c('10'), c('8')],  // player 18
+        rules: { insuranceAllowed: true },
       })
 
       table.startRound()
@@ -134,6 +135,7 @@ describe('Gameplay', () => {
       const { session, table } = setupGame({
         dealer: [c('A'), c('K')],   // dealer blackjack
         player: [c('10'), c('8')],  // player 18
+        rules: { insuranceAllowed: true },
       })
 
       table.startRound()
@@ -146,6 +148,7 @@ describe('Gameplay', () => {
       const { session, table } = setupGame({
         dealer: [c('A'), c('7')],   // dealer soft 18, no blackjack
         player: [c('10'), c('9')],  // player 19
+        rules: { insuranceAllowed: true },
       })
 
       table.startRound()
@@ -160,6 +163,7 @@ describe('Gameplay', () => {
       const { session, table } = setupGame({
         dealer: [c('A'), c('7')],   // dealer soft 18, no blackjack
         player: [c('10'), c('9')],  // player 19
+        rules: { insuranceAllowed: true },
       })
 
       table.startRound()
@@ -173,6 +177,7 @@ describe('Gameplay', () => {
       const { session, table } = setupGame({
         dealer: [c('A'), c('4')],  // dealer soft 15, no blackjack
         player: [c('A'), c('K')],  // player blackjack
+        rules: { insuranceAllowed: true },
       })
 
       table.startRound()
