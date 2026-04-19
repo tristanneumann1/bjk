@@ -339,6 +339,7 @@ watch(
   padding: 0.5rem 0.25rem;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
   position: relative; /* allow floating controls without affecting layout */
+  justify-content: space-between;
   min-height: 10rem;
 }
 
