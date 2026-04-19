@@ -84,7 +84,7 @@ defineEmits<{ reveal: [] }>()
   top: 100%;
   left: 0;
   right: 0;
-  height: 38px;
+  height: 8px;
 }
 
 @media (prefers-reduced-motion: reduce) {
