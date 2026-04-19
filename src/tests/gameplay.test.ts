@@ -143,7 +143,7 @@ describe('Gameplay', () => {
     })
 
     it('insurance costs half the bet when dealer does not have blackjack', () => {
-      const { session, table, chair } = setupGame({
+      const { session, table } = setupGame({
         dealer: [c('A'), c('7')],   // dealer soft 18, no blackjack
         player: [c('10'), c('9')],  // player 19
       })

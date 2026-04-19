@@ -1,6 +1,6 @@
 import { type ModelPropertyChangeEvent, modelChangeEvent, modelPropertyEvent, modelInstanceEvent, modelInstancePropertyEvent, modelEvents } from "@/lib/mitt";
 
-type Constructor<T = object> = new (...args: any[]) => T
+type Constructor<T = object> = new (...args: never[]) => T
 
 interface AttachOptions<T extends Constructor> {
   model: string

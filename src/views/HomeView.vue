@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { ref, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import Auth from '@/components/Auth.vue'
+import AuthContainer from '@/components/AuthContainer.vue'
 
 const router = useRouter()
 const isMounted = ref(false)
@@ -112,7 +112,7 @@ const features: Array<{ heading: string; comingSoon?: boolean; items: string[] }
             <li>Sync across devices — free</li>
           </ul>
         </div>
-        <Auth />
+        <AuthContainer />
       </div>
       <p v-else-if="isMounted && currentUser" class="landing-shell__signed-in">
         Signed in as <strong>{{ currentUser.displayName ?? currentUser.email }}</strong>

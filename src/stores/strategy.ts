@@ -1,7 +1,12 @@
 import {defineStore} from 'pinia'
 import {computed, ref, watch} from 'vue'
 import {STRATEGIES} from '@/models/strategy/strategies'
-import type {ComparisonRule, ScenarioKey, StrategyGrid} from '@/types/strategies'
+import {
+  type ComparisonRule,
+  isScenarioKey,
+  type ScenarioKey,
+  type StrategyGrid
+} from '@/types/strategies'
 import {getAuth, onAuthStateChanged} from 'firebase/auth'
 import {getPlayerDocs, upsertPlayerDoc} from '@/lib/firestore'
 import {
@@ -11,8 +16,6 @@ import {
   toStrategyGrid
 } from '@/docs/strategy'
 import {STRATEGY_STORAGE_KEY} from "@/constants.ts";
-
-const isScenarioKey = (key: string): key is ScenarioKey => /\d+_\d+/.test(key)
 
 const cloneRules = (rules: ComparisonRule[]): ComparisonRule[] => rules.map(rule => ({ ...rule }))
 

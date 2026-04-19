@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import Chair from '@/components/Chair.vue'
+import ChairSection from '@/components/ChairSection.vue'
 import InactiveChair from '@/components/InactiveChair.vue'
 import PlayerBalanceDisplay from '@/components/PlayerBalanceDisplay.vue'
 import ActionSection from '@/components/ActionSection.vue'
@@ -62,7 +62,7 @@ const handleGuessSubmit = (guess: number | null) => {
     <div class="chairs-container">
       <template v-if="shouldShowChairs">
         <template v-for="chairId in chairSlots" :key="chairId">
-          <Chair
+          <ChairSection
             v-if="chairStore.getChairView(chairId)"
             :chair-id="chairId"
           />

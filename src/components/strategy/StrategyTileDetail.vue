@@ -168,7 +168,7 @@ const hydrateFromStore = () => {
 
 const persistToStore = () => {
   const serialized: ComparisonRule[] = [
-    ...editableRules.value.map(({ id, ...rule }) => rule),
+    ...editableRules.value.map(({ id: _id, ...rule }) => rule),
     { action: finalAction.value },
   ]
   strategyStore.setRulesForScenario(scenarioKey.value, serialized)

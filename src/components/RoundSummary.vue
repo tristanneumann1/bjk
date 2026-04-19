@@ -98,7 +98,7 @@
           <li>Save custom strategy grids to your account</li>
           <li>Sync across devices — free</li>
         </ul>
-        <Auth />
+        <AuthContainer />
       </div>
     </div>
   </section>
@@ -109,7 +109,7 @@ import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import CardHand from '@/components/CardHand.vue'
 import PlayingCard from '@/components/PlayingCard.vue'
-import Auth from '@/components/Auth.vue'
+import AuthContainer from '@/components/AuthContainer.vue'
 import { useStatsStore } from '@/stores/stats'
 import type { PlayerAction } from '@/types/actions'
 import {ACTION_COLORS} from "@/constants.ts";

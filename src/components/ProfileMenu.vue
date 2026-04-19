@@ -95,7 +95,7 @@
             <li>Sync across devices — free</li>
           </ul>
         </header>
-        <Auth />
+        <AuthContainer />
       </div>
 
       <div v-else class="profile-menu__panel" role="dialog" aria-label="Player menu">
@@ -134,7 +134,7 @@
 import { computed, ref, onMounted, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import Auth from '@/components/Auth.vue'
+import AuthContainer from '@/components/AuthContainer.vue'
 import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import StrategyTab from '@/components/menuTabs/StrategyTab.vue'

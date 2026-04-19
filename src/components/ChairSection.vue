@@ -159,7 +159,7 @@ import { computed, ref, watch } from 'vue'
 import CardHand from '@/components/CardHand.vue'
 import ResultCounter from '@/components/ResultCounter.vue'
 import BetControl from "@/components/BetControl.vue";
-import {CARD_SCALE_LARGE, CARD_SCALE_SMALL} from "@/constants.ts";
+import { CARD_SCALE_SMALL } from "@/constants.ts";
 import { useChairsStore } from '@/stores/chairs'
 import type { HandResult } from '@/models/chair'
 import type { Card } from '@/types/card.ts'
@@ -174,7 +174,7 @@ type HandEntry = {
 
 const MAX_HAND_SETS = 8
 const BASE_SMALL_CARD_HEIGHT = 64 * CARD_SCALE_SMALL
-const BASE_LARGE_CARD_HEIGHT = 64 * CARD_SCALE_LARGE
+// const BASE_LARGE_CARD_HEIGHT = 64 * CARD_SCALE_LARGE
 const STACK_OVERLAP = BASE_SMALL_CARD_HEIGHT / 2
 const MAX_VISIBLE_STACK = 2
 
@@ -223,39 +223,41 @@ const handEntries = computed<HandEntry[]>(() =>
   }),
 )
 
-const resolvedActiveHandIndex = computed(() => {
+// Candidate index from the store, or null if it's out of range / unavailable.
+// Used by both the computed (for the happy path) and the tracking watcher below.
+const inRangeActiveHandIndex = computed<number | null>(() => {
   const view = chairView.value
-  if (!view) {
-    lastResolvedActiveHandIndex.value = null
-    return 0
-  }
-
-  const { hands, activeHandIndex, clampedActiveHandIndex } = view
-  const handCount = hands.length
-  const inHandCountRange = clampedActiveHandIndex !== null
-    ? clampedActiveHandIndex >= 0 && clampedActiveHandIndex < handCount
-    : activeHandIndex >= 0 && activeHandIndex < handCount
-
-  if (inHandCountRange) {
-    const resolved = clampedActiveHandIndex !== null
-      ? clampedActiveHandIndex
-      : activeHandIndex
-    lastResolvedActiveHandIndex.value = resolved
-    return resolved
-  }
-
-  if (handCount === 0) {
-    lastResolvedActiveHandIndex.value = null
-    return 0
-  }
-
-  const fallback = lastResolvedActiveHandIndex.value !== null && lastResolvedActiveHandIndex.value < handCount
-    ? lastResolvedActiveHandIndex.value
-    : handCount - 1
-
-  lastResolvedActiveHandIndex.value = fallback
-  return fallback
+  if (!view || view.hands.length === 0) return null
+  const candidate = view.clampedActiveHandIndex ?? view.activeHandIndex
+  return candidate >= 0 && candidate < view.hands.length ? candidate : null
 })
+
+// Pure derivation of the index to render.
+// Prefers the live in-range candidate; otherwise falls back to the last
+// valid index we saw (so mid-transition glitches don't flicker the UI);
+// otherwise points at the last hand.
+const resolvedActiveHandIndex = computed(() => {
+  const live = inRangeActiveHandIndex.value
+  if (live !== null) return live
+
+  const view = chairView.value
+  const handCount = view?.hands.length ?? 0
+  if (handCount === 0) return 0
+
+  const remembered = lastResolvedActiveHandIndex.value
+  if (remembered !== null && remembered < handCount) return remembered
+  return handCount - 1
+})
+
+// Remember the most recent VALID index so the fallback branch has something
+// to anchor on. No writes from the computed — state changes live here.
+watch(
+  inRangeActiveHandIndex,
+  candidate => {
+    if (candidate !== null) lastResolvedActiveHandIndex.value = candidate
+  },
+  { immediate: true },
+)
 
 const activeEntry = computed(() =>
   handEntries.value.find(entry => entry.index === resolvedActiveHandIndex.value) ?? null,

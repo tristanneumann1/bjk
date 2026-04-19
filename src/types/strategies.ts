@@ -13,7 +13,7 @@ export type ComparisonRule = {
 }
 
 export type ScenarioKey = `${number}_${number}`
-export const isScenarioKey = (input: any | ScenarioKey): input is ScenarioKey => /^\d+_\d+$/.test(input)
+export const isScenarioKey = (input: unknown | ScenarioKey): input is ScenarioKey => /^\d+_\d+$/.test(<string>input)
 
 export type StrategyGrid = { id: string, name: string } & {
   [K in ScenarioKey]: ComparisonRule[]

@@ -2,7 +2,7 @@
 import { nextTick, ref } from 'vue'
 import ProfileMenu from '@/components/ProfileMenu.vue'
 import PeekBar from '@/components/PeekBar.vue'
-import Table from '@/components/Table.vue'
+import TableSection from '@/components/TableSection.vue'
 import { useSettingsStore } from '@/stores/settings'
 
 const settingsStore = useSettingsStore()
@@ -21,7 +21,7 @@ const handleReveal = () => {
     <ProfileMenu ref="profileMenuRef" />
     <PeekBar :visible="settingsStore.menuHidden" @reveal="handleReveal" />
     <div class="home-shell__body">
-      <Table />
+      <TableSection />
     </div>
   </div>
 </template>

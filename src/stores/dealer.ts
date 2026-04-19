@@ -10,7 +10,7 @@ import {
 } from '@/lib/mitt'
 import { getModelInstanceId } from '@/lib/modelEvents'
 import type { Chair } from '@/models/chair'
-import { Hand, NEW_CARD_EVENT } from '@/models/hand'
+import { NEW_CARD_EVENT } from '@/models/hand'
 import type { Card as CardType } from '@/types/card'
 import {RESHUFFLE, SESSION_RULES_CHANGED} from "@/lib/userEvents.ts";
 

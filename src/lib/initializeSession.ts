@@ -2,7 +2,7 @@ import {Rules} from "@/models/rules.ts";
 import {Card} from "@/models/card.ts";
 import {Session} from "@/models/session.ts";
 
-const OPTIONAL_STARTING_CARDS = {
+const _OPTIONAL_STARTING_CARDS = {
   playerSplitIntoBlackJack: [
     new Card('Spades', '2'),
     new Card( 'Hearts', '3'),
@@ -176,6 +176,6 @@ export default function initializeSession() {
   const rules = new Rules()
 
   const session = Session.initialize(rules)
-  // const session = Session.initialize(rules, { shoePrefix: OPTIONAL_STARTING_CARDS.insuranceExercises })
+  // const session = Session.initialize(rules, { shoePrefix: _OPTIONAL_STARTING_CARDS.insuranceExercises })
   return session
 }
