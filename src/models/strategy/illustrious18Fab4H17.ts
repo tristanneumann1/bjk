@@ -1,5 +1,5 @@
-import {basicStrategyH17} from "@/models/strategy/basicStrategyH17.ts";
-import {isScenarioKey, type StrategyGrid} from "@/types/strategies.ts";
+import {basicStrategyH17} from "@/models/strategy/basicStrategyH17";
+import {isScenarioKey, type StrategyGrid} from "@/types/strategies";
 
 let illustrious18Fab4H17: StrategyGrid = {
   ...basicStrategyH17,
