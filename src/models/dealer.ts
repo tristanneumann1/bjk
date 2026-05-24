@@ -66,11 +66,8 @@ export class Dealer {
   }
 
   completeDealerHand(dealerHand: Hand): void {
-    while(dealerHand.bestValue <= 17) {
-      if (dealerHand.bestValue === 17 && dealerHand.isSoft && Session.getInstance().rules.dealerHitsSoft17) {
-        dealerHand.addCard(this.dealCard())
-        continue;
-      }
+    const dealerAtSoft17 = dealerHand.bestValue === 17 && dealerHand.isSoft && Session.getInstance().rules.dealerHitsSoft17
+    while(dealerHand.bestValue < 17 || dealerAtSoft17) {
       dealerHand.addCard(this.dealCard())
     }
     this.revealHoleCard()
