@@ -178,6 +178,9 @@ export class Chair {
         if (activeHand.cards.length !== 2) {
           return 'Can only surrender on first two cards'
         }
+        if (activeHand.isSplit) {
+          return 'Can not surrender Split hands'
+        }
         if (!rules.surrenderAllowed) {
           return 'Surrender not allowed'
         }
