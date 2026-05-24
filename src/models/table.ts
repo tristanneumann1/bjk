@@ -10,7 +10,6 @@ import {
   type ModelPropertyChangeEvent
 } from "@/lib/mitt";
 import {Card} from "@/models/card";
-import {roundTowards0} from "@/lib/utils";
 
 interface PlayerChair {
   [chairId: number]: Chair | null;
