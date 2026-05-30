@@ -52,10 +52,10 @@ export const useDealerStore = defineStore('dealer', () => {
   const setHoleCardHidden = () => holeCardHidden.value = Session.getInstance().table.dealer.holeCardHidden
 
   const resetShoe = () => {
+    pastPenetration.value = false
+    remainingShoeSize.value = totalShoeSize.value
     Session.getInstance().table.dealer.reset()
     Session.getInstance().table.dealer.resetDealIndex()
-    remainingShoeSize.value = totalShoeSize.value
-    pastPenetration.value = false
     setRunningCount()
   }
 
