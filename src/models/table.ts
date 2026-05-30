@@ -10,7 +10,6 @@ import {
   type ModelPropertyChangeEvent
 } from "@/lib/mitt";
 import {Card} from "@/models/card";
-import {roundTowards0} from "@/lib/utils";
 
 interface PlayerChair {
   [chairId: number]: Chair | null;
@@ -73,13 +72,22 @@ export class Table {
     }
     return this.playerChairArray.length > 0 && this.playerChairArray.some(chair => chair.hands.length > 0)
   }
+
+  get remainingDecksLower(): number {
+    return Math.floor(2 * this.dealer.remainingDecks) / 2
+  }
+  get remainingDecksUpper(): number {
+    return Math.ceil(2 * this.dealer.remainingDecks) / 2
+  }
   get trueCountLower(): number {
-    const remainingDecksLower = Math.floor(2 * this.dealer.remainingDecks) / 2
-    return roundTowards0(this.runningCount / remainingDecksLower)
+    const floorLower = Math.floor(this.runningCount / this.remainingDecksLower)
+    const floorUpper = Math.floor(this.runningCount / this.remainingDecksUpper)
+    return Math.min(floorLower, floorUpper)
   }
   get trueCountUpper(): number {
-    const remainingDecksUpper = Math.ceil(2 * this.dealer.remainingDecks) / 2
-    return roundTowards0(this.runningCount / remainingDecksUpper)
+    const floorLower = Math.ceil(this.runningCount / this.remainingDecksLower)
+    const floorUpper = Math.ceil(this.runningCount / this.remainingDecksUpper)
+    return Math.max(floorLower, floorUpper)
   }
 
   get gameComplete(): boolean {
