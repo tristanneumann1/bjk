@@ -40,10 +40,11 @@ const props = defineProps<{
 const toDollars = (cents: number) => cents / 100
 
 const chartData = computed(() => ({
-  labels: props.data.map((_, i) => String(i + 1)),
   datasets: [
     {
-      data: props.data.map(d => toDollars(d.balance)),
+      // WHY: linear x-axis uses {x, y} points so the axis has a true origin at 0
+      // while the first game still plots at x = 1
+      data: props.data.map((d, i) => ({ x: i + 1, y: toDollars(d.balance) })),
       borderColor: COLORS.primary400,
       backgroundColor: 'rgba(50, 130, 160, 0.15)',
       fill: true,
@@ -67,9 +68,11 @@ const chartOptions = computed(() => ({
   },
   scales: {
     x: {
+      type: 'linear' as const,
+      min: 0,
       ticks: {
         color: 'rgba(255,255,255,0.7)',
-        maxTicksLimit: 10,
+        stepSize: 10,
       },
       grid: {
         color: 'rgba(255,255,255,0.1)',
