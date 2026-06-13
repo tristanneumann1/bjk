@@ -67,6 +67,39 @@
         </div>
       </Transition>
     </div>
+    <footer class="strategy-tab__references">
+      <h4>Reference charts</h4>
+      <p>
+        Printable basic strategy charts created by
+        <a
+          href="https://www.blackjackapprenticeship.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Blackjack Apprenticeship</a
+        >. © Blackjack Apprenticeship LLC. Charts hosted by and linked from their
+        site; all rights remain with the copyright owner.
+      </p>
+      <ul>
+        <li>
+          <a
+            href="https://www.blackjackapprenticeship.com/wp-content/uploads/2024/09/H17-Basic-Strategy.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            >H17 Basic Strategy chart (PDF)</a
+          >
+          <span>— dealer hits soft 17</span>
+        </li>
+        <li>
+          <a
+            href="https://www.blackjackapprenticeship.com/wp-content/uploads/2024/09/S17-Basic-Strategy.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            >S17 Basic Strategy chart (PDF)</a
+          >
+          <span>— dealer stands on soft 17</span>
+        </li>
+      </ul>
+    </footer>
     <v-snackbar v-model="snackbar.visible" :color="snackbar.color" timeout="2500">
       {{ snackbar.text }}
     </v-snackbar>
@@ -331,5 +364,46 @@ const strategyGrid = computed(() =>
   left: 0;
   font-size: 0.85rem;
   z-index: 2;
+}
+
+.strategy-tab__references {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 0.6rem;
+  font-size: 0.75rem;
+  opacity: 0.85;
+
+  h4 {
+    margin: 0 0 0.25rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.9;
+  }
+
+  p {
+    margin: 0 0 0.4rem;
+    line-height: 1.4;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  span {
+    opacity: 0.7;
+  }
+
+  a {
+    color: #60a5fa;
+    text-decoration: underline;
+  }
+
+  a:hover {
+    color: #93c5fd;
+  }
 }
 </style>
