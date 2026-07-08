@@ -139,11 +139,13 @@ import ProfileTab from '@/components/menuTabs/ProfileTab.vue'
 import GameTab from '@/components/menuTabs/GameTab.vue'
 import StrategyTab from '@/components/menuTabs/StrategyTab.vue'
 import StatsTab from '@/components/menuTabs/StatsTab.vue'
+import SimulateTab from '@/components/menuTabs/SimulateTab.vue'
 import FeedbackDialog from '@/components/FeedbackDialog.vue'
 import ProfileIcon from '@/assets/icons/profile.svg?component'
 import GameIcon from '@/assets/icons/game.svg?component'
 import StrategyIcon from '@/assets/icons/strategy.svg?component'
 import StatsIcon from '@/assets/icons/stats.svg?component'
+import SimulateIcon from '@/assets/icons/simulate.svg?component'
 import StyleIcon from '@/assets/icons/style.svg?component'
 import { useSettingsStore } from '@/stores/settings'
 
@@ -184,12 +186,13 @@ const initials = computed(() => {
 })
 const activeSection = ref<MenuSectionId>('profile')
 
-type MenuSectionId = 'profile' | 'game' | 'strategy' | 'stats' | 'style'
+type MenuSectionId = 'profile' | 'game' | 'strategy' | 'simulate' | 'stats' | 'style'
 
 const menuSections: Array<{ id: MenuSectionId; label: string; description: string }> = [
   { id: 'profile', label: 'Profile', description: 'Log in and view profile information.' },
   { id: 'game', label: 'Game', description: 'Customize table rules and preferences.' },
   { id: 'strategy', label: 'Strategy', description: 'Adjust and review your strategy charts.' },
+  { id: 'simulate', label: 'Simulate', description: 'Simulate your bet spread and rules to estimate EV, variance, and risk of ruin.' },
   { id: 'stats', label: 'Stats', description: 'Review historical performance and bankroll.' },
   { id: 'style', label: 'Style', description: 'Personalize the look and feel of the game.' },
 ]
@@ -198,6 +201,7 @@ const iconMap: Record<MenuSectionId, Component> = {
   profile: ProfileIcon,
   game: GameIcon,
   strategy: StrategyIcon,
+  simulate: SimulateIcon,
   stats: StatsIcon,
   style: StyleIcon,
 }
@@ -206,6 +210,7 @@ const tabComponents: Partial<Record<MenuSectionId, Component>> = {
   profile: ProfileTab,
   game: GameTab,
   strategy: StrategyTab,
+  simulate: SimulateTab,
   stats: StatsTab,
 }
 

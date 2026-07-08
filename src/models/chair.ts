@@ -236,6 +236,7 @@ export class Chair {
         this.moveToNextHand(dealer);
         break;
       case 'Split':
+        Session.getInstance().player.removeMoney(this.bet)
         const splitCard = this.activeHand.splitCards();
         if (!splitCard) {
           throw new Error('No card to split');

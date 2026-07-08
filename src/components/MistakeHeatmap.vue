@@ -49,8 +49,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: 'selectCell', total: number, upcard: number): void }>()
 
-// Mirror the strategy chart axes: hard totals 5–20, dealer upcards 2..10 then Ace.
-const hardTotals = Array.from({ length: 16 }, (_, i) => 5 + i)
+const hardTotals = Array.from({ length: 19 }, (_, i) => 2 + i)
 const upcards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
 
 const count = (total: number, upcard: number) => props.cells[`${total}_${upcard}`] ?? 0

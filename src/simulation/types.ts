@@ -26,6 +26,9 @@ export interface SimulationResult {
   netProfit: number         // cents
   roi: number               // netProfit / totalWagered
   evPer100Rounds: number    // cents
+  perRoundMean: number      // μ, cents (== netProfit / rounds)
+  perRoundVariance: number  // σ², cents² (population variance of per-round net P/L)
+  perRoundStdDev: number    // cents, sqrt(perRoundVariance)
   finalRunningCount: number
   handOutcomes: Record<OutcomeKey, number>
 }

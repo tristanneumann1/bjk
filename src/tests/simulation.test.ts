@@ -84,4 +84,23 @@ describe('runSimulation', () => {
     // Not a guarantee, but overwhelmingly likely at 5 shoes.
     expect(b.netProfit).not.toBe(a.netProfit)
   })
+
+  it('populates per-round statistics consistently', () => {
+    const result = runSimulation({ ...baseConfig, shoeCount: 5, seed: 'stats-seed' })
+
+    expect(Number.isFinite(result.perRoundMean)).toBe(true)
+    expect(result.perRoundVariance).toBeGreaterThanOrEqual(0)
+    expect(result.perRoundStdDev).toBeCloseTo(Math.sqrt(result.perRoundVariance), 6)
+    // The sum of per-round deltas equals netProfit, so the mean is exactly
+    // netProfit / rounds (within float tolerance).
+    expect(result.perRoundMean).toBeCloseTo(result.netProfit / result.rounds, 6)
+  })
+
+  it('produces identical per-round variance for the same seed', () => {
+    const a = runSimulation({ ...baseConfig, shoeCount: 5, seed: 'variance-seed' })
+    const b = runSimulation({ ...baseConfig, shoeCount: 5, seed: 'variance-seed' })
+
+    expect(b.perRoundMean).toBe(a.perRoundMean)
+    expect(b.perRoundVariance).toBe(a.perRoundVariance)
+  })
 })

@@ -28,6 +28,12 @@ export const runSimulation = (config: SimulationConfig): SimulationResult => {
     let rounds = 0
     let hands = 0
     let totalWagered = 0
+    // Running accumulators for per-round net P/L (O(1) memory). We measure the
+    // change in the player's balance across each round rather than re-deriving
+    // payouts, so every payout quirk (double/split/insurance/even-money and the
+    // Double_Push → bet*2 case) is captured automatically.
+    let netSum = 0
+    let netSumSq = 0
     const handOutcomes: Record<OutcomeKey, number> = {
       Win: 0, Lose: 0, Push: 0,
       Double_Win: 0, Double_Lose: 0, Double_Push: 0,
@@ -51,6 +57,9 @@ export const runSimulation = (config: SimulationConfig): SimulationResult => {
       for (let shoe = 0; shoe < config.shoeCount; shoe++) {
         // Keep playing rounds until the shoe hits penetration.
         while (!table.dealer.pastPenetration()) {
+          // Snapshot balance before any money leaves the player (bet, and any
+          // mid-round double/split/insurance deductions).
+          const balanceBefore = session.player.balance
           const trueCount = table.trueCountLower
           chair.bet = pickBet(trueCount, config.betSpread)
           totalWagered += chair.bet
@@ -73,6 +82,9 @@ export const runSimulation = (config: SimulationConfig): SimulationResult => {
             throw new Error('runSimulation: round exceeded action cap; likely stuck in strategy loop')
           }
 
+          const netDelta = session.player.balance - balanceBefore
+          netSum += netDelta
+          netSumSq += netDelta * netDelta
           rounds++
         }
 
@@ -87,6 +99,11 @@ export const runSimulation = (config: SimulationConfig): SimulationResult => {
     const netProfit = endingBalance - config.startingBalance
     const roi = totalWagered > 0 ? netProfit / totalWagered : 0
     const evPer100Rounds = rounds > 0 ? (netProfit / rounds) * 100 : 0
+    const perRoundMean = rounds > 0 ? netSum / rounds : 0
+    // Population variance via E[x²] − E[x]². Clamp at 0 to absorb any tiny
+    // negative from floating-point cancellation at large n.
+    const perRoundVariance = rounds > 0 ? Math.max(0, netSumSq / rounds - perRoundMean ** 2) : 0
+    const perRoundStdDev = Math.sqrt(perRoundVariance)
 
     return {
       shoes: config.shoeCount,
@@ -98,6 +115,9 @@ export const runSimulation = (config: SimulationConfig): SimulationResult => {
       netProfit,
       roi,
       evPer100Rounds,
+      perRoundMean,
+      perRoundVariance,
+      perRoundStdDev,
       finalRunningCount: table.runningCount,
       handOutcomes,
     }
