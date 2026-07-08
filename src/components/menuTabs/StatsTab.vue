@@ -3,6 +3,10 @@
     <h3 class="stats-tab__heading">Bankroll</h3>
     <p v-if="isLoading" class="stats-tab__loading">Loading...</p>
     <BankrollChart v-else :data="bankrollHistory" />
+
+    <v-divider class="stats-tab__divider" />
+
+    <CommonMistakes />
   </div>
 </template>
 
@@ -10,6 +14,7 @@
 import { storeToRefs } from 'pinia'
 import { useBankrollStore } from '@/stores/bankroll'
 import BankrollChart from '@/components/BankrollChart.vue'
+import CommonMistakes from '@/components/CommonMistakes.vue'
 
 const bankrollStore = useBankrollStore()
 const { bankrollHistory, isLoading } = storeToRefs(bankrollStore)
@@ -33,5 +38,10 @@ const { bankrollHistory, isLoading } = storeToRefs(bankrollStore)
   margin: 0;
   font-size: 0.875rem;
   opacity: 0.6;
+}
+
+.stats-tab__divider {
+  margin: 0.25rem 0;
+  opacity: 0.4;
 }
 </style>

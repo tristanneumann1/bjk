@@ -1,6 +1,6 @@
 // This doc is a model agnostic client for firestore db, model specific logic exists in the docs/ directory
 
-import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, orderBy, getCountFromServer, type QueryFieldFilterConstraint, type OrderByDirection } from 'firebase/firestore'
+import { doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, collection, query, limit, orderBy, getCountFromServer, startAfter, documentId, type QueryConstraint, type QueryFieldFilterConstraint, type OrderByDirection } from 'firebase/firestore'
 import { fbApp } from '@/lib/firebase.ts'
 import { PLAYER_COLLECTION, playerDocId } from "@/docs/player.ts"
 import { FIREBASE_ENABLED, FIREBASE_ALLOWED_UIDS } from '@/constants.ts'
@@ -76,4 +76,56 @@ export const upsertFbDoc = async <T>(collectionId: string, address: string[], da
 
 export const upsertPlayerDoc = async <T>(playerUid: string, address: string[], data: Partial<T>) => {
   return upsertFbDoc(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], data)
+}
+
+/**
+ * Merge-write a payload that may contain Firestore FieldValues (e.g. increment()).
+ * Used for atomic aggregate updates — no read, so it stays a single cheap write.
+ */
+export const incrementPlayerDoc = async (playerUid: string, address: string[], data: Record<string, unknown>) => {
+  const fullAddress = [playerDocId(playerUid), ...address]
+  if (!isAllowed(fullAddress)) return
+  const fbDoc = doc(firestore, PLAYER_COLLECTION, ...fullAddress)
+  return setDoc(fbDoc, { ...data, updatedAt: serverTimestamp() }, { merge: true })
+}
+
+export interface PageOptions {
+  wheres?: Array<QueryFieldFilterConstraint>
+  pageSize?: number
+  /** Document id of the last item from the previous page (exclusive cursor). */
+  startAfterId?: string
+}
+
+export interface DocPage<T> {
+  items: T[]
+  lastId: string | null
+  hasMore: boolean
+}
+
+/**
+ * Fetch a page of documents ordered by document id. Ordering by __name__ keeps
+ * equality / array-contains queries servable WITHOUT a composite index, so this
+ * supports paginated drill-down on a single-field filter.
+ */
+export const getFbDocsPage = async <T>(collectionId: string, address: string[], options: PageOptions): Promise<DocPage<T>> => {
+  if (!isAllowed(address)) return { items: [], lastId: null, hasMore: false }
+  const col = collection(firestore, collectionId, ...address)
+  const pageSize = options.pageSize ?? 10
+  const constraints: QueryConstraint[] = [...(options.wheres ?? []), orderBy(documentId())]
+  if (options.startAfterId) constraints.push(startAfter(options.startAfterId))
+  // WHY: fetch one extra to detect whether another page exists.
+  const q = query(col, ...constraints, limit(pageSize + 1))
+  const snapshot = await getDocs(q)
+  const docs = snapshot.docs
+  const hasMore = docs.length > pageSize
+  const page = hasMore ? docs.slice(0, pageSize) : docs
+  return {
+    items: page.map(d => d.data() as T),
+    lastId: page.length ? page[page.length - 1].id : null,
+    hasMore,
+  }
+}
+
+export const getPlayerDocsPage = async <T>(playerUid: string, address: string[], options: PageOptions): Promise<DocPage<T>> => {
+  return getFbDocsPage<T>(PLAYER_COLLECTION, [playerDocId(playerUid), ...address], options)
 }

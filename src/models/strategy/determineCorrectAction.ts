@@ -5,6 +5,16 @@ import type { PlayerAction } from '@/types/actions'
 import type {Session} from "@/models/session.ts"
 import type {ComparisonRule, RulesMeta, ScenarioKey, StrategyGrid} from "@/types/strategies.ts";
 
+export interface DetailedCorrectAction {
+  actions: PlayerAction[]
+  /** The rule matched at the upper true-count bound (undefined if none matched). */
+  matchedUpper?: ComparisonRule
+  /** The rule matched at the lower true-count bound (undefined if none matched). */
+  matchedLower?: ComparisonRule
+  /** The full ordered rule set for this scenario (empty if the scenario is unknown). */
+  ruleSet: ComparisonRule[]
+}
+
 export function isActionIncorrect(session: Session, strategy: StrategyGrid, action: PlayerAction) {
   const correctActions = determineCorrectAction(session, strategy)
 
@@ -20,6 +30,18 @@ export function determineCorrectAction(
   session: Session,
   strategyGrid: StrategyGrid,
 ): PlayerAction[] {
+  return determineCorrectActionDetailed(session, strategyGrid).actions
+}
+
+/**
+ * Like determineCorrectAction, but also surfaces the ComparisonRule that matched
+ * at each true-count bound. Analytics uses the matched rule to tell a deviation
+ * (rule has a numeric trueCountGreaterEqualTo) apart from a basic-strategy play.
+ */
+export function determineCorrectActionDetailed(
+  session: Session,
+  strategyGrid: StrategyGrid,
+): DetailedCorrectAction {
   const rules = session.rules as Rules
   const table = session.table
   const activeChair  = table.activeChair
@@ -29,7 +51,7 @@ export function determineCorrectAction(
   const trueCountLower = table.trueCountLower
 
   if (!activeChair || !playerHand || !dealerUpCard) {
-    return []
+    return { actions: [], ruleSet: [] }
   }
 
   const canSplit = !activeChair.validateAction('Split')
@@ -56,23 +78,22 @@ export function determineCorrectAction(
   const scenarioKey = buildScenarioKey(playerHand, dealerUpCard)
   const ruleSet = strategyGrid[scenarioKey] ?? []
 
+  const matchedUpper = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountUpper, rule))
+  const matchedLower = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountLower, rule))
+
   if (canInsure) {
-    const matchedUpper = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountUpper, rule))
-    const matchedLower = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountLower, rule))
     const upper: PlayerAction = matchedUpper?.action === 'Insurance' ? 'Insurance' : 'DeclineInsurance'
     const lower: PlayerAction = matchedLower?.action === 'Insurance' ? 'Insurance' : 'DeclineInsurance'
-    return [upper, lower]
+    return { actions: [upper, lower], matchedUpper, matchedLower, ruleSet }
   }
 
-  const matchedRuleUpper = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountUpper, rule))
-  const matchedRuleLower = ruleSet.find(rule => matchesCountRule(ruleMeta, trueCountLower, rule))
-  if (!matchedRuleUpper?.action || !matchedRuleLower?.action) {
+  if (!matchedUpper?.action || !matchedLower?.action) {
     throw `Missing default rule for ${playerHand.softValue} vs ${dealerUpCard.value}`
   }
-  return [matchedRuleUpper.action, matchedRuleLower.action]
+  return { actions: [matchedUpper.action, matchedLower.action], matchedUpper, matchedLower, ruleSet }
 }
 
-const matchesCountRule = (ruleMeta: RulesMeta, count: number, rule: ComparisonRule): boolean => {
+export const matchesCountRule = (ruleMeta: RulesMeta, count: number, rule: ComparisonRule): boolean => {
   if (rule.isSoft && !ruleMeta.isSoft) {
     return false
   }
@@ -95,9 +116,13 @@ const matchesCountRule = (ruleMeta: RulesMeta, count: number, rule: ComparisonRu
 
 }
 
-const buildScenarioKey = (hand: Hand, dealerCard: Card): ScenarioKey => {
+export const buildScenarioKey = (hand: Hand, dealerCard: Card): ScenarioKey => {
   const dealerValue = dealerCard.value
 
   const playerValue = hand.softValue
   return `${playerValue}_${dealerValue}`
 }
+
+/** A rule is a count-dependent deviation when it gates on a true-count threshold. */
+export const isDeviationRule = (rule?: ComparisonRule): boolean =>
+  typeof rule?.trueCountGreaterEqualTo === 'number'

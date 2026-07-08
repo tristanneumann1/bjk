@@ -8,16 +8,26 @@ import {isAction} from "@/models/hand.ts";
 import {Session} from "@/models/session.ts";
 import type {Card} from "@/types/card.ts";
 import {
-  determineCorrectAction,
+  determineCorrectActionDetailed,
   isActionIncorrect
 } from "@/models/strategy/determineCorrectAction.ts";
+import {isDeviationMistake} from "@/models/strategy/isDeviationMistake.ts";
 import {getAuth} from "firebase/auth";
 import {useGameStore} from "@/stores/game.ts";
-import {upsertPlayerDoc} from "@/lib/firestore.ts";
+import {incrementPlayerDoc, upsertPlayerDoc} from "@/lib/firestore.ts";
 import {GAMES_SUBCOLLECTION} from "@/docs/game.ts";
 import {buildRoundDocId} from "@/docs/round.ts";
 import {type ActionDoc, ACTIONS_SUBCOLLECTION, buildActionDocId} from "@/docs/action.ts";
+import {
+  ANALYTICS_SUBCOLLECTION,
+  buildMistakeDocId,
+  buildSummaryIncrement,
+  MISTAKE_SUMMARY_DOC_ID,
+  MISTAKES_SUBCOLLECTION
+} from "@/docs/analytics.ts";
 import {useStrategyStore} from "@/stores/strategy.ts";
+import {categorizeMistake} from "@/models/analytics/categorizeMistake.ts";
+import type {StoredMistake} from "@/types/analytics.ts";
 
 const PLAYER_ACTIONS: PlayerAction[] = ['Hit', 'Stand', 'Split', 'Double', 'Surrender', 'Insurance', 'DeclineInsurance']
 
@@ -93,7 +103,10 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
     const startingTrueCountLower = table.trueCountLower
     const startingTrueCountUpper = table.trueCountUpper
 
-    const correctActions = determineCorrectAction(Session.getInstance(), strategyStore.selectedStrategy)
+    const strategy = strategyStore.selectedStrategy
+    const detailed = determineCorrectActionDetailed(Session.getInstance(), strategy)
+    const correctActions = detailed.actions
+    const actionIsCorrect = !isActionIncorrect(Session.getInstance(), strategy, action)
 
     const actionDoc: ActionDoc = {
       cards,
@@ -103,11 +116,78 @@ export const usePlayerActionsStore = defineStore('playerActions', () => {
       chosenAction: action,
       strategyId: strategyStore.selectedStrategyId,
       expectedAction: correctActions,
-      actionIsCorrect: !isActionIncorrect(Session.getInstance(), strategyStore.selectedStrategy, action),
+      actionIsCorrect,
       roundId: buildRoundDocId(roundId)
     }
 
+    if (!actionIsCorrect) {
+      void persistMistake(userId, roundId, action, correctActions, detailed, {
+        cards,
+        upCard: { rank: upCardRank, suit: upCardSuit },
+        startingTrueCountLower,
+        startingTrueCountUpper,
+      })
+    }
+
     return upsertPlayerDoc<ActionDoc>(userId, [ GAMES_SUBCOLLECTION, gameId, ACTIONS_SUBCOLLECTION, buildActionDocId()], actionDoc)
+  }
+
+  /**
+   * Preprocess an incorrect decision at write time (the matched rule + full rule
+   * set are known here) and persist it two ways: a queryable individual record
+   * (for lazy drill-down) and atomic increments on the cumulative summary doc
+   * (the single-read analytics view). Fire-and-forget — never blocks play.
+   */
+  const persistMistake = (
+    userId: string,
+    roundId: string | number,
+    action: PlayerAction,
+    correctActions: PlayerAction[],
+    detailed: ReturnType<typeof determineCorrectActionDetailed>,
+    raw: { cards: Card[]; upCard: Card; startingTrueCountLower: number; startingTrueCountUpper: number },
+  ) => {
+    const activeHand = Session.getInstance().table.activeChair?.activeHand
+    if (!activeHand) return
+    const handCards = activeHand.cards
+    const isPair = handCards.length === 2 && handCards[0].value === handCards[1].value
+    const dealerUpCard = Session.getInstance().table.upCard.value
+    const isDeviation = isDeviationMistake({
+      matchedUpper: detailed.matchedUpper,
+      matchedLower: detailed.matchedLower,
+      ruleSet: detailed.ruleSet,
+      chosenAction: action,
+    })
+
+    const categorization = categorizeMistake({
+      handValue: activeHand.softValue,
+      dealerUpCard,
+      isSoft: activeHand.isSoft,
+      isPair,
+      pairValue: isPair ? handCards[0].value : undefined,
+      chosenAction: action,
+      expectedAction: correctActions,
+      isDeviation,
+    })
+
+    const mistakeId = buildMistakeDocId()
+    const storedMistake: StoredMistake = {
+      id: mistakeId,
+      roundId: buildRoundDocId(roundId),
+      strategyId: strategyStore.selectedStrategyId,
+      cards: raw.cards,
+      upCard: raw.upCard,
+      startingTrueCountLower: raw.startingTrueCountLower,
+      startingTrueCountUpper: raw.startingTrueCountUpper,
+      chosenAction: action,
+      expectedAction: correctActions,
+      cellKey: `${categorization.handValue}_${categorization.dealerUpCard}`,
+      ...categorization,
+    }
+
+    return Promise.all([
+      upsertPlayerDoc<StoredMistake>(userId, [MISTAKES_SUBCOLLECTION, mistakeId], storedMistake),
+      incrementPlayerDoc(userId, [ANALYTICS_SUBCOLLECTION, MISTAKE_SUMMARY_DOC_ID], buildSummaryIncrement(storedMistake)),
+    ]).catch(error => console.error('Failed to persist mistake', error))
   }
 
   const onAct = async (event: UserEventMap) => {
