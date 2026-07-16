@@ -8,6 +8,7 @@ import { useStrategyStore } from '@/stores/strategy'
 import { useSettingsStore } from '@/stores/settings'
 import { usePlayerStore } from '@/stores/player'
 import { getAuth } from 'firebase/auth'
+import { nanoid } from 'nanoid'
 import { upsertPlayerDoc } from '@/lib/firestore'
 import {
   buildSimulationDoc,
@@ -97,7 +98,10 @@ export const useSimulateStore = defineStore('simulate', () => {
   const handsPerHour = ref(DEFAULT_HANDS_PER_HOUR)
   const shoeCount = ref(DEFAULT_SHOE_COUNT)
   const bankroll = ref(playerStore.balance) // cents
-  const seed = ref('simulate-analysis')
+  // A fresh seed is generated per run (see run()) so each run is an independent
+  // Monte Carlo sample. It is recorded on the persisted doc so any run remains
+  // exactly reproducible after the fact.
+  const seed = ref('')
 
   // ── Output ──────────────────────────────────────────────────────────────
   const result = ref<SimulateMetrics | null>(null)
@@ -131,6 +135,8 @@ export const useSimulateStore = defineStore('simulate', () => {
     if (isRunning.value) return
     isRunning.value = true
     error.value = null
+    // Fresh seed each run → independent sample, but still recorded for repro.
+    seed.value = nanoid()
     try {
       const sim = await runSim({
         shoeCount: shoeCount.value,
@@ -165,7 +171,9 @@ export const useSimulateStore = defineStore('simulate', () => {
 
   const persistRun = async (sim: SimulationResult) => {
     const uid = getAuth().currentUser?.uid
-    if (!uid) return // Not signed in — nothing to persist to.
+    if (!uid) {
+      return // Not signed in — nothing to persist to.
+    }
     try {
       const id = buildSimulationDocId()
       const docData = buildSimulationDoc({
